@@ -1,3 +1,34 @@
+# ns3.40
+
+```bash
+uv sync
+conda create -p ./.venv python=3.13
+```
+
+```bash
+sudo apt update && sudo apt full-upgrade
+sudo apt install libzmq5 libzmq3-dev libprotobuf-dev protobuf-compiler
+sudo apt autoclean && sudo apt autoremove
+
+conda create -p ./.venv python=3.13
+conda activate ./.venv
+
+./ns3 configure --enable-mtp --enable-examples
+./ns3 build
+
+pip3 install --user ./contrib/opengym/model/ns3gym
+
+./ns3 run "rl-tcp --transport_prot=TcpRl"
+python ./contrib/opengym/examples/rl-tcp/test_tcp.py --start=0 &> ./rl-tcp.log
+
+./ns3 run "gemini-tcp --transport_prot=TcpGemini"
+python ./contrib/opengym/examples/gemini-tcp/test_gemini.py --start=0 --verbose &> ./gemini-tcp.log
+
+cp ./contrib/opengym/examples/gemini-tcp/sim.cc ./scratch/sim.cc
+# std::string transport_prot = "TcpNewReno";
+./ns3 run scratch/sim
+```
+
 # Unison for ns-3
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10077300.svg)](https://doi.org/10.5281/zenodo.10077300)

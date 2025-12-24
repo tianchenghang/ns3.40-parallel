@@ -54,3 +54,11 @@ vcpkg/
 
 # Ignore local cache used by e.g. clangd
 .cache/
+
+**/.DS_Store
+.mypy_cache/
+.venv/
+*.log
+**/*.flowmonitor
+
+**/.idea
