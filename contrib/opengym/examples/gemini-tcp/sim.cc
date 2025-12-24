@@ -32,7 +32,7 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 
 // parallel
-// #include "ns3/mtp-interface.h"
+#include "ns3/mtp-interface.h"
 
 #include "./tcp-gemini.h"
 
@@ -82,7 +82,7 @@ PrintRxCount()
 int
 main(int argc, char* argv[])
 {
-    // MtpInterface::Enable();
+    MtpInterface::Enable();
 
     uint32_t openGymPort = 5555;
     double tcpEnvTimeStep = 0.1;

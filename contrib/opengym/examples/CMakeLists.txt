@@ -79,4 +79,5 @@ build_lib_example(
     ${libopengym}
     ${libpoint-to-point-layout}
     ${libptp}
+    ${libmtp}
 )
