@@ -90,14 +90,14 @@ main(int argc, char* argv[])
     uint32_t nLeaf = 3;
     std::string transport_prot = "TcpGemini";
     double error_p = 0.0;
-    std::string bottleneck_bandwidth = "2Mbps";
-    std::string bottleneck_delay = "0.01ms";
-    std::string access_bandwidth = "10Mbps";
-    std::string access_delay = "20ms";
+    std::string bottleneck_bandwidth = "2Gbps";
+    std::string bottleneck_delay = "5us";
+    std::string access_bandwidth = "10Gbps";
+    std::string access_delay = "2us";
     std::string prefix_file_name = "TcpGeminiSimulator";
     uint64_t data_mbytes = 0;
-    uint32_t mtu_bytes = 400;
-    double duration = 60.0 * 60 * 3;
+    uint32_t mtu_bytes = 1500;
+    double duration = 10.0;
     uint32_t run = 0;
     bool flow_monitor = true;
     bool sack = true;
@@ -184,7 +184,9 @@ main(int argc, char* argv[])
 
     // 4 MB of TCP buffer
     Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(1 << 22));
+    //! Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(1 << 24));
     Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(1 << 22));
+    //! Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(1 << 24));
     Config::SetDefault("ns3::TcpSocketBase::Sack", BooleanValue(sack));
     Config::SetDefault("ns3::TcpSocket::DelAckCount", UintegerValue(2));
 
@@ -241,8 +243,12 @@ main(int argc, char* argv[])
 
     Config::SetDefault("ns3::PfifoFastQueueDisc::MaxSize",
                        QueueSizeValue(QueueSize(QueueSizeUnit::PACKETS, size / mtu_bytes)));
+    //! Config::SetDefault("ns3::PfifoFastQueueDisc::MaxSize",
+    //!                QueueSizeValue(QueueSize(QueueSizeUnit::PACKETS, 1000)));
     Config::SetDefault("ns3::CoDelQueueDisc::MaxSize",
                        QueueSizeValue(QueueSize(QueueSizeUnit::BYTES, size)));
+    //! Config::SetDefault("ns3::CoDelQueueDisc::MaxSize",
+    //!                QueueSizeValue(QueueSize(QueueSizeUnit::BYTES, 1500 * 1000)));
 
     if (queue_disc_type.compare("ns3::PfifoFastQueueDisc") == 0)
     {
@@ -306,13 +312,13 @@ main(int argc, char* argv[])
     udpSinkApp.Stop(Seconds(stop_time));
     OnOffHelper udpBurstHelper("ns3::UdpSocketFactory",
                                InetSocketAddress(d.GetRightIpv4Address(0), udpPort));
-    udpBurstHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1.0]"));
+    udpBurstHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=0.005]"));
     udpBurstHelper.SetAttribute("OffTime",
-                                StringValue("ns3::ConstantRandomVariable[Constant=2.0]"));
-    udpBurstHelper.SetAttribute("DataRate", StringValue("1.5Mbps"));
+                                StringValue("ns3::ConstantRandomVariable[Constant=0.005]"));
+    udpBurstHelper.SetAttribute("DataRate", StringValue("800Mbps"));
     udpBurstHelper.SetAttribute("PacketSize", UintegerValue(1024));
     ApplicationContainer udpBurstApp = udpBurstHelper.Install(d.GetLeft(0));
-    udpBurstApp.Start(Seconds(2.0));
+    udpBurstApp.Start(Seconds(0.5));
     udpBurstApp.Stop(Seconds(stop_time));
     //  <<< UDP Burst <<<
 
