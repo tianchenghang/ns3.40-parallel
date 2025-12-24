@@ -60,5 +60,3 @@ vcpkg/
 .venv/
 *.log
 **/*.flowmonitor
-
-**/.idea

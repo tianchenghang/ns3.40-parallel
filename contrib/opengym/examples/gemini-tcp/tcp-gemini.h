@@ -2,9 +2,8 @@
 #ifndef TCP_GEMINI_H
 #define TCP_GEMINI_H
 
-#include "../rl-tcp/tcp-rl.h"
-#include "tcp-gemini-env.h"
 #include "../rl-tcp/tcp-rl.h" // Inherit base logic from RL example
+#include "tcp-gemini-env.h"
 
 namespace ns3
 {

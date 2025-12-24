@@ -94,7 +94,7 @@ class TcpGemini(TcpEventBased):
         # --- Logic Implementation ---
 
         # Event: PACKET LOSS (Eq 3) or explicitly signaled
-        if calledFunc == 0: # Loss Event (GET_SS_THRESH)
+        if calledFunc == 0:  # Loss Event (GET_SS_THRESH)
             congestion_signal = True
             # Congestion Recovery: Multiplicative Decrease
             # W' = lambda * W
@@ -102,7 +102,7 @@ class TcpGemini(TcpEventBased):
             new_ssThresh = new_cWnd
 
         # Event: ACK RECEIVED
-        elif calledFunc == 1: # Ack Event (INCREASE_WINDOW)
+        elif calledFunc == 1:  # Ack Event (INCREASE_WINDOW)
             # 1. Congestion Signal Detection (Eq 1)
             # Check RTT Inflation: T_min - T_min_global > delta * (T_max - T_min)
             # We use local window T_min vs global base or window variation
