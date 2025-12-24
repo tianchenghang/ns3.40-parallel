@@ -14,7 +14,7 @@ def find_ns3_lock() -> str:
     # Get the absolute path to this file
     path_to_this_init_file = os.path.dirname(os.path.abspath(__file__))
     path_to_lock = path_to_this_init_file
-    lock_file = (".lock-ns3_%s_build" % sys.platform)
+    lock_file = ".lock-ns3_%s_build" % sys.platform
 
     # Move upwards until we reach the directory with the ns3 script
     prev_path = None
@@ -32,15 +32,13 @@ def find_ns3_lock() -> str:
     return path_to_lock
 
 
-SYSTEM_LIBRARY_DIRECTORIES = (DEFAULT_LIB_DIR,
-                              os.path.dirname(DEFAULT_LIB_DIR),
-                              "/usr/lib64",
-                              "/usr/lib"
-                              )
-DYNAMIC_LIBRARY_EXTENSIONS = {"linux": "so",
-                              "win32": "dll",
-                              "darwin": "dylib"
-                              }
+SYSTEM_LIBRARY_DIRECTORIES = (
+    DEFAULT_LIB_DIR,
+    os.path.dirname(DEFAULT_LIB_DIR),
+    "/usr/lib64",
+    "/usr/lib",
+)
+DYNAMIC_LIBRARY_EXTENSIONS = {"linux": "so", "win32": "dll", "darwin": "dylib"}
 LIBRARY_EXTENSION = DYNAMIC_LIBRARY_EXTENSIONS[sys.platform]
 
 
@@ -76,20 +74,27 @@ def _search_libraries() -> dict:
     library_search_paths += [os.path.dirname(library_search_paths[-1])]
 
     # Filter unique search paths and those that are not part of system directories
-    library_search_paths = list(filter(lambda x: x not in SYSTEM_LIBRARY_DIRECTORIES,
-                                       set(library_search_paths)))
+    library_search_paths = list(
+        filter(lambda x: x not in SYSTEM_LIBRARY_DIRECTORIES, set(library_search_paths))
+    )
 
     # Search for the core library in the search paths
     libraries = []
     for search_path in library_search_paths:
         if os.path.exists(search_path):
-            libraries += glob.glob("%s/**/*.%s*" % (search_path, LIBRARY_EXTENSION), recursive=True)
+            libraries += glob.glob(
+                "%s/**/*.%s*" % (search_path, LIBRARY_EXTENSION), recursive=True
+            )
 
     # Search system library directories (too slow for recursive search)
     for search_path in SYSTEM_LIBRARY_DIRECTORIES:
         if os.path.exists(search_path):
-            libraries += glob.glob("%s/**/*.%s*" % (search_path, LIBRARY_EXTENSION), recursive=False)
-            libraries += glob.glob("%s/*.%s*" % (search_path, LIBRARY_EXTENSION), recursive=False)
+            libraries += glob.glob(
+                "%s/**/*.%s*" % (search_path, LIBRARY_EXTENSION), recursive=False
+            )
+            libraries += glob.glob(
+                "%s/*.%s*" % (search_path, LIBRARY_EXTENSION), recursive=False
+            )
 
     del search_path, library_search_paths
 
@@ -106,7 +111,7 @@ def _search_libraries() -> dict:
         library_map[library_infix].add(library)
 
     # Replace sets with lists
-    for (key, values) in library_map.items():
+    for key, values in library_map.items():
         library_map[key] = list(values)
     return library_map
 
@@ -114,7 +119,9 @@ def _search_libraries() -> dict:
 def search_libraries(library_name: str) -> list:
     libraries_map = _search_libraries()
     trimmed_library_name = trim_library_path(library_name)
-    matched_names = list(filter(lambda x: trimmed_library_name in x, libraries_map.keys()))
+    matched_names = list(
+        filter(lambda x: trimmed_library_name in x, libraries_map.keys())
+    )
     matched_libraries = []
 
     if matched_names:
@@ -128,7 +135,7 @@ LIBRARY_AND_DEFINES = {
     "libxml2": ["HAVE_LIBXML2"],
     "libsqlite3": ["HAVE_SQLITE3"],
     "openflow": ["NS3_OPENFLOW", "ENABLE_OPENFLOW"],
-    "click": ["NS3_CLICK"]
+    "click": ["NS3_CLICK"],
 }
 
 
@@ -137,11 +144,11 @@ def add_library_defines(library_name: str):
     defines = ""
     if len(has_defines):
         for define in LIBRARY_AND_DEFINES[has_defines[0]]:
-            defines += (f"""
+            defines += f"""
                     #ifndef {define}
                     #define {define} 1
                     #endif
-                """)
+                """
     return defines
 
 
@@ -156,10 +163,15 @@ def extract_linked_libraries(library_name: str, prefix: str) -> tuple:
     # First discover which 3rd-party libraries are used by the current module
     try:
         with open(os.path.abspath(library_path), "rb") as f:
-            linked_libs = re.findall(b"\x00(lib.*?.%b)" % LIBRARY_EXTENSION.encode("utf-8"), f.read())
+            linked_libs = re.findall(
+                b"\x00(lib.*?.%b)" % LIBRARY_EXTENSION.encode("utf-8"), f.read()
+            )
     except Exception as e:
-        print("Failed to extract libraries used by {library} with exception:{exception}"
-              .format(library=library_path, exception=e))
+        print(
+            "Failed to extract libraries used by {library} with exception:{exception}".format(
+                library=library_path, exception=e
+            )
+        )
         exit(-1)
     return library_path, lib, list(map(lambda x: x.decode("utf-8"), linked_libs))
 
@@ -183,7 +195,9 @@ def extract_library_include_dirs(library_name: str, prefix: str) -> tuple:
         if len(linked_library_path) == 0:
             raise Exception(
                 "Failed to find {library}. Make sure its library directory is in LD_LIBRARY_PATH.".format(
-                    library=linked_library))
+                    library=linked_library
+                )
+            )
 
         # Get path with the shortest length
         linked_library_path = sorted(linked_library_path, key=lambda x: len(x))[0]
@@ -196,14 +210,20 @@ def extract_library_include_dirs(library_name: str, prefix: str) -> tuple:
         defines += add_library_defines(linked_library)
 
         # If it is part of the system directories, try to find it
-        system_include_dir = os.path.dirname(linked_library_path).replace(lib, "include")
+        system_include_dir = os.path.dirname(linked_library_path).replace(
+            lib, "include"
+        )
         if os.path.exists(system_include_dir):
             linked_libs_include_dirs.add(system_include_dir)
 
             # If system_include_dir/library_name exists, we add it too
-            linked_library_name = linked_library.replace("lib", "").replace("." + LIBRARY_EXTENSION, "")
+            linked_library_name = linked_library.replace("lib", "").replace(
+                "." + LIBRARY_EXTENSION, ""
+            )
             if os.path.exists(os.path.join(system_include_dir, linked_library_name)):
-                linked_libs_include_dirs.add(os.path.join(system_include_dir, linked_library_name))
+                linked_libs_include_dirs.add(
+                    os.path.join(system_include_dir, linked_library_name)
+                )
 
         # In case it isn't, include new include directories based on the path
         def add_parent_dir_recursively(x: str, y: int) -> None:
@@ -229,22 +249,30 @@ def find_ns3_from_lock_file(lock_file: str) -> (str, list, str):
     # If we find a lock file, load the ns-3 modules from it
     # Should be the case when running from the source directory
     exec(open(lock_file).read(), {}, values)
-    suffix = "-" + values["BUILD_PROFILE"] if values["BUILD_PROFILE"] != "release" else ""
+    suffix = (
+        "-" + values["BUILD_PROFILE"] if values["BUILD_PROFILE"] != "release" else ""
+    )
     modules = [module.replace("ns3-", "") for module in values["NS3_ENABLED_MODULES"]]
     prefix = values["out_dir"]
-    libraries = {os.path.splitext(os.path.basename(x))[0]: x for x in os.listdir(os.path.join(prefix, "lib"))}
+    libraries = {
+        os.path.splitext(os.path.basename(x))[0]: x
+        for x in os.listdir(os.path.join(prefix, "lib"))
+    }
     version = values["VERSION"]
 
     # Filter out test libraries and incorrect versions
-    def filter_in_matching_ns3_libraries(libraries_to_filter: dict,
-                                         modules_to_filter: list,
-                                         version: str,
-                                         suffix: str) -> dict:
+    def filter_in_matching_ns3_libraries(
+        libraries_to_filter: dict, modules_to_filter: list, version: str, suffix: str
+    ) -> dict:
         suffix = [suffix[1:]] if len(suffix) > 1 else []
         filtered_in_modules = []
         for module in modules_to_filter:
-            filtered_in_modules += list(filter(lambda x: "-".join([version, module, *suffix]) in x,
-                                               libraries_to_filter.keys()))
+            filtered_in_modules += list(
+                filter(
+                    lambda x: "-".join([version, module, *suffix]) in x,
+                    libraries_to_filter.keys(),
+                )
+            )
         for library in list(libraries_to_filter.keys()):
             if library not in filtered_in_modules:
                 libraries_to_filter.pop(library)
@@ -256,14 +284,13 @@ def find_ns3_from_lock_file(lock_file: str) -> (str, list, str):
     libraries_to_load = []
     for module in modules:
         library_name = "libns{version}-{module}{suffix}".format(
-            version=version,
-            module=module,
-            suffix=suffix
+            version=version, module=module, suffix=suffix
         )
         if library_name not in libraries:
-            raise Exception("Missing library %s\n" % library_name,
-                            "Build all modules with './ns3 build'"
-                            )
+            raise Exception(
+                "Missing library %s\n" % library_name,
+                "Build all modules with './ns3 build'",
+            )
         libraries_to_load.append(libraries[library_name])
     return prefix, libraries_to_load, version
 
@@ -282,7 +309,14 @@ def filter_module_name(library: str) -> str:
         components.pop(0)
 
     # Drop build profile suffix and test libraries
-    if components[-1] in ["debug", "default", "optimized", "release", "relwithdebinfo", "minsizerel"]:
+    if components[-1] in [
+        "debug",
+        "default",
+        "optimized",
+        "release",
+        "relwithdebinfo",
+        "minsizerel",
+    ]:
         components.pop(-1)
     return "-".join(components)
 
@@ -332,15 +366,21 @@ def find_ns3_from_search() -> (str, list, str):
     # Filter out module names
     modules = set([filter_module_name(library) for library in libraries])
 
-    def filter_in_newest_ns3_libraries(libraries_to_filter: list, modules_to_filter: list) -> tuple:
+    def filter_in_newest_ns3_libraries(
+        libraries_to_filter: list, modules_to_filter: list
+    ) -> tuple:
         newest_version_found = ""
         # Filter out older ns-3 libraries
         for module in list(modules_to_filter):
             # Filter duplicates of modules, while excluding test libraries
-            conflicting_libraries = list(filter(lambda x: module == filter_module_name(x), libraries_to_filter))
+            conflicting_libraries = list(
+                filter(lambda x: module == filter_module_name(x), libraries_to_filter)
+            )
 
             # Extract versions from conflicting libraries
-            conflicting_libraries_versions = list(map(lambda x: extract_version(x, module), conflicting_libraries))
+            conflicting_libraries_versions = list(
+                map(lambda x: extract_version(x, module), conflicting_libraries)
+            )
 
             # Get the newest version found for that library
             newest_version = get_newest_version(conflicting_libraries_versions)
@@ -349,10 +389,14 @@ def find_ns3_from_search() -> (str, list, str):
             if not newest_version_found:
                 newest_version_found = newest_version
             else:
-                newest_version_found = get_newest_version([newest_version, newest_version_found])
+                newest_version_found = get_newest_version(
+                    [newest_version, newest_version_found]
+                )
                 if newest_version != newest_version_found:
-                    raise Exception("Incompatible versions of the ns-3 module '%s' were found: %s != %s."
-                                    % (module, newest_version, newest_version_found))
+                    raise Exception(
+                        "Incompatible versions of the ns-3 module '%s' were found: %s != %s."
+                        % (module, newest_version, newest_version_found)
+                    )
 
             for conflicting_library in list(conflicting_libraries):
                 if "-".join([newest_version, module]) not in conflicting_library:
@@ -360,8 +404,10 @@ def find_ns3_from_search() -> (str, list, str):
                     conflicting_libraries.remove(conflicting_library)
 
             if len(conflicting_libraries) > 1:
-                raise Exception("There are multiple build profiles for module '%s'.\nDelete one to continue: %s"
-                                % (module, ", ".join(conflicting_libraries)))
+                raise Exception(
+                    "There are multiple build profiles for module '%s'.\nDelete one to continue: %s"
+                    % (module, ", ".join(conflicting_libraries))
+                )
 
         return libraries_to_filter, newest_version_found
 
@@ -375,7 +421,9 @@ def load_modules():
     libraries_to_load = []
 
     # Search for prefix to ns-3 build, modules and respective libraries plus version
-    ret = find_ns3_from_search() if not lock_file else find_ns3_from_lock_file(lock_file)
+    ret = (
+        find_ns3_from_search() if not lock_file else find_ns3_from_lock_file(lock_file)
+    )
 
     # Unpack returned values
     prefix, libraries, version = ret
@@ -387,11 +435,19 @@ def load_modules():
         libraries = list(map(lambda x: os.path.basename(x), libraries))
         for ns3_library in libraries:
             _, _, linked_libraries = extract_linked_libraries(ns3_library, prefix)
-            linked_libraries = list(filter(lambda x: "libns3" in x and ns3_library not in x, linked_libraries))
-            linked_libraries = list(map(lambda x: os.path.basename(x), linked_libraries))
+            linked_libraries = list(
+                filter(
+                    lambda x: "libns3" in x and ns3_library not in x, linked_libraries
+                )
+            )
+            linked_libraries = list(
+                map(lambda x: os.path.basename(x), linked_libraries)
+            )
             module_dependencies[os.path.basename(ns3_library)] = linked_libraries
 
-        def modules_that_can_be_loaded(module_dependencies, pending_modules, current_modules):
+        def modules_that_can_be_loaded(
+            module_dependencies, pending_modules, current_modules
+        ):
             modules = []
             for pending_module in pending_modules:
                 can_be_loaded = True
@@ -404,19 +460,35 @@ def load_modules():
                 modules.append(pending_module)
             return modules
 
-        def dependency_order(module_dependencies, pending_modules, current_modules, step_number=0, steps={}):
+        def dependency_order(
+            module_dependencies,
+            pending_modules,
+            current_modules,
+            step_number=0,
+            steps={},
+        ):
             if len(pending_modules) == 0:
                 return steps
             if step_number not in steps:
                 steps[step_number] = []
-            for module in modules_that_can_be_loaded(module_dependencies, pending_modules, current_modules):
+            for module in modules_that_can_be_loaded(
+                module_dependencies, pending_modules, current_modules
+            ):
                 steps[step_number].append(module)
                 pending_modules.remove(module)
                 current_modules.append(module)
-            return dependency_order(module_dependencies, pending_modules, current_modules, step_number + 1, steps)
+            return dependency_order(
+                module_dependencies,
+                pending_modules,
+                current_modules,
+                step_number + 1,
+                steps,
+            )
 
         sorted_libraries = []
-        for step in dependency_order(module_dependencies, list(module_dependencies.keys()), [], 0).values():
+        for step in dependency_order(
+            module_dependencies, list(module_dependencies.keys()), [], 0
+        ).values():
             sorted_libraries.extend(step)
         return sorted_libraries
 
@@ -441,7 +513,8 @@ def load_modules():
 
     # Register Ptr<> as a smart pointer
     import libcppyy
-    libcppyy.AddSmartPtrType('Ptr')
+
+    libcppyy.AddSmartPtrType("Ptr")
 
     # Import ns-3 libraries
     for variant in ["lib", "lib64"]:
@@ -522,38 +595,42 @@ def load_modules():
     def CreateObject(className):
         try:
             try:
-                func = "CreateObject%s" % re.sub('[<|>]', '_', className)
+                func = "CreateObject%s" % re.sub("[<|>]", "_", className)
                 return getattr(cppyy.gbl, func)()
             except AttributeError:
                 pass
             try:
-                func = "Create%s" % re.sub('[<|>]', '_', className)
+                func = "Create%s" % re.sub("[<|>]", "_", className)
                 return getattr(cppyy.gbl, func)()
             except AttributeError:
                 pass
             raise AttributeError
         except AttributeError:
             try:
-                func = "CreateObject%s" % re.sub('[<|>]', '_', className)
-                cppyy.cppdef("""
+                func = "CreateObject%s" % re.sub("[<|>]", "_", className)
+                cppyy.cppdef(
+                    """
                             using namespace ns3;
                             Ptr<%s> %s(){
                                 Ptr<%s> object = CreateObject<%s>();
                                 return object;
                             }
-                            """ % (className, func, className, className)
-                             )
+                            """
+                    % (className, func, className, className)
+                )
             except Exception as e:
                 try:
-                    func = "Create%s" % re.sub('[<|>]', '_', className)
-                    cppyy.cppdef("""
+                    func = "Create%s" % re.sub("[<|>]", "_", className)
+                    cppyy.cppdef(
+                        """
                                 using namespace ns3;
                                 %s %s(){
                                     %s object = %s();
                                     return object;
                                 }
-                                """ % (className, func, className, className)
-                                 )
+                                """
+                        % (className, func, className, className)
+                    )
                 except Exception as e:
                     exit(-1)
         return getattr(cppyy.gbl, func)()
@@ -582,10 +659,13 @@ def load_modules():
                {
                     return parentPtr->GetObject<%s>();
                }
-            """ % (aggregatedType, aggregatedType, aggregatedType, aggregatedType)
+            """
+            % (aggregatedType, aggregatedType, aggregatedType, aggregatedType)
         )
-        return cppyy.gbl.getAggregatedObject(parentObject,
-                                             aggregatedObject if aggregatedIsClass else aggregatedObject.__class__)
+        return cppyy.gbl.getAggregatedObject(
+            parentObject,
+            aggregatedObject if aggregatedIsClass else aggregatedObject.__class__,
+        )
 
     setattr(cppyy.gbl.ns3, "GetObject", GetObject)
     return cppyy.gbl.ns3
@@ -593,4 +673,4 @@ def load_modules():
 
 # Load all modules and make them available via a built-in
 ns = load_modules()  # can be imported via 'from ns import ns'
-builtins.__dict__['ns'] = ns  # or be made widely available with 'from ns import *'
+builtins.__dict__["ns"] = ns  # or be made widely available with 'from ns import *'

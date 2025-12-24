@@ -22,6 +22,7 @@
 
 from ns import ns
 
+
 def main(argv):
     """The main function in this Battery discharge example
 
@@ -32,7 +33,7 @@ def main(argv):
     ns.core.LogComponentEnable("GenericBatteryModel", ns.core.LOG_LEVEL_DEBUG)
 
     node = ns.network.Node()
-    batteryHelper =  ns.energy.GenericBatteryModelHelper()
+    batteryHelper = ns.energy.GenericBatteryModelHelper()
     batteryModel = ns.CreateObject("GenericBatteryModel")
     devicesEnergyModel = ns.energy.SimpleDeviceEnergyModel()
 
@@ -40,16 +41,22 @@ def main(argv):
     batteryModel.SetAttribute("MaxCapacity", ns.core.DoubleValue(7.0))  # Q
 
     batteryModel.SetAttribute("NominalVoltage", ns.core.DoubleValue(1.18))  # Vnom
-    batteryModel.SetAttribute("NominalCapacity", ns.core.DoubleValue(6.25)) # QNom
+    batteryModel.SetAttribute("NominalCapacity", ns.core.DoubleValue(6.25))  # QNom
 
-    batteryModel.SetAttribute("ExponentialVoltage", ns.core.DoubleValue(1.28)) # Vexp
-    batteryModel.SetAttribute("ExponentialCapacity", ns.core.DoubleValue(1.3)) # Qexp
+    batteryModel.SetAttribute("ExponentialVoltage", ns.core.DoubleValue(1.28))  # Vexp
+    batteryModel.SetAttribute("ExponentialCapacity", ns.core.DoubleValue(1.3))  # Qexp
 
-    batteryModel.SetAttribute("InternalResistance", ns.core.DoubleValue(0.0046))   # R
-    batteryModel.SetAttribute("TypicalDischargeCurrent", ns.core.DoubleValue(1.3)) # i typical
-    batteryModel.SetAttribute("CutoffVoltage", ns.core.DoubleValue(1.0))   # End of charge.
+    batteryModel.SetAttribute("InternalResistance", ns.core.DoubleValue(0.0046))  # R
+    batteryModel.SetAttribute(
+        "TypicalDischargeCurrent", ns.core.DoubleValue(1.3)
+    )  # i typical
+    batteryModel.SetAttribute(
+        "CutoffVoltage", ns.core.DoubleValue(1.0)
+    )  # End of charge.
 
-    batteryModel.SetAttribute("BatteryType", ns.core.EnumValue(ns.NIMH_NICD))  # Battery type
+    batteryModel.SetAttribute(
+        "BatteryType", ns.core.EnumValue(ns.NIMH_NICD)
+    )  # Battery type
 
     devicesEnergyModel.SetEnergySource(batteryModel)
     batteryModel.AppendDeviceEnergyModel(devicesEnergyModel)
@@ -57,14 +64,12 @@ def main(argv):
 
     devicesEnergyModel.SetCurrentA(6.5)
 
-
     ns.core.Simulator.Stop(ns.core.Seconds(3600))
     ns.core.Simulator.Run()
     ns.core.Simulator.Destroy()
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
-    main(sys.argv)
 
+    main(sys.argv)

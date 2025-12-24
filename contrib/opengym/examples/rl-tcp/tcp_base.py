@@ -6,6 +6,7 @@ __email__ = "gawlowicz@tkn.tu-berlin.de"
 
 class Tcp(object):
     """docstring for Tcp"""
+
     def __init__(self):
         super(Tcp, self).__init__()
 
@@ -19,6 +20,7 @@ class Tcp(object):
 
 class TcpEventBased(Tcp):
     """docstring for TcpEventBased"""
+
     def __init__(self):
         super(TcpEventBased, self).__init__()
 
@@ -40,11 +42,11 @@ class TcpEventBased(Tcp):
         # number of acked segments
         segmentsAcked = obs[7]
         # estimated bytes in flight
-        bytesInFlight  = obs[8]
+        bytesInFlight = obs[8]
         # last estimation of RTT
-        lastRtt_us  = obs[9]
+        lastRtt_us = obs[9]
         # min value of RTT
-        minRtt_us  = obs[10]
+        minRtt_us = obs[10]
         # function from Congestion Algorithm (CA) interface:
         #  GET_SS_THRESH = 0 (packet loss),
         #  INCREASE_WINDOW (packet acked),
@@ -91,6 +93,7 @@ class TcpEventBased(Tcp):
 
 class TcpTimeBased(Tcp):
     """docstring for TcpTimeBased"""
+
     def __init__(self):
         super(TcpTimeBased, self).__init__()
 

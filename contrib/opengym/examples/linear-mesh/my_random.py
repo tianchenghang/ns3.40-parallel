@@ -10,35 +10,37 @@ __version__ = "0.1.0"
 __email__ = "gawlowicz@tkn.tu-berlin.de"
 
 
-parser = argparse.ArgumentParser(description='Start simulation script on/off')
-parser.add_argument('--start',
-                    type=int,
-                    default=0,
-                    help='Start simulation script 0/1, Default: 0')
-parser.add_argument('--iterations',
-                    type=int,
-                    default=1,
-                    help='Number of iterations, Default: 1')
+parser = argparse.ArgumentParser(description="Start simulation script on/off")
+parser.add_argument(
+    "--start", type=int, default=0, help="Start simulation script 0/1, Default: 0"
+)
+parser.add_argument(
+    "--iterations", type=int, default=1, help="Number of iterations, Default: 1"
+)
 args = parser.parse_args()
 startSim = bool(args.start)
 iterationNum = int(args.iterations)
 
 port = 5550
-simTime = 10 # seconds
+simTime = 10  # seconds
 stepTime = 0.01  # seconds
 seed = 0
-simArgs = {"--simTime": simTime,
-           "--testArg": 123,
-           "--nodeNum": 5,
-           "--distance": 500}
+simArgs = {"--simTime": simTime, "--testArg": 123, "--nodeNum": 5, "--distance": 500}
 debug = False
 
-env = ns3env.Ns3Env(port=port, stepTime=stepTime, startSim=startSim, simSeed=seed, simArgs=simArgs, debug=debug)
+env = ns3env.Ns3Env(
+    port=port,
+    stepTime=stepTime,
+    startSim=startSim,
+    simSeed=seed,
+    simArgs=simArgs,
+    debug=debug,
+)
 env.reset()
 
 ob_space = env.observation_space
 ac_space = env.action_space
-print("Observation space: ", ob_space,  ob_space.dtype)
+print("Observation space: ", ob_space, ob_space.dtype)
 print("Action space: ", ac_space, ac_space.dtype)
 
 stepIdx = 0

@@ -28,6 +28,7 @@ import sys
 # //                      LAN 10.1.2.0
 
 from ctypes import c_int, c_bool
+
 nCsma = c_int(3)
 verbose = c_bool(True)
 cmd = ns.CommandLine(__file__)
@@ -64,10 +65,14 @@ stack.Install(p2pNodes.Get(0))
 stack.Install(csmaNodes)
 
 address = ns.internet.Ipv4AddressHelper()
-address.SetBase(ns.network.Ipv4Address("10.1.1.0"), ns.network.Ipv4Mask("255.255.255.0"))
+address.SetBase(
+    ns.network.Ipv4Address("10.1.1.0"), ns.network.Ipv4Mask("255.255.255.0")
+)
 p2pInterfaces = address.Assign(p2pDevices)
 
-address.SetBase(ns.network.Ipv4Address("10.1.2.0"), ns.network.Ipv4Mask("255.255.255.0"))
+address.SetBase(
+    ns.network.Ipv4Address("10.1.2.0"), ns.network.Ipv4Mask("255.255.255.0")
+)
 csmaInterfaces = address.Assign(csmaDevices)
 
 echoServer = ns.applications.UdpEchoServerHelper(9)
@@ -76,9 +81,11 @@ serverApps = echoServer.Install(csmaNodes.Get(nCsma.value))
 serverApps.Start(ns.core.Seconds(1.0))
 serverApps.Stop(ns.core.Seconds(10.0))
 
-echoClient = ns.applications.UdpEchoClientHelper(csmaInterfaces.GetAddress(nCsma.value).ConvertTo(), 9)
+echoClient = ns.applications.UdpEchoClientHelper(
+    csmaInterfaces.GetAddress(nCsma.value).ConvertTo(), 9
+)
 echoClient.SetAttribute("MaxPackets", ns.core.UintegerValue(1))
-echoClient.SetAttribute("Interval", ns.core.TimeValue(ns.core.Seconds (1.0)))
+echoClient.SetAttribute("Interval", ns.core.TimeValue(ns.core.Seconds(1.0)))
 echoClient.SetAttribute("PacketSize", ns.core.UintegerValue(1024))
 
 clientApps = echoClient.Install(p2pNodes.Get(0))
@@ -88,8 +95,7 @@ clientApps.Stop(ns.core.Seconds(10.0))
 ns.internet.Ipv4GlobalRoutingHelper.PopulateRoutingTables()
 
 pointToPoint.EnablePcapAll("second")
-csma.EnablePcap ("second", csmaDevices.Get (1), True)
+csma.EnablePcap("second", csmaDevices.Get(1), True)
 
 ns.core.Simulator.Run()
 ns.core.Simulator.Destroy()
-

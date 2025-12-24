@@ -1,10 +1,12 @@
 # -*- Mode: python; coding: utf-8 -*-
 from ctypes import c_double
 
-LAYOUT_ALGORITHM = 'neato' # ['neato'|'dot'|'twopi'|'circo'|'fdp'|'nop']
+LAYOUT_ALGORITHM = "neato"  # ['neato'|'dot'|'twopi'|'circo'|'fdp'|'nop']
 REPRESENT_CHANNELS_AS_NODES = 1
-DEFAULT_NODE_SIZE = 1.0 # default node size in meters
-DEFAULT_TRANSMISSIONS_MEMORY = 5 # default number of of past intervals whose transmissions are remembered
+DEFAULT_NODE_SIZE = 1.0  # default node size in meters
+DEFAULT_TRANSMISSIONS_MEMORY = (
+    5  # default number of of past intervals whose transmissions are remembered
+)
 BITRATE_FONT_SIZE = 10
 
 # internal constants, normally not meant to be changed
@@ -14,6 +16,7 @@ PRIORITY_UPDATE_VIEW = 200
 
 import warnings
 import platform
+
 if platform.system() == "Windows":
     SHELL_FONT = "Lucida Console 9"
 else:
@@ -52,9 +55,9 @@ except ImportError:
     svgitem = None
 
 try:
-    gi.require_version('GooCanvas', '2.0')
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('Gdk', '3.0')
+    gi.require_version("GooCanvas", "2.0")
+    gi.require_version("Gtk", "3.0")
+    gi.require_version("Gdk", "3.0")
     gi.require_foreign("cairo")
     from gi.repository import GObject
     from gi.repository import GLib
@@ -73,13 +76,26 @@ try:
 except ImportError:
     ipython_view = None
 
-from .base import InformationWindow, PyVizObject, Link, lookup_netdevice_traits, PIXELS_PER_METER
-from .base import transform_distance_simulation_to_canvas, transform_point_simulation_to_canvas
-from .base import transform_distance_canvas_to_simulation, transform_point_canvas_to_simulation
+from .base import (
+    InformationWindow,
+    PyVizObject,
+    Link,
+    lookup_netdevice_traits,
+    PIXELS_PER_METER,
+)
+from .base import (
+    transform_distance_simulation_to_canvas,
+    transform_point_simulation_to_canvas,
+)
+from .base import (
+    transform_distance_canvas_to_simulation,
+    transform_point_canvas_to_simulation,
+)
 from .base import load_plugins, register_plugin, plugins
 
-PI_OVER_2 = math.pi/2
-PI_TIMES_2 = math.pi*2
+PI_OVER_2 = math.pi / 2
+PI_TIMES_2 = math.pi * 2
+
 
 ## Node class
 class Node(PyVizObject):
@@ -122,7 +138,7 @@ class Node(PyVizObject):
     ## the first signal parameter is a python list of strings, to which
     ## information can be appended
     __gsignals__ = {
-        'query-extra-tooltip-info': (GObject.SignalFlags.RUN_LAST, None, (object,)),
+        "query-extra-tooltip-info": (GObject.SignalFlags.RUN_LAST, None, (object,)),
     }
 
     def __init__(self, visualizer, node_index):
@@ -141,7 +157,7 @@ class Node(PyVizObject):
         self._has_mobility = None
         self._selected = False
         self._highlighted = False
-        self._color = 0x808080ff
+        self._color = 0x808080FF
         self._size = DEFAULT_NODE_SIZE
         self.canvas_item.connect("enter-notify-event", self.on_enter_notify_event)
         self.canvas_item.connect("leave-notify-event", self.on_leave_notify_event)
@@ -152,9 +168,11 @@ class Node(PyVizObject):
         self._label = None
         self._label_canvas_item = None
 
-        self._update_appearance() # call this last
+        self._update_appearance()  # call this last
 
-    def set_svg_icon(self, file_base_name, width=None, height=None, align_x=0.5, align_y=0.5):
+    def set_svg_icon(
+        self, file_base_name, width=None, height=None, align_x=0.5, align_y=0.5
+    ):
         """!
         Set a background SVG icon for the node.
 
@@ -185,15 +203,17 @@ class Node(PyVizObject):
         self.svg_item.props.parent = self.visualizer.canvas.get_root_item()
         self.svg_item.props.pointer_events = GooCanvas.CanvasPointerEvents.NONE
         self.svg_item.lower(None)
-        self.svg_item.props.visibility = GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD
+        self.svg_item.props.visibility = (
+            GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD
+        )
         if width is not None:
             self.svg_item.props.width = transform_distance_simulation_to_canvas(width)
         if height is not None:
             self.svg_item.props.height = transform_distance_simulation_to_canvas(height)
 
-        #threshold1 = 10.0/self.svg_item.props.height
-        #threshold2 = 10.0/self.svg_item.props.width
-        #self.svg_item.props.visibility_threshold = min(threshold1, threshold2)
+        # threshold1 = 10.0/self.svg_item.props.height
+        # threshold2 = 10.0/self.svg_item.props.width
+        # self.svg_item.props.visibility_threshold = min(threshold1, threshold2)
 
         self.svg_align_x = align_x
         self.svg_align_y = align_y
@@ -224,9 +244,9 @@ class Node(PyVizObject):
         """
         w = self.svg_item.width
         h = self.svg_item.height
-        self.svg_item.set_properties(x=(x - (1-self.svg_align_x)*w),
-                                     y=(y - (1-self.svg_align_y)*h))
-
+        self.svg_item.set_properties(
+            x=(x - (1 - self.svg_align_x) * w), y=(y - (1 - self.svg_align_y) * h)
+        )
 
     def tooltip_query(self, tooltip):
         """!
@@ -242,52 +262,67 @@ class Node(PyVizObject):
             ipv4 = ns.cppyy.gbl.getNodeIpv4(ns3_node)
             ipv6 = ns.cppyy.gbl.getNodeIpv6(ns3_node)
 
-            name = '<b><u>Node %i</u></b>' % self.node_index
-            node_name = ns.Names.FindName (ns3_node)
-            if len(node_name)!=0:
-                name += ' <b>(' + node_name + ')</b>'
+            name = "<b><u>Node %i</u></b>" % self.node_index
+            node_name = ns.Names.FindName(ns3_node)
+            if len(node_name) != 0:
+                name += " <b>(" + node_name + ")</b>"
 
             lines = [name]
-            lines.append('')
+            lines.append("")
 
             self.emit("query-extra-tooltip-info", lines)
 
             mob = ns.cppyy.gbl.hasMobilityModel(ns3_node)
             if mob:
                 mobility_model_name = ns.cppyy.gbl.getMobilityModelName(ns3_node)
-                lines.append('  <b>Mobility Model</b>: %s' % ns.cppyy.gbl.getMobilityModelName(ns3_node))
+                lines.append(
+                    "  <b>Mobility Model</b>: %s"
+                    % ns.cppyy.gbl.getMobilityModelName(ns3_node)
+                )
 
             for devI in range(ns3_node.GetNDevices()):
-                lines.append('')
-                lines.append('  <u>NetDevice %i:</u>' % devI)
+                lines.append("")
+                lines.append("  <u>NetDevice %i:</u>" % devI)
                 dev = ns3_node.GetDevice(devI)
                 name = ns.Names.FindName(dev)
                 if name:
-                    lines.append('    <b>Name:</b> %s' % name)
+                    lines.append("    <b>Name:</b> %s" % name)
                 devname = dev.GetInstanceTypeId().GetName()
-                lines.append('    <b>Type:</b> %s' % devname)
+                lines.append("    <b>Type:</b> %s" % devname)
 
                 if ipv4 is not None:
                     ipv4_idx = ipv4.GetInterfaceForDevice(dev)
                     if ipv4_idx != -1:
                         addresses = [
-                            '%s/%s' % (ipv4.GetAddress(ipv4_idx, i).GetLocal(),
-                                       ipv4.GetAddress(ipv4_idx, i).GetMask())
-                            for i in range(ipv4.GetNAddresses(ipv4_idx))]
-                        lines.append('    <b>IPv4 Addresses:</b> %s' % '; '.join(addresses))
+                            "%s/%s"
+                            % (
+                                ipv4.GetAddress(ipv4_idx, i).GetLocal(),
+                                ipv4.GetAddress(ipv4_idx, i).GetMask(),
+                            )
+                            for i in range(ipv4.GetNAddresses(ipv4_idx))
+                        ]
+                        lines.append(
+                            "    <b>IPv4 Addresses:</b> %s" % "; ".join(addresses)
+                        )
 
                 if ipv6 is not None:
                     ipv6_idx = ipv6.GetInterfaceForDevice(dev)
                     if ipv6_idx != -1:
                         addresses = [
-                            '%s/%s' % (ipv6.GetAddress(ipv6_idx, i).GetAddress(),
-                                       ipv6.GetAddress(ipv6_idx, i).GetPrefix())
-                            for i in range(ipv6.GetNAddresses(ipv6_idx))]
-                        lines.append('    <b>IPv6 Addresses:</b> %s' % '; '.join(addresses))
+                            "%s/%s"
+                            % (
+                                ipv6.GetAddress(ipv6_idx, i).GetAddress(),
+                                ipv6.GetAddress(ipv6_idx, i).GetPrefix(),
+                            )
+                            for i in range(ipv6.GetNAddresses(ipv6_idx))
+                        ]
+                        lines.append(
+                            "    <b>IPv6 Addresses:</b> %s" % "; ".join(addresses)
+                        )
 
-                lines.append('    <b>MAC Address:</b> %s' % (dev.GetAddress(),))
+                lines.append("    <b>MAC Address:</b> %s" % (dev.GetAddress(),))
 
-            tooltip.set_markup('\n'.join(lines))
+            tooltip.set_markup("\n".join(lines))
         finally:
             self.visualizer.simulation.lock.release()
 
@@ -327,6 +362,7 @@ class Node(PyVizObject):
         """
         self._selected = value
         self._update_appearance()
+
     def _get_selected(self):
         """!
         Get selected function.
@@ -348,6 +384,7 @@ class Node(PyVizObject):
         """
         self._highlighted = value
         self._update_appearance()
+
     def _get_highlighted(self):
         """!
         Get highlighted function.
@@ -382,33 +419,40 @@ class Node(PyVizObject):
         if self.svg_item is not None:
             alpha = 0x80
         else:
-            alpha = 0xff
-        fill_color_rgba = (self._color & 0xffffff00) | alpha
-        self.canvas_item.set_properties(radius_x=size, radius_y=size,
-                                        fill_color_rgba=fill_color_rgba)
+            alpha = 0xFF
+        fill_color_rgba = (self._color & 0xFFFFFF00) | alpha
+        self.canvas_item.set_properties(
+            radius_x=size, radius_y=size, fill_color_rgba=fill_color_rgba
+        )
         if self._selected:
-            line_width = size*.3
+            line_width = size * 0.3
         else:
-            line_width = size*.15
+            line_width = size * 0.15
         if self.highlighted:
-            stroke_color = 'yellow'
+            stroke_color = "yellow"
         else:
-            stroke_color = 'black'
-        self.canvas_item.set_properties(line_width=line_width, stroke_color=stroke_color)
+            stroke_color = "black"
+        self.canvas_item.set_properties(
+            line_width=line_width, stroke_color=stroke_color
+        )
 
         if self._label is not None:
             if self._label_canvas_item is None:
-                self._label_canvas_item = GooCanvas.CanvasText(visibility_threshold=0.5,
-                                                               font="Sans Serif 10",
-                                                               fill_color_rgba=0x808080ff,
-                                                               alignment=Pango.Alignment.CENTER,
-                                                               anchor=GooCanvas.CanvasAnchorType.N,
-                                                               parent=self.visualizer.canvas.get_root_item(),
-                                                               pointer_events=GooCanvas.CanvasPointerEvents.NONE)
+                self._label_canvas_item = GooCanvas.CanvasText(
+                    visibility_threshold=0.5,
+                    font="Sans Serif 10",
+                    fill_color_rgba=0x808080FF,
+                    alignment=Pango.Alignment.CENTER,
+                    anchor=GooCanvas.CanvasAnchorType.N,
+                    parent=self.visualizer.canvas.get_root_item(),
+                    pointer_events=GooCanvas.CanvasPointerEvents.NONE,
+                )
                 self._label_canvas_item.lower(None)
 
-            self._label_canvas_item.set_properties(visibility=GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD,
-                                                   text=self._label)
+            self._label_canvas_item.set_properties(
+                visibility=GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD,
+                text=self._label,
+            )
             self._update_position()
 
     def set_position(self, x, y):
@@ -429,7 +473,7 @@ class Node(PyVizObject):
             link.update_points()
 
         if self._label_canvas_item is not None:
-            self._label_canvas_item.set_properties(x=x, y=(y+self._size*3))
+            self._label_canvas_item.set_properties(x=x, y=(y + self._size * 3))
 
         # If the location of the point is now beyond the bounds of the
         # canvas then those bounds now need to be increased
@@ -458,7 +502,10 @@ class Node(PyVizObject):
         @param self: class object.
         @return x and y position
         """
-        return (self.canvas_item.get_property("center_x"), self.canvas_item.get_property("center_y"))
+        return (
+            self.canvas_item.get_property("center_x"),
+            self.canvas_item.get_property("center_y"),
+        )
 
     def _update_position(self):
         """!
@@ -480,7 +527,12 @@ class Node(PyVizObject):
         """
         if isinstance(color, str):
             color = Gdk.color_parse(color)
-            color = ((color.red>>8) << 24) | ((color.green>>8) << 16) | ((color.blue>>8) << 8) | 0xff
+            color = (
+                ((color.red >> 8) << 24)
+                | ((color.green >> 8) << 16)
+                | ((color.blue >> 8) << 8)
+                | 0xFF
+            )
         self._color = color
         self._update_appearance()
 
@@ -537,11 +589,15 @@ class Channel(PyVizObject):
         @param channel: channel.
         """
         self.channel = channel
-        self.canvas_item = GooCanvas.CanvasEllipse(radius_x=30, radius_y=30,
-                                                   fill_color="white",
-                                                   stroke_color="grey", line_width=2.0,
-                                                   line_dash=GooCanvas.CanvasLineDash.newv([10.0, 10.0 ]),
-                                                   visibility=GooCanvas.CanvasItemVisibility.VISIBLE)
+        self.canvas_item = GooCanvas.CanvasEllipse(
+            radius_x=30,
+            radius_y=30,
+            fill_color="white",
+            stroke_color="grey",
+            line_width=2.0,
+            line_dash=GooCanvas.CanvasLineDash.newv([10.0, 10.0]),
+            visibility=GooCanvas.CanvasItemVisibility.VISIBLE,
+        )
         self.canvas_item.pyviz_object = self
         self.links = []
 
@@ -567,7 +623,10 @@ class Channel(PyVizObject):
         @param self: class object.
         @return x / y position.
         """
-        return (self.canvas_item.get_property("center_x"), self.canvas_item.get_property("center_y"))
+        return (
+            self.canvas_item.get_property("center_x"),
+            self.canvas_item.get_property("center_y"),
+        )
 
 
 ## WiredLink
@@ -605,7 +664,9 @@ class WiredLink(Link):
         """
         pos1_x, pos1_y = self.node1.get_position()
         pos2_x, pos2_y = self.node2.get_position()
-        self.canvas_item.set_property("data", "M %r %r L %r %r" % (pos1_x, pos1_y, pos2_x, pos2_y))
+        self.canvas_item.set_property(
+            "data", "M %r %r L %r %r" % (pos1_x, pos1_y, pos2_x, pos2_y)
+        )
 
 
 ## SimulationThread
@@ -633,11 +694,11 @@ class SimulationThread(threading.Thread):
         """
         super(SimulationThread, self).__init__()
         assert isinstance(viz, Visualizer)
-        self.viz = viz # Visualizer object
+        self.viz = viz  # Visualizer object
         self.lock = threading.Lock()
         self.go = threading.Event()
         self.go.clear()
-        self.target_time = 0 # in seconds
+        self.target_time = 0  # in seconds
         self.quit = False
         self.sim_helper = ns.PyViz()
         self.pause_messages = []
@@ -664,30 +725,31 @@ class SimulationThread(threading.Thread):
         @return none
         """
         while not self.quit:
-            #print "sim: Wait for go"
-            self.go.wait() # wait until the main (view) thread gives us the go signal
+            # print "sim: Wait for go"
+            self.go.wait()  # wait until the main (view) thread gives us the go signal
             self.go.clear()
             if self.quit:
                 break
-            #self.go.clear()
-            #print "sim: Acquire lock"
+            # self.go.clear()
+            # print "sim: Acquire lock"
             self.lock.acquire()
             try:
                 if 0:
                     if ns3.Simulator.IsFinished():
                         self.viz.play_button.set_sensitive(False)
                         break
-                #print "sim: Current time is %f; Run until: %f" % (ns3.Simulator.Now ().GetSeconds (), self.target_time)
-                #if ns3.Simulator.Now ().GetSeconds () > self.target_time:
+                # print "sim: Current time is %f; Run until: %f" % (ns3.Simulator.Now ().GetSeconds (), self.target_time)
+                # if ns3.Simulator.Now ().GetSeconds () > self.target_time:
                 #    print "skipping, model is ahead of view!"
                 self.sim_helper.SimulatorRunUntil(ns.Seconds(self.target_time))
-                #print "sim: Run until ended at current time: ", ns3.Simulator.Now ().GetSeconds ()
+                # print "sim: Run until ended at current time: ", ns3.Simulator.Now ().GetSeconds ()
                 self.pause_messages.extend(self.sim_helper.GetPauseMessages())
                 GLib.idle_add(self.viz.update_model, priority=PRIORITY_UPDATE_MODEL)
-                #print "sim: Run until: ", self.target_time, ": finished."
+                # print "sim: Run until: ", self.target_time, ": finished."
             finally:
                 self.lock.release()
-            #print "sim: Release lock, loop."
+            # print "sim: Release lock, loop."
+
 
 ## ShowTransmissionsMode
 class ShowTransmissionsMode(object):
@@ -700,9 +762,12 @@ class ShowTransmissionsMode(object):
 
     ## enumeration
     __slots__ = []
+
+
 ShowTransmissionsMode.ALL = ShowTransmissionsMode()
 ShowTransmissionsMode.NONE = ShowTransmissionsMode()
 ShowTransmissionsMode.SELECTED = ShowTransmissionsMode()
+
 
 ## Visualizer
 class Visualizer(GObject.GObject):
@@ -712,20 +777,22 @@ class Visualizer(GObject.GObject):
 
     if _import_error is None:
         __gsignals__ = {
-
             # signal emitted whenever a right-click-on-node popup menu is being constructed
-            'populate-node-menu': (GObject.SignalFlags.RUN_LAST, None, (object, Gtk.Menu,)),
-
+            "populate-node-menu": (
+                GObject.SignalFlags.RUN_LAST,
+                None,
+                (
+                    object,
+                    Gtk.Menu,
+                ),
+            ),
             # signal emitted after every simulation period (SAMPLE_PERIOD seconds of simulated time)
             # the simulation lock is acquired while the signal is emitted
-            'simulation-periodic-update': (GObject.SignalFlags.RUN_LAST, None, ()),
-
+            "simulation-periodic-update": (GObject.SignalFlags.RUN_LAST, None, ()),
             # signal emitted right after the topology is scanned
-            'topology-scanned': (GObject.SignalFlags.RUN_LAST, None, ()),
-
+            "topology-scanned": (GObject.SignalFlags.RUN_LAST, None, ()),
             # signal emitted when it's time to update the view objects
-            'update-view': (GObject.SignalFlags.RUN_LAST, None, ()),
-
+            "update-view": (GObject.SignalFlags.RUN_LAST, None, ()),
         }
 
     def __init__(self):
@@ -738,14 +805,14 @@ class Visualizer(GObject.GObject):
         assert Visualizer.INSTANCE is None
         Visualizer.INSTANCE = self
         super(Visualizer, self).__init__()
-        self.nodes =  {} # node index -> Node
-        self.channels = {} # id(ns3.Channel) -> Channel
-        self.window = None # toplevel window
-        self.canvas = None # GooCanvas.Canvas
-        self.time_label = None # Gtk.Label
-        self.play_button = None # Gtk.ToggleButton
-        self.zoom = None # Gtk.Adjustment
-        self._scrolled_window = None # Gtk.ScrolledWindow
+        self.nodes = {}  # node index -> Node
+        self.channels = {}  # id(ns3.Channel) -> Channel
+        self.window = None  # toplevel window
+        self.canvas = None  # GooCanvas.Canvas
+        self.time_label = None  # Gtk.Label
+        self.play_button = None  # Gtk.ToggleButton
+        self.zoom = None  # Gtk.Adjustment
+        self._scrolled_window = None  # Gtk.ScrolledWindow
 
         self.links_group = GooCanvas.CanvasGroup()
         self.channels_group = GooCanvas.CanvasGroup()
@@ -753,7 +820,7 @@ class Visualizer(GObject.GObject):
 
         self._update_timeout_id = None
         self.simulation = SimulationThread(self)
-        self.selected_node = None # node currently selected
+        self.selected_node = None  # node currently selected
         self.speed = 1.0
         self.information_windows = []
         self._transmission_arrows = []
@@ -811,9 +878,9 @@ class Visualizer(GObject.GObject):
         main_hbox1 = GObject.new(Gtk.HBox, border_width=8, visible=True)
         main_vbox.pack_start(main_hbox1, True, True, 0)
 
-        show_transmissions_group = GObject.new(Gtk.HeaderBar,
-                                               title="Show transmissions",
-                                               visible=True)
+        show_transmissions_group = GObject.new(
+            Gtk.HeaderBar, title="Show transmissions", visible=True
+        )
         main_hbox1.pack_start(show_transmissions_group, False, False, 8)
 
         vbox = Gtk.VBox(homogeneous=True, spacing=4)
@@ -841,20 +908,25 @@ class Visualizer(GObject.GObject):
         def toggled(radio):
             if radio.get_active():
                 self.set_show_transmissions_mode(ShowTransmissionsMode.ALL)
+
         all_nodes.connect("toggled", toggled)
 
         def toggled(radio):
             if radio.get_active():
                 self.set_show_transmissions_mode(ShowTransmissionsMode.NONE)
+
         no_node.connect("toggled", toggled)
 
         def toggled(radio):
             if radio.get_active():
                 self.set_show_transmissions_mode(ShowTransmissionsMode.SELECTED)
+
         selected_node.connect("toggled", toggled)
 
         # -- misc settings
-        misc_settings_group = GObject.new(Gtk.HeaderBar, title="Misc Settings", visible=True)
+        misc_settings_group = GObject.new(
+            Gtk.HeaderBar, title="Misc Settings", visible=True
+        )
         main_hbox1.pack_start(misc_settings_group, False, False, 8)
         settings_hbox = GObject.new(Gtk.HBox, border_width=8, visible=True)
         misc_settings_group.add(settings_hbox)
@@ -863,12 +935,16 @@ class Visualizer(GObject.GObject):
         vbox = GObject.new(Gtk.VBox, border_width=0, visible=True)
         scale = GObject.new(Gtk.HScale, visible=True, digits=2)
         vbox.pack_start(scale, True, True, 0)
-        vbox.pack_start(GObject.new(Gtk.Label, label="Node Size", visible=True), True, True, 0)
+        vbox.pack_start(
+            GObject.new(Gtk.Label, label="Node Size", visible=True), True, True, 0
+        )
         settings_hbox.pack_start(vbox, False, False, 6)
         self.node_size_adjustment = scale.get_adjustment()
+
         def node_size_changed(adj):
             for node in self.nodes.values():
                 node.set_size(adj.get_value())
+
         self.node_size_adjustment.connect("value-changed", node_size_changed)
         self.node_size_adjustment.set_lower(0.01)
         self.node_size_adjustment.set_upper(20)
@@ -879,14 +955,19 @@ class Visualizer(GObject.GObject):
         vbox = GObject.new(Gtk.VBox, border_width=0, visible=True)
         scale = GObject.new(Gtk.HScale, visible=True, digits=1)
         vbox.pack_start(scale, True, True, 0)
-        vbox.pack_start(GObject.new(Gtk.Label, label="Tx. Smooth Factor (s)", visible=True), True, True, 0)
+        vbox.pack_start(
+            GObject.new(Gtk.Label, label="Tx. Smooth Factor (s)", visible=True),
+            True,
+            True,
+            0,
+        )
         settings_hbox.pack_start(vbox, False, False, 6)
         self.transmissions_smoothing_adjustment = scale.get_adjustment()
         adj = self.transmissions_smoothing_adjustment
         adj.set_lower(0.1)
         adj.set_upper(10)
         adj.set_step_increment(0.1)
-        adj.set_value(DEFAULT_TRANSMISSIONS_MEMORY*0.1)
+        adj.set_value(DEFAULT_TRANSMISSIONS_MEMORY * 0.1)
 
         return expander
 
@@ -894,7 +975,7 @@ class Visualizer(GObject.GObject):
     class _PanningState(object):
         ## @var __slots__
         #  internal variables
-        __slots__ = ['initial_mouse_pos', 'initial_canvas_pos', 'motion_signal']
+        __slots__ = ["initial_mouse_pos", "initial_canvas_pos", "motion_signal"]
 
     def _begin_panning(self, widget, event):
         """!
@@ -913,7 +994,9 @@ class Visualizer(GObject.GObject):
         x = self._scrolled_window.get_hadjustment().get_value()
         y = self._scrolled_window.get_vadjustment().get_value()
         self._panning_state.initial_canvas_pos = (x, y)
-        self._panning_state.motion_signal = self.canvas.connect("motion-notify-event", self._panning_motion)
+        self._panning_state.motion_signal = self.canvas.connect(
+            "motion-notify-event", self._panning_motion
+        )
 
     def _end_panning(self, event):
         """!
@@ -979,6 +1062,7 @@ class Visualizer(GObject.GObject):
 
     def get_hadjustment(self):
         return self._scrolled_window.get_hadjustment()
+
     def get_vadjustment(self):
         return self._scrolled_window.get_vadjustment()
 
@@ -996,7 +1080,8 @@ class Visualizer(GObject.GObject):
         self.canvas.props.has_tooltip = True
         self.canvas.connect("query-tooltip", self._canvas_tooltip_cb)
         self.canvas.show()
-        sw = Gtk.ScrolledWindow(); sw.show()
+        sw = Gtk.ScrolledWindow()
+        sw.show()
         self._scrolled_window = sw
         sw.add(self.canvas)
         vbox.pack_start(sw, True, True, 4)
@@ -1004,52 +1089,75 @@ class Visualizer(GObject.GObject):
         self.canvas.set_bounds(-10000, -10000, 10000, 10000)
         self.canvas.scroll_to(0, 0)
 
-
         self.canvas.get_root_item().add_child(self.links_group, -1)
-        self.links_group.set_property("visibility", GooCanvas.CanvasItemVisibility.VISIBLE)
+        self.links_group.set_property(
+            "visibility", GooCanvas.CanvasItemVisibility.VISIBLE
+        )
 
         self.canvas.get_root_item().add_child(self.channels_group, -1)
-        self.channels_group.set_property("visibility", GooCanvas.CanvasItemVisibility.VISIBLE)
+        self.channels_group.set_property(
+            "visibility", GooCanvas.CanvasItemVisibility.VISIBLE
+        )
         self.channels_group.raise_(self.links_group)
 
         self.canvas.get_root_item().add_child(self.nodes_group, -1)
-        self.nodes_group.set_property("visibility", GooCanvas.CanvasItemVisibility.VISIBLE)
+        self.nodes_group.set_property(
+            "visibility", GooCanvas.CanvasItemVisibility.VISIBLE
+        )
         self.nodes_group.raise_(self.channels_group)
 
         self.hud = hud.Axes(self)
 
-        hbox = Gtk.HBox(); hbox.show()
+        hbox = Gtk.HBox()
+        hbox.show()
         vbox.pack_start(hbox, False, False, 4)
 
         # zoom
-        zoom_adj = Gtk.Adjustment(value=1.0, lower=0.01, upper=10.0,
-                                  step_increment=0.02,
-                                  page_increment=1.0,
-                                  page_size=1.0)
+        zoom_adj = Gtk.Adjustment(
+            value=1.0,
+            lower=0.01,
+            upper=10.0,
+            step_increment=0.02,
+            page_increment=1.0,
+            page_size=1.0,
+        )
         self.zoom = zoom_adj
+
         def _zoom_changed(adj):
             self.canvas.set_scale(adj.get_value())
+
         zoom_adj.connect("value-changed", _zoom_changed)
         zoom = Gtk.SpinButton.new(zoom_adj, 0.1, 1)
         zoom.set_digits(3)
         zoom.show()
-        hbox.pack_start(GObject.new(Gtk.Label, label=" Zoom:", visible=True), False, False, 4)
+        hbox.pack_start(
+            GObject.new(Gtk.Label, label=" Zoom:", visible=True), False, False, 4
+        )
         hbox.pack_start(zoom, False, False, 4)
         _zoom_changed(zoom_adj)
 
         # speed
-        speed_adj = Gtk.Adjustment(value=1.0, lower=0.01, upper=10.0,
-                                   step_increment=0.02,
-                                   page_increment=1.0, page_size=0)
+        speed_adj = Gtk.Adjustment(
+            value=1.0,
+            lower=0.01,
+            upper=10.0,
+            step_increment=0.02,
+            page_increment=1.0,
+            page_size=0,
+        )
+
         def _speed_changed(adj):
             self.speed = adj.get_value()
-            self.sample_period = SAMPLE_PERIOD*adj.get_value()
+            self.sample_period = SAMPLE_PERIOD * adj.get_value()
             self._start_update_timer()
+
         speed_adj.connect("value-changed", _speed_changed)
         speed = Gtk.SpinButton.new(speed_adj, 1, 0)
         speed.set_digits(3)
         speed.show()
-        hbox.pack_start(GObject.new(Gtk.Label, label="  Speed:", visible=True), False, False, 4)
+        hbox.pack_start(
+            GObject.new(Gtk.Label, label="  Speed:", visible=True), False, False, 4
+        )
         hbox.pack_start(speed, False, False, 4)
         _speed_changed(speed_adj)
 
@@ -1059,10 +1167,13 @@ class Visualizer(GObject.GObject):
         hbox.pack_start(self.time_label, False, False, 4)
 
         # Screenshot button
-        screenshot_button = GObject.new(Gtk.Button,
-                                        label="Snapshot",
-                                        relief=Gtk.ReliefStyle.NONE, focus_on_click=False,
-                                        visible=True)
+        screenshot_button = GObject.new(
+            Gtk.Button,
+            label="Snapshot",
+            relief=Gtk.ReliefStyle.NONE,
+            focus_on_click=False,
+            visible=True,
+        )
         hbox.pack_start(screenshot_button, False, False, 4)
 
         def load_button_icon(button, icon_name):
@@ -1078,28 +1189,37 @@ class Visualizer(GObject.GObject):
 
         # Shell button
         if ipython_view is not None:
-            shell_button = GObject.new(Gtk.Button,
-                                       label="Shell",
-                                       relief=Gtk.ReliefStyle.NONE, focus_on_click=False,
-                                       visible=True)
+            shell_button = GObject.new(
+                Gtk.Button,
+                label="Shell",
+                relief=Gtk.ReliefStyle.NONE,
+                focus_on_click=False,
+                visible=True,
+            )
             hbox.pack_start(shell_button, False, False, 4)
             load_button_icon(shell_button, "gnome-terminal")
             shell_button.connect("clicked", self._start_shell)
 
         # Play button
-        self.play_button = GObject.new(Gtk.ToggleButton,
-                                       label="Simulate (F3)",
-                                       relief=Gtk.ReliefStyle.NONE, focus_on_click=False,
-                                       visible=True)
+        self.play_button = GObject.new(
+            Gtk.ToggleButton,
+            label="Simulate (F3)",
+            relief=Gtk.ReliefStyle.NONE,
+            focus_on_click=False,
+            visible=True,
+        )
         load_button_icon(self.play_button, "media-playback-start")
         accel_group = Gtk.AccelGroup()
         self.window.add_accel_group(accel_group)
-        self.play_button.add_accelerator("clicked", accel_group,
-                                         Gdk.KEY_F3, 0, Gtk.AccelFlags.VISIBLE)
+        self.play_button.add_accelerator(
+            "clicked", accel_group, Gdk.KEY_F3, 0, Gtk.AccelFlags.VISIBLE
+        )
         self.play_button.connect("toggled", self._on_play_button_toggled)
         hbox.pack_start(self.play_button, False, False, 4)
 
-        self.canvas.get_root_item().connect("button-press-event", self.on_root_button_press_event)
+        self.canvas.get_root_item().connect(
+            "button-press-event", self.on_root_button_press_event
+        )
 
         vbox.pack_start(self._create_advanced_controls(), False, False, 4)
 
@@ -1125,7 +1245,10 @@ class Visualizer(GObject.GObject):
         for nodeI in range(ns.NodeList.GetNNodes()):
             seen_nodes += 1
             if seen_nodes == 100:
-                print("scan topology... %i nodes visited (%.1f%%)" % (nodeI, 100*nodeI/ns.NodeList.GetNNodes()))
+                print(
+                    "scan topology... %i nodes visited (%.1f%%)"
+                    % (nodeI, 100 * nodeI / ns.NodeList.GetNNodes())
+                )
                 seen_nodes = 0
             node = ns.NodeList.GetNode(nodeI)
             node_name = "Node %i" % nodeI
@@ -1135,8 +1258,10 @@ class Visualizer(GObject.GObject):
             if mobility:
                 node_view.set_color("red")
                 pos = ns.cppyy.gbl.getNodePosition(node)
-                node_view.set_position(*transform_point_simulation_to_canvas(pos.x, pos.y))
-                #print "node has mobility position -> ", "%f,%f" % (pos.x, pos.y)
+                node_view.set_position(
+                    *transform_point_simulation_to_canvas(pos.x, pos.y)
+                )
+                # print "node has mobility position -> ", "%f,%f" % (pos.x, pos.y)
             else:
                 graph.add_node(node_name)
 
@@ -1155,7 +1280,9 @@ class Visualizer(GObject.GObject):
                             channel_name = "Channel %s" % id(channel)
                             graph.add_edge(node_name, channel_name)
                         self.get_channel(channel)
-                        self.create_link(self.get_node(nodeI), self.get_channel(channel))
+                        self.create_link(
+                            self.get_node(nodeI), self.get_channel(channel)
+                        )
                     else:
                         # don't represent channels, just add links between nodes in the same channel
                         for otherDevI in range(channel.GetNDevices()):
@@ -1181,12 +1308,12 @@ class Visualizer(GObject.GObject):
         print("scanning topology: calling graphviz layout")
         graph.layout(LAYOUT_ALGORITHM)
         for node in graph.iternodes():
-            #print node, "=>", node.attr['pos']
-            node_type, node_id = node.split(' ')
-            pos_x, pos_y = [float(s) for s in node.attr['pos'].split(',')]
-            if node_type == 'Node':
+            # print node, "=>", node.attr['pos']
+            node_type, node_id = node.split(" ")
+            pos_x, pos_y = [float(s) for s in node.attr["pos"].split(",")]
+            if node_type == "Node":
                 obj = self.nodes[int(node_id)]
-            elif node_type == 'Channel':
+            elif node_type == "Channel":
                 obj = self.channels[int(node_id)]
             obj.set_position(pos_x, pos_y)
 
@@ -1200,8 +1327,12 @@ class Visualizer(GObject.GObject):
             node = Node(self, index)
             self.nodes[index] = node
             self.nodes_group.add_child(node.canvas_item, -1)
-            node.canvas_item.connect("button-press-event", self.on_node_button_press_event, node)
-            node.canvas_item.connect("button-release-event", self.on_node_button_release_event, node)
+            node.canvas_item.connect(
+                "button-press-event", self.on_node_button_press_event, node
+            )
+            node.canvas_item.connect(
+                "button-release-event", self.on_node_button_release_event, node
+            )
             return node
 
     def get_channel(self, ns3_channel):
@@ -1219,7 +1350,7 @@ class Visualizer(GObject.GObject):
         link.canvas_item.lower(None)
 
     def update_view(self):
-        #print "update_view"
+        # print "update_view"
 
         self.time_label.set_text("Time: %f s" % ns.Simulator.Now().GetSeconds())
 
@@ -1275,7 +1406,7 @@ class Visualizer(GObject.GObject):
             self.simulation.lock.release()
 
     def do_simulation_periodic_update(self):
-        smooth_factor = int(self.transmissions_smoothing_adjustment.get_value()*10)
+        smooth_factor = int(self.transmissions_smoothing_adjustment.get_value() * 10)
 
         transmissions = self.simulation.sim_helper.GetTransmissionSamples()
         self._last_transmissions.append(transmissions)
@@ -1290,18 +1421,28 @@ class Visualizer(GObject.GObject):
     def _get_label_over_line_position(self, pos1_x, pos1_y, pos2_x, pos2_y):
         hadj = self._scrolled_window.get_hadjustment()
         vadj = self._scrolled_window.get_vadjustment()
-        bounds_x1, bounds_y1 = self.canvas.convert_from_pixels(hadj.get_value(), vadj.get_value())
-        bounds_x2, bounds_y2 = self.canvas.convert_from_pixels(hadj.get_value() + hadj.get_page_size(),
-                                                               vadj.get_value() + vadj.get_page_size())
+        bounds_x1, bounds_y1 = self.canvas.convert_from_pixels(
+            hadj.get_value(), vadj.get_value()
+        )
+        bounds_x2, bounds_y2 = self.canvas.convert_from_pixels(
+            hadj.get_value() + hadj.get_page_size(),
+            vadj.get_value() + vadj.get_page_size(),
+        )
         try:
-            pos1_x, pos1_y, pos2_x, pos2_y = ns.PyViz.LineClipping(bounds_x1, bounds_y1,
-                                                               bounds_x2, bounds_y2,
-                                                               pos1_x, pos1_y,
-                                                               pos2_x, pos2_y)
+            pos1_x, pos1_y, pos2_x, pos2_y = ns.PyViz.LineClipping(
+                bounds_x1,
+                bounds_y1,
+                bounds_x2,
+                bounds_y2,
+                pos1_x,
+                pos1_y,
+                pos2_x,
+                pos2_y,
+            )
         except:
-            res = (0,0,0,0)
+            res = (0, 0, 0, 0)
         pos1_x, pos1_y, pos2_x, pos2_y = res
-        return (pos1_x + pos2_x)/2, (pos1_y + pos2_y)/2
+        return (pos1_x + pos2_x) / 2, (pos1_y + pos2_y) / 2
 
     def _update_transmissions_view(self):
         transmissions_average = {}
@@ -1319,23 +1460,37 @@ class Visualizer(GObject.GObject):
             label.set_property("visibility", GooCanvas.CanvasItemVisibility.HIDDEN)
         new_arrows = []
 
-        k = self.node_size_adjustment.get_value()/5
+        k = self.node_size_adjustment.get_value() / 5
 
-        for (transmitter_id, receiver_id), (rx_bytes, rx_count) in transmissions_average.items():
+        for (transmitter_id, receiver_id), (
+            rx_bytes,
+            rx_count,
+        ) in transmissions_average.items():
             transmitter = self.get_node(transmitter_id)
             receiver = self.get_node(receiver_id)
             try:
                 arrow, label = old_arrows.pop()
             except IndexError:
-                arrow = GooCanvas.CanvasPolyline(line_width=2.0, stroke_color_rgba=0x00C000C0, close_path=False, end_arrow=True, pointer_events=GooCanvas.CanvasPointerEvents.NONE)
+                arrow = GooCanvas.CanvasPolyline(
+                    line_width=2.0,
+                    stroke_color_rgba=0x00C000C0,
+                    close_path=False,
+                    end_arrow=True,
+                    pointer_events=GooCanvas.CanvasPointerEvents.NONE,
+                )
                 arrow.set_property("parent", self.canvas.get_root_item())
                 arrow.raise_(None)
 
-                label = GooCanvas.CanvasText(parent=self.canvas.get_root_item(), pointer_events=GooCanvas.CanvasPointerEvents.NONE)
+                label = GooCanvas.CanvasText(
+                    parent=self.canvas.get_root_item(),
+                    pointer_events=GooCanvas.CanvasPointerEvents.NONE,
+                )
                 label.raise_(None)
 
             arrow.set_property("visibility", GooCanvas.CanvasItemVisibility.VISIBLE)
-            line_width = max(0.1, math.log(float(rx_bytes)/rx_count/self.sample_period)*k)
+            line_width = max(
+                0.1, math.log(float(rx_bytes) / rx_count / self.sample_period) * k
+            )
             arrow.set_property("line-width", line_width)
 
             pos1_x, pos1_y = transmitter.get_position()
@@ -1345,39 +1500,48 @@ class Visualizer(GObject.GObject):
             points.set_point(1, pos2_x, pos2_y)
             arrow.set_property("points", points)
 
-            kbps = float(rx_bytes*8)/1e3/rx_count/self.sample_period
-            label.set_properties(visibility=GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD,
-                                 visibility_threshold=0.5,
-                                 font=("Sans Serif %f" % int(1+BITRATE_FONT_SIZE*k)))
+            kbps = float(rx_bytes * 8) / 1e3 / rx_count / self.sample_period
+            label.set_properties(
+                visibility=GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD,
+                visibility_threshold=0.5,
+                font=("Sans Serif %f" % int(1 + BITRATE_FONT_SIZE * k)),
+            )
             angle = math.atan2((pos2_y - pos1_y), (pos2_x - pos1_x))
             if -PI_OVER_2 <= angle <= PI_OVER_2:
-                label.set_properties(text=("%.2f kbit/s →" % (kbps,)),
-                                     alignment=Pango.Alignment.CENTER,
-                                     anchor=GooCanvas.CanvasAnchorType.S,
-                                     x=0, y=-line_width/2)
+                label.set_properties(
+                    text=("%.2f kbit/s →" % (kbps,)),
+                    alignment=Pango.Alignment.CENTER,
+                    anchor=GooCanvas.CanvasAnchorType.S,
+                    x=0,
+                    y=-line_width / 2,
+                )
             else:
-                label.set_properties(text=("← %.2f kbit/s" % (kbps,)),
-                                     alignment=Pango.Alignment.CENTER,
-                                     anchor=GooCanvas.CanvasAnchorType.N,
-                                     x=0, y=line_width/2)
+                label.set_properties(
+                    text=("← %.2f kbit/s" % (kbps,)),
+                    alignment=Pango.Alignment.CENTER,
+                    anchor=GooCanvas.CanvasAnchorType.N,
+                    x=0,
+                    y=line_width / 2,
+                )
             M = cairo.Matrix()
-            lx, ly = self._get_label_over_line_position(c_double(pos1_x), c_double(pos1_y),
-                                                        c_double(pos2_x), c_double(pos2_y))
+            lx, ly = self._get_label_over_line_position(
+                c_double(pos1_x), c_double(pos1_y), c_double(pos2_x), c_double(pos2_y)
+            )
             M.translate(lx, ly)
             M.rotate(angle)
             try:
                 label.set_transform(M)
             except KeyError:
                 # https://gitlab.gnome.org/GNOME/pygobject/issues/16
-                warnings.warn("PyGobject bug causing label position error; "
-                              "should be fixed in PyGObject >= 3.29.1")
-                label.set_properties(x=(lx + label.props.x),
-                                     y=(ly + label.props.y))
+                warnings.warn(
+                    "PyGobject bug causing label position error; "
+                    "should be fixed in PyGObject >= 3.29.1"
+                )
+                label.set_properties(x=(lx + label.props.x), y=(ly + label.props.y))
 
             new_arrows.append((arrow, label))
 
         self._transmission_arrows = new_arrows + old_arrows
-
 
     def _update_drops_view(self):
         drops_average = {}
@@ -1400,23 +1564,37 @@ class Visualizer(GObject.GObject):
         bottom_y = vadjustment.get_value() + vadjustment.get_page_size()
         dummy, edge_y = self.canvas.convert_from_pixels(0, bottom_y)
 
-        k = self.node_size_adjustment.get_value()/5
+        k = self.node_size_adjustment.get_value() / 5
 
         for transmitter_id, (drop_bytes, drop_count) in drops_average.items():
             transmitter = self.get_node(transmitter_id)
             try:
                 arrow, label = old_arrows.pop()
             except IndexError:
-                arrow = GooCanvas.CanvasPolyline(line_width=2.0, stroke_color_rgba=0xC00000C0, close_path=False, end_arrow=True, pointer_events=GooCanvas.CanvasPointerEvents.NONE)
+                arrow = GooCanvas.CanvasPolyline(
+                    line_width=2.0,
+                    stroke_color_rgba=0xC00000C0,
+                    close_path=False,
+                    end_arrow=True,
+                    pointer_events=GooCanvas.CanvasPointerEvents.NONE,
+                )
                 arrow.set_property("parent", self.canvas.get_root_item())
                 arrow.raise_(None)
 
-                label = GooCanvas.CanvasText(pointer_events=GooCanvas.CanvasPointerEvents.NONE)#, fill_color_rgba=0x00C000C0)
+                label = GooCanvas.CanvasText(
+                    pointer_events=GooCanvas.CanvasPointerEvents.NONE
+                )  # , fill_color_rgba=0x00C000C0)
                 label.set_property("parent", self.canvas.get_root_item())
                 label.raise_(None)
 
             arrow.set_property("visibility", GooCanvas.CanvasItemVisibility.VISIBLE)
-            arrow.set_property("line-width", max(0.1, math.log(float(drop_bytes)/drop_count/self.sample_period)*k))
+            arrow.set_property(
+                "line-width",
+                max(
+                    0.1,
+                    math.log(float(drop_bytes) / drop_count / self.sample_period) * k,
+                ),
+            )
             pos1_x, pos1_y = transmitter.get_position()
             pos2_x, pos2_y = pos1_x, edge_y
             points = GooCanvas.CanvasPoints.new(2)
@@ -1424,21 +1602,25 @@ class Visualizer(GObject.GObject):
             points.set_point(1, pos2_x, pos2_y)
             arrow.set_property("points", points)
 
-            label.set_properties(visibility=GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD,
-                                 visibility_threshold=0.5,
-                                 font=("Sans Serif %i" % int(1+BITRATE_FONT_SIZE*k)),
-                                 text=("%.2f kbit/s" % (float(drop_bytes*8)/1e3/drop_count/self.sample_period,)),
-                                 alignment=Pango.Alignment.CENTER,
-                                 x=(pos1_x + pos2_x)/2,
-                                 y=(pos1_y + pos2_y)/2)
+            label.set_properties(
+                visibility=GooCanvas.CanvasItemVisibility.VISIBLE_ABOVE_THRESHOLD,
+                visibility_threshold=0.5,
+                font=("Sans Serif %i" % int(1 + BITRATE_FONT_SIZE * k)),
+                text=(
+                    "%.2f kbit/s"
+                    % (float(drop_bytes * 8) / 1e3 / drop_count / self.sample_period,)
+                ),
+                alignment=Pango.Alignment.CENTER,
+                x=(pos1_x + pos2_x) / 2,
+                y=(pos1_y + pos2_y) / 2,
+            )
 
             new_arrows.append((arrow, label))
 
         self._drop_arrows = new_arrows + old_arrows
 
-
     def update_view_timeout(self):
-        #print "view: update_view_timeout called at real time ", time.time()
+        # print "view: update_view_timeout called at real time ", time.time()
 
         # while the simulator is busy, run the gtk event loop
         while not self.simulation.lock.acquire(False):
@@ -1448,15 +1630,22 @@ class Visualizer(GObject.GObject):
         self.simulation.pause_messages = []
         try:
             self.update_view()
-            self.simulation.target_time = ns.Simulator.Now ().GetSeconds () + self.sample_period
-            #print "view: target time set to %f" % self.simulation.target_time
+            self.simulation.target_time = (
+                ns.Simulator.Now().GetSeconds() + self.sample_period
+            )
+            # print "view: target time set to %f" % self.simulation.target_time
         finally:
             self.simulation.lock.release()
 
         if pause_messages:
-            #print pause_messages
-            dialog = Gtk.MessageDialog(parent=self.window, flags=0, type=Gtk.MessageType.WARNING, buttons=Gtk.ButtonsType.OK,
-                                       message_format='\n'.join(pause_messages))
+            # print pause_messages
+            dialog = Gtk.MessageDialog(
+                parent=self.window,
+                flags=0,
+                type=Gtk.MessageType.WARNING,
+                buttons=Gtk.ButtonsType.OK,
+                message_format="\n".join(pause_messages),
+            )
             dialog.connect("response", lambda d, r: d.destroy())
             dialog.show()
             self.play_button.set_active(False)
@@ -1466,18 +1655,20 @@ class Visualizer(GObject.GObject):
             self._update_timeout_id = None
             return False
 
-        #print "view: self.simulation.go.set()"
+        # print "view: self.simulation.go.set()"
         self.simulation.go.set()
-        #print "view: done."
+        # print "view: done."
         return True
 
     def _start_update_timer(self):
         if self._update_timeout_id is not None:
             GLib.source_remove(self._update_timeout_id)
-        #print "start_update_timer"
-        self._update_timeout_id = GLib.timeout_add(int(SAMPLE_PERIOD/min(self.speed, 1)*1e3),
-                                                   self.update_view_timeout,
-                                                   priority=PRIORITY_UPDATE_VIEW)
+        # print "start_update_timer"
+        self._update_timeout_id = GLib.timeout_add(
+            int(SAMPLE_PERIOD / min(self.speed, 1) * 1e3),
+            self.update_view_timeout,
+            priority=PRIORITY_UPDATE_VIEW,
+        )
 
     def _on_play_button_toggled(self, button):
         if button.get_active():
@@ -1503,15 +1694,18 @@ class Visualizer(GObject.GObject):
         # that is executed.
 
         original_runcode = self.ipython.runcode
+
         def runcode(ip, *args):
-            #print "lock"
+            # print "lock"
             self.simulation.lock.acquire()
             try:
                 return original_runcode(*args)
             finally:
-                #print "unlock"
+                # print "unlock"
                 self.simulation.lock.release()
+
         import types
+
         self.ipython.runcode = types.MethodType(runcode, self.ipython)
 
     def autoscale_view(self):
@@ -1519,8 +1713,8 @@ class Visualizer(GObject.GObject):
             return
         self._update_node_positions()
         positions = [node.get_position() for node in self.nodes.values()]
-        min_x, min_y = min(x for (x,y) in positions), min(y for (x,y) in positions)
-        max_x, max_y = max(x for (x,y) in positions), max(y for (x,y) in positions)
+        min_x, min_y = min(x for (x, y) in positions), min(y for (x, y) in positions)
+        max_x, max_y = max(x for (x, y) in positions), max(y for (x, y) in positions)
         min_x_px, min_y_px = self.canvas.convert_to_pixels(min_x, min_y)
         max_x_px, max_y_px = self.canvas.convert_to_pixels(max_x, max_y)
         dx = max_x - min_x
@@ -1529,31 +1723,33 @@ class Visualizer(GObject.GObject):
         dy_px = max_y_px - min_y_px
         hadj = self._scrolled_window.get_hadjustment()
         vadj = self._scrolled_window.get_vadjustment()
-        new_dx, new_dy = 1.5*dx_px, 1.5*dy_px
+        new_dx, new_dy = 1.5 * dx_px, 1.5 * dy_px
 
         if new_dx == 0 or new_dy == 0:
             return
 
-        self.zoom.set_value(min(hadj.get_page_size()/new_dx, vadj.get_page_size()/new_dy))
+        self.zoom.set_value(
+            min(hadj.get_page_size() / new_dx, vadj.get_page_size() / new_dy)
+        )
 
         x1, y1 = self.canvas.convert_from_pixels(hadj.get_value(), vadj.get_value())
-        x2, y2 = self.canvas.convert_from_pixels((hadj.get_value() +
-                                                  hadj.get_page_size()),
-                                                 (vadj.get_value() +
-                                                  vadj.get_page_size()))
+        x2, y2 = self.canvas.convert_from_pixels(
+            (hadj.get_value() + hadj.get_page_size()),
+            (vadj.get_value() + vadj.get_page_size()),
+        )
         width = x2 - x1
         height = y2 - y1
         center_x = (min_x + max_x) / 2
         center_y = (min_y + max_y) / 2
 
-        self.canvas.scroll_to(center_x - width/2, center_y - height/2)
+        self.canvas.scroll_to(center_x - width / 2, center_y - height / 2)
 
         return False
 
     def start(self):
         self.scan_topology()
         self.window.connect("delete-event", self._quit)
-        #self._start_update_timer()
+        # self._start_update_timer()
         GLib.timeout_add(200, self.autoscale_view)
         self.simulation.start()
 
@@ -1565,7 +1761,6 @@ class Visualizer(GObject.GObject):
             self._monkey_patch_ipython()
 
         Gtk.main()
-
 
     def on_root_button_press_event(self, view, target, event):
         if event.button == 1:
@@ -1614,7 +1809,9 @@ class Visualizer(GObject.GObject):
         devpos = self.canvas.get_window().get_device_position(event.device)
         x0, y0 = self.canvas.convert_from_pixels(devpos.x, devpos.y)
         self.node_drag_state = self.NodeDragState(x0, y0, pos.x, pos.y)
-        self.node_drag_state.motion_signal = node.canvas_item.connect("motion-notify-event", self.node_drag_motion, node)
+        self.node_drag_state.motion_signal = node.canvas_item.connect(
+            "motion-notify-event", self.node_drag_motion, node
+        )
 
     def node_drag_motion(self, item, targe_item, event, node):
         self.simulation.lock.acquire()
@@ -1627,12 +1824,18 @@ class Visualizer(GObject.GObject):
                 return False
             devpos = self.canvas.get_window().get_device_position(event.device)
             canvas_x, canvas_y = self.canvas.convert_from_pixels(devpos.x, devpos.y)
-            dx = (canvas_x - self.node_drag_state.canvas_x0)
-            dy = (canvas_y - self.node_drag_state.canvas_y0)
+            dx = canvas_x - self.node_drag_state.canvas_x0
+            dy = canvas_y - self.node_drag_state.canvas_y0
             pos = mob.GetPosition()
-            pos.x = self.node_drag_state.sim_x0 + transform_distance_canvas_to_simulation(dx)
-            pos.y = self.node_drag_state.sim_y0 + transform_distance_canvas_to_simulation(dy)
-            #print "SetPosition(%G, %G)" % (pos.x, pos.y)
+            pos.x = (
+                self.node_drag_state.sim_x0
+                + transform_distance_canvas_to_simulation(dx)
+            )
+            pos.y = (
+                self.node_drag_state.sim_y0
+                + transform_distance_canvas_to_simulation(dy)
+            )
+            # print "SetPosition(%G, %G)" % (pos.x, pos.y)
             mob.SetPosition(pos)
             node.set_position(*transform_point_simulation_to_canvas(pos.x, pos.y))
         finally:
@@ -1667,8 +1870,7 @@ class Visualizer(GObject.GObject):
                     ns3_node = ns.NodeList.GetNode(self.selected_node.node_index)
                 finally:
                     self.simulation.lock.release()
-            self.ipython.updateNamespace({'selected_node': ns3_node})
-
+            self.ipython.updateNamespace({"selected_node": ns3_node})
 
     def select_node(self, node):
         if isinstance(node, ns.Node):
@@ -1699,7 +1901,6 @@ class Visualizer(GObject.GObject):
 
         self._update_ipython_selected_node()
 
-
     def add_information_window(self, info_win):
         self.information_windows.append(info_win)
         self.simulation.lock.acquire()
@@ -1712,12 +1913,14 @@ class Visualizer(GObject.GObject):
         self.information_windows.remove(info_win)
 
     def _canvas_tooltip_cb(self, canvas, x, y, keyboard_mode, tooltip):
-        #print "tooltip query: ", x, y
+        # print "tooltip query: ", x, y
         hadj = self._scrolled_window.get_hadjustment()
         vadj = self._scrolled_window.get_vadjustment()
-        x, y = self.canvas.convert_from_pixels(hadj.get_value() + x, vadj.get_value() + y)
+        x, y = self.canvas.convert_from_pixels(
+            hadj.get_value() + x, vadj.get_value() + y
+        )
         item = self.canvas.get_item_at(x, y, True)
-        #print "items at (%f, %f): %r | keyboard_mode=%r" % (x, y, item, keyboard_mode)
+        # print "items at (%f, %f): %r | keyboard_mode=%r" % (x, y, item, keyboard_mode)
         if not item:
             return False
         while item is not None:
@@ -1729,10 +1932,13 @@ class Visualizer(GObject.GObject):
         return False
 
     def _get_export_file_name(self):
-        sel = Gtk.FileChooserNative.new("Save...", self.canvas.get_toplevel(),
-                                        Gtk.FileChooserAction.SAVE,
-                                        "_Save",
-                                        "_Cancel")
+        sel = Gtk.FileChooserNative.new(
+            "Save...",
+            self.canvas.get_toplevel(),
+            Gtk.FileChooserAction.SAVE,
+            "_Save",
+            "_Cancel",
+        )
         sel.set_local_only(True)
         sel.set_do_overwrite_confirmation(True)
         sel.set_current_name("Unnamed.pdf")
@@ -1762,7 +1968,7 @@ class Visualizer(GObject.GObject):
         return file_name
 
     def _take_screenshot(self, dummy_button):
-        #print "Cheese!"
+        # print "Cheese!"
         file_name = self._get_export_file_name()
         if file_name is None:
             return
@@ -1777,23 +1983,25 @@ class Visualizer(GObject.GObject):
         bounds.x2, bounds.y2 = self.canvas.convert_from_pixels(x2, y2)
         dest_width = bounds.x2 - bounds.x1
         dest_height = bounds.y2 - bounds.y1
-        #print bounds.x1, bounds.y1, " -> ", bounds.x2, bounds.y2
+        # print bounds.x1, bounds.y1, " -> ", bounds.x2, bounds.y2
 
         dummy, extension = os.path.splitext(file_name)
         extension = extension.lower()
-        if extension == '.eps':
+        if extension == ".eps":
             surface = cairo.PSSurface(file_name, dest_width, dest_height)
-        elif extension == '.pdf':
+        elif extension == ".pdf":
             surface = cairo.PDFSurface(file_name, dest_width, dest_height)
-        elif extension == '.svg':
+        elif extension == ".svg":
             surface = cairo.SVGSurface(file_name, dest_width, dest_height)
         else:
-            dialog = Gtk.MessageDialog(parent  = self.canvas.get_toplevel(),
-                                       flags   = Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                                       type    = Gtk.MessageType.ERROR,
-                                       buttons = Gtk.ButtonsType.OK,
-                                       message_format = "Unknown extension '%s' (valid extensions are '.eps', '.svg', and '.pdf')"
-                                                        % (extension,))
+            dialog = Gtk.MessageDialog(
+                parent=self.canvas.get_toplevel(),
+                flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                message_format="Unknown extension '%s' (valid extensions are '.eps', '.svg', and '.pdf')"
+                % (extension,),
+            )
             dialog.run()
             dialog.destroy()
             return
@@ -1816,11 +2024,10 @@ class Visualizer(GObject.GObject):
             return
 
         self.shell_window = Gtk.Window()
-        self.shell_window.set_size_request(750,550)
+        self.shell_window.set_size_request(750, 550)
         self.shell_window.set_resizable(True)
         scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
-                                   Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.ipython = ipython_view.IPythonView()
         self.ipython.modify_font(Pango.FontDescription(SHELL_FONT))
         self.ipython.set_wrap_mode(Gtk.WrapMode.CHAR)
@@ -1829,17 +2036,17 @@ class Visualizer(GObject.GObject):
         scrolled_window.show()
         self.shell_window.add(scrolled_window)
         self.shell_window.show()
-        self.shell_window.connect('destroy', self._on_shell_window_destroy)
+        self.shell_window.connect("destroy", self._on_shell_window_destroy)
 
         self._update_ipython_selected_node()
-        self.ipython.updateNamespace({'viz': self})
-
+        self.ipython.updateNamespace({"viz": self})
 
     def _on_shell_window_destroy(self, window):
         self.shell_window = None
 
 
 initialization_hooks = []
+
 
 def add_initialization_hook(hook, *args):
     """
@@ -1852,12 +2059,14 @@ def add_initialization_hook(hook, *args):
 
 
 def set_bounds(x1, y1, x2, y2):
-    assert x2>x1
-    assert y2>y1
+    assert x2 > x1
+    assert y2 > y1
+
     def hook(viz):
         cx1, cy1 = transform_point_simulation_to_canvas(x1, y1)
         cx2, cy2 = transform_point_simulation_to_canvas(x2, y2)
         viz.canvas.set_bounds(cx1, cy1, cx2, cy2)
+
     add_initialization_hook(hook)
 
 
@@ -1865,8 +2074,8 @@ def start():
     assert Visualizer.INSTANCE is None
     if _import_error is not None:
         import sys
-        print("No visualization support (%s)." % (str(_import_error),),
-              file=sys.stderr)
+
+        print("No visualization support (%s)." % (str(_import_error),), file=sys.stderr)
         ns.Simulator.Run()
         return
     load_plugins()

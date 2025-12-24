@@ -32,9 +32,7 @@ from ns import ns
 
 def main():
     parser = argparse.ArgumentParser("sample-rng-plot")
-    parser.add_argument("--not-blocking",
-                        action="store_true",
-                        default=False)
+    parser.add_argument("--not-blocking", action="store_true", default=False)
     args = parser.parse_args(sys.argv[1:])
 
     # mu, var = 100, 225
@@ -52,16 +50,16 @@ def main():
     ## Make a probability density histogram
     density = 1
     ## Plot color
-    facecolor = 'g'
+    facecolor = "g"
     ## Plot alpha value (transparency)
     alpha = 0.75
 
     # We don't really need the plot results, we're just going to show it later.
     # n, bins, patches = plt.hist(x, 50, density=1, facecolor='g', alpha=0.75)
-    n, bins, patches = plt.hist(x, 50, density=True, facecolor='g', alpha=0.75)
+    n, bins, patches = plt.hist(x, 50, density=True, facecolor="g", alpha=0.75)
 
-    plt.title('ns-3 histogram')
-    plt.text(60, .025, r'$\mu=100,\ \sigma=15$')
+    plt.title("ns-3 histogram")
+    plt.text(60, 0.025, r"$\mu=100,\ \sigma=15$")
     plt.axis([40, 160, 0, 0.03])
     plt.grid(True)
     plt.show(block=not args.not_blocking)

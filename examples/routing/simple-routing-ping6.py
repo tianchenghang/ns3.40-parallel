@@ -73,7 +73,7 @@ def main(argv):
     print("Application")
     packetSize = 1024
     maxPacketCount = 5
-    interPacketInterval = ns.Seconds(1.)
+    interPacketInterval = ns.Seconds(1.0)
     # ping = ns.PingHelper(i2.GetAddress(1, 1).ConvertTo())
     ping = ns.PingHelper(i2.GetAddress(1, 1).ConvertTo())
 
@@ -98,7 +98,7 @@ def main(argv):
     ns.Simulator.Destroy()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     main(sys.argv)

@@ -40,8 +40,9 @@ internet.Install(csmaNodes.Get(1))
 
 # Install Click on node A
 clickinternet = ns.ClickInternetStackHelper()
-clickinternet.SetClickFile(csmaNodes.Get(0),
-                           clickConfigFolder + "/nsclick-lan-single-interface.click")
+clickinternet.SetClickFile(
+    csmaNodes.Get(0), clickConfigFolder + "/nsclick-lan-single-interface.click"
+)
 clickinternet.SetRoutingTableElement(csmaNodes.Get(0), "rt")
 clickinternet.Install(csmaNodes.Get(0))
 
@@ -58,8 +59,12 @@ recvapp.Start(ns.Seconds(5.0))
 recvapp.Stop(ns.Seconds(10.0))
 
 onOffHelper = ns.OnOffHelper("ns3::TcpSocketFactory", ns.Address())
-onOffHelper.SetAttribute("OnTime", ns.StringValue("ns3::ConstantRandomVariable[Constant=1]"))
-onOffHelper.SetAttribute("OffTime", ns.StringValue("ns3::ConstantRandomVariable[Constant=0]"))
+onOffHelper.SetAttribute(
+    "OnTime", ns.StringValue("ns3::ConstantRandomVariable[Constant=1]")
+)
+onOffHelper.SetAttribute(
+    "OffTime", ns.StringValue("ns3::ConstantRandomVariable[Constant=0]")
+)
 
 appcont = ns.ApplicationContainer()
 

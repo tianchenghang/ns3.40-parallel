@@ -186,7 +186,9 @@ class TestSimulator(unittest.TestCase):
         @param self this object
         @return None
         """
-        ns.Config.SetDefault("ns3::OnOffApplication::PacketSize", ns.core.UintegerValue(123))
+        ns.Config.SetDefault(
+            "ns3::OnOffApplication::PacketSize", ns.core.UintegerValue(123)
+        )
         # hm.. no Config.Get?
 
     def testSocket(self):
@@ -210,13 +212,28 @@ class TestSimulator(unittest.TestCase):
             }
         """)
 
-        sink = ns.network.Socket.CreateSocket(node, ns.core.TypeId.LookupByName("ns3::UdpSocketFactory"))
-        sink.Bind(ns.network.InetSocketAddress(ns.network.Ipv4Address.GetAny(), 80).ConvertTo())
-        sink.SetRecvCallback(ns.cppyy.gbl.make_rx_callback_test_socket(python_rx_callback))
+        sink = ns.network.Socket.CreateSocket(
+            node, ns.core.TypeId.LookupByName("ns3::UdpSocketFactory")
+        )
+        sink.Bind(
+            ns.network.InetSocketAddress(
+                ns.network.Ipv4Address.GetAny(), 80
+            ).ConvertTo()
+        )
+        sink.SetRecvCallback(
+            ns.cppyy.gbl.make_rx_callback_test_socket(python_rx_callback)
+        )
 
-        source = ns.network.Socket.CreateSocket(node, ns.core.TypeId.LookupByName("ns3::UdpSocketFactory"))
-        source.SendTo(ns.network.Packet(19), 0,
-                      ns.network.InetSocketAddress(ns.network.Ipv4Address("127.0.0.1"), 80).ConvertTo())
+        source = ns.network.Socket.CreateSocket(
+            node, ns.core.TypeId.LookupByName("ns3::UdpSocketFactory")
+        )
+        source.SendTo(
+            ns.network.Packet(19),
+            0,
+            ns.network.InetSocketAddress(
+                ns.network.Ipv4Address("127.0.0.1"), 80
+            ).ConvertTo(),
+        )
 
         ns.Simulator.Run()
         self.assertTrue(self._received_packet is not None)
@@ -355,8 +372,9 @@ class TestSimulator(unittest.TestCase):
         stack.Install(nodes)
 
         address = ns.internet.Ipv4AddressHelper()
-        address.SetBase(ns.network.Ipv4Address("10.1.1.0"),
-                        ns.network.Ipv4Mask("255.255.255.0"))
+        address.SetBase(
+            ns.network.Ipv4Address("10.1.1.0"), ns.network.Ipv4Mask("255.255.255.0")
+        )
 
         interfaces = address.Assign(devices)
 
@@ -388,13 +406,20 @@ class TestSimulator(unittest.TestCase):
                 return None
                 """
                 super().__init__()
-                self.__python_owns__ = False  # Let C++ destroy this on Simulator::Destroy
+                self.__python_owns__ = (
+                    False  # Let C++ destroy this on Simulator::Destroy
+                )
                 ## Listen port for the server
                 self.port = port
                 ## Socket used by the server to listen to port
-                self.m_socket = ns.network.Socket.CreateSocket(node,
-                                                               ns.core.TypeId.LookupByName("ns3::UdpSocketFactory"))
-                self.m_socket.Bind(ns.network.InetSocketAddress(ns.network.Ipv4Address.GetAny(), self.port).ConvertTo())
+                self.m_socket = ns.network.Socket.CreateSocket(
+                    node, ns.core.TypeId.LookupByName("ns3::UdpSocketFactory")
+                )
+                self.m_socket.Bind(
+                    ns.network.InetSocketAddress(
+                        ns.network.Ipv4Address.GetAny(), self.port
+                    ).ConvertTo()
+                )
                 self.m_socket.SetRecvCallback(ns.make_rx_callback(EchoServer._Receive))
                 EchoServer.socketToInstanceDict[self.m_socket] = self
 
@@ -415,13 +440,16 @@ class TestSimulator(unittest.TestCase):
                 self.m_socket.SendTo(packet, 0, address)
                 if EchoServer.LOGGING:
                     inetAddress = ns.InetSocketAddress.ConvertFrom(address)
-                    print("At time +{s}s server sent {b} bytes from {ip} port {port}"
-                          .format(s=ns.Simulator.Now().GetSeconds(),
-                                  b=packet.__deref__().GetSize(),
-                                  ip=inetAddress.GetIpv4(),
-                                  port=inetAddress.GetPort()),
-                          file=sys.stderr,
-                          flush=True)
+                    print(
+                        "At time +{s}s server sent {b} bytes from {ip} port {port}".format(
+                            s=ns.Simulator.Now().GetSeconds(),
+                            b=packet.__deref__().GetSize(),
+                            ip=inetAddress.GetIpv4(),
+                            port=inetAddress.GetPort(),
+                        ),
+                        file=sys.stderr,
+                        flush=True,
+                    )
 
             def Receive(self):
                 """! Function to receive a packet from an address
@@ -432,14 +460,19 @@ class TestSimulator(unittest.TestCase):
                 packet = self.m_socket.RecvFrom(address)
                 if EchoServer.LOGGING:
                     inetAddress = ns.InetSocketAddress.ConvertFrom(address)
-                    print("At time +{s}s server received {b} bytes from {ip} port {port}"
-                          .format(s=ns.Simulator.Now().GetSeconds(),
-                                  b=packet.__deref__().GetSize(),
-                                  ip=inetAddress.GetIpv4(),
-                                  port=inetAddress.GetPort()),
-                          file=sys.stderr,
-                          flush=True)
-                event = ns.pythonMakeEventSend(EchoServer._Send, self.m_socket, packet, address)
+                    print(
+                        "At time +{s}s server received {b} bytes from {ip} port {port}".format(
+                            s=ns.Simulator.Now().GetSeconds(),
+                            b=packet.__deref__().GetSize(),
+                            ip=inetAddress.GetIpv4(),
+                            port=inetAddress.GetPort(),
+                        ),
+                        file=sys.stderr,
+                        flush=True,
+                    )
+                event = ns.pythonMakeEventSend(
+                    EchoServer._Send, self.m_socket, packet, address
+                )
                 ns.Simulator.Schedule(ns.Seconds(1), event)
 
             @staticmethod
@@ -486,5 +519,5 @@ class TestSimulator(unittest.TestCase):
         ns.Simulator.Destroy()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=1, failfast=True)

@@ -8,6 +8,7 @@ __email__ = "gawlowicz@tkn.tu-berlin.de"
 
 class TcpNewReno(TcpEventBased):
     """docstring for TcpNewReno"""
+
     def __init__(self):
         super(TcpNewReno, self).__init__()
 
@@ -29,26 +30,26 @@ class TcpNewReno(TcpEventBased):
         # number of acked segments
         segmentsAcked = obs[7]
         # estimated bytes in flight
-        bytesInFlight  = obs[8]
+        bytesInFlight = obs[8]
 
         new_cWnd = 1
         new_ssThresh = 1
 
         # IncreaseWindow
-        if (cWnd < ssThresh):
+        if cWnd < ssThresh:
             # slow start
-            if (segmentsAcked >= 1):
+            if segmentsAcked >= 1:
                 new_cWnd = cWnd + segmentSize
 
-        if (cWnd >= ssThresh):
+        if cWnd >= ssThresh:
             # congestion avoidance
-            if (segmentsAcked > 0):
-                adder = 1.0 * (segmentSize * segmentSize) / cWnd;
-                adder = int(max (1.0, adder))
+            if segmentsAcked > 0:
+                adder = 1.0 * (segmentSize * segmentSize) / cWnd
+                adder = int(max(1.0, adder))
                 new_cWnd = cWnd + adder
 
         # GetSsThresh
-        new_ssThresh = int(max (2 * segmentSize, bytesInFlight / 2))
+        new_ssThresh = int(max(2 * segmentSize, bytesInFlight / 2))
 
         # return actions
         actions = [new_ssThresh, new_cWnd]

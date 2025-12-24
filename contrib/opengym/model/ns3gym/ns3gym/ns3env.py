@@ -24,6 +24,7 @@ __email__ = "gawlowicz@tkn.tu-berlin.de"
 
 class Ns3ZmqBridge(object):
     """docstring for Ns3ZmqBridge"""
+
     def __init__(self, port=0, startSim=True, simSeed=0, simArgs={}, debug=False):
         super(Ns3ZmqBridge, self).__init__()
         port = int(port)
@@ -40,23 +41,25 @@ class Ns3ZmqBridge(object):
         self.socket = context.socket(zmq.REP)
         try:
             if port == 0 and self.startSim:
-                port = self.socket.bind_to_random_port('tcp://*', min_port=5001, max_port=10000, max_tries=100)
+                port = self.socket.bind_to_random_port(
+                    "tcp://*", min_port=5001, max_port=10000, max_tries=100
+                )
                 print("Got new port for ns3gm interface: ", port)
 
             elif port == 0 and not self.startSim:
-                print("Cannot use port %s to bind" % str(port) )
-                print("Please specify correct port" )
+                print("Cannot use port %s to bind" % str(port))
+                print("Please specify correct port")
                 sys.exit()
 
             else:
-                self.socket.bind ("tcp://*:%s" % str(port))
+                self.socket.bind("tcp://*:%s" % str(port))
 
         except Exception as e:
-            print("Cannot bind to tcp://*:%s as port is already in use" % str(port) )
-            print("Please specify different port or use 0 to get free port" )
+            print("Cannot bind to tcp://*:%s as port is already in use" % str(port))
+            print("Please specify different port or use 0 to get free port")
             sys.exit()
 
-        if (startSim == True and simSeed == 0):
+        if startSim == True and simSeed == 0:
             maxSeed = np.iinfo(np.uint32).max
             simSeed = np.random.randint(0, maxSeed)
             self.simSeed = simSeed
@@ -65,7 +68,11 @@ class Ns3ZmqBridge(object):
             # run simulation script
             self.ns3Process = start_sim_script(port, simSeed, simArgs, debug)
         else:
-            print("Waiting for simulation script to connect on port: tcp://localhost:{}".format(port))
+            print(
+                "Waiting for simulation script to connect on port: tcp://localhost:{}".format(
+                    port
+                )
+            )
             print('Please start proper ns-3 simulation script using ./waf --run "..."')
 
         self._action_space = None
@@ -98,12 +105,12 @@ class Ns3ZmqBridge(object):
 
     def _create_space(self, spaceDesc):
         space = None
-        if (spaceDesc.type == pb.Discrete):
+        if spaceDesc.type == pb.Discrete:
             discreteSpacePb = pb.DiscreteSpace()
             spaceDesc.space.Unpack(discreteSpacePb)
             space = spaces.Discrete(discreteSpacePb.n)
 
-        elif (spaceDesc.type == pb.Box):
+        elif spaceDesc.type == pb.Box:
             boxSpacePb = pb.BoxSpace()
             spaceDesc.space.Unpack(boxSpacePb)
             low = boxSpacePb.low
@@ -122,7 +129,7 @@ class Ns3ZmqBridge(object):
 
             space = spaces.Box(low=low, high=high, shape=shape, dtype=mtype)
 
-        elif (spaceDesc.type == pb.Tuple):
+        elif spaceDesc.type == pb.Tuple:
             mySpaceList = []
             tupleSpacePb = pb.TupleSpace()
             spaceDesc.space.Unpack(tupleSpacePb)
@@ -134,7 +141,7 @@ class Ns3ZmqBridge(object):
             mySpaceTuple = tuple(mySpaceList)
             space = spaces.Tuple(mySpaceTuple)
 
-        elif (spaceDesc.type == pb.Dict):
+        elif spaceDesc.type == pb.Dict:
             mySpaceDict = {}
             dictSpacePb = pb.DictSpace()
             spaceDesc.space.Unpack(dictSpacePb)
@@ -234,13 +241,13 @@ class Ns3ZmqBridge(object):
         return self.gameOver
 
     def _create_data(self, dataContainerPb):
-        if (dataContainerPb.type == pb.Discrete):
+        if dataContainerPb.type == pb.Discrete:
             discreteContainerPb = pb.DiscreteDataContainer()
             dataContainerPb.data.Unpack(discreteContainerPb)
             data = discreteContainerPb.data
             return data
 
-        if (dataContainerPb.type == pb.Box):
+        if dataContainerPb.type == pb.Box:
             boxContainerPb = pb.BoxDataContainer()
             dataContainerPb.data.Unpack(boxContainerPb)
             # print(boxContainerPb.shape, boxContainerPb.dtype, boxContainerPb.uintData)
@@ -258,7 +265,7 @@ class Ns3ZmqBridge(object):
             data = np.array(data)
             return data
 
-        elif (dataContainerPb.type == pb.Tuple):
+        elif dataContainerPb.type == pb.Tuple:
             tupleDataPb = pb.TupleDataContainer()
             dataContainerPb.data.Unpack(tupleDataPb)
 
@@ -270,7 +277,7 @@ class Ns3ZmqBridge(object):
             data = tuple(myDataList)
             return data
 
-        elif (dataContainerPb.type == pb.Dict):
+        elif dataContainerPb.type == pb.Dict:
             dictDataPb = pb.DictDataContainer()
             dataContainerPb.data.Unpack(dictDataPb)
 
@@ -309,19 +316,19 @@ class Ns3ZmqBridge(object):
             shape = [len(actions)]
             boxContainerPb.shape.extend(shape)
 
-            if (spaceDesc.dtype in ['int', 'int8', 'int16', 'int32', 'int64']):
+            if spaceDesc.dtype in ["int", "int8", "int16", "int32", "int64"]:
                 boxContainerPb.dtype = pb.INT
                 boxContainerPb.intData.extend(actions)
 
-            elif (spaceDesc.dtype in ['uint', 'uint8', 'uint16', 'uint32', 'uint64']):
+            elif spaceDesc.dtype in ["uint", "uint8", "uint16", "uint32", "uint64"]:
                 boxContainerPb.dtype = pb.UINT
                 boxContainerPb.uintData.extend(actions)
 
-            elif (spaceDesc.dtype in ['float', 'float32', 'float64']):
+            elif spaceDesc.dtype in ["float", "float32", "float64"]:
                 boxContainerPb.dtype = pb.FLOAT
                 boxContainerPb.floatData.extend(actions)
 
-            elif (spaceDesc.dtype in ['double']):
+            elif spaceDesc.dtype in ["double"]:
                 boxContainerPb.dtype = pb.DOUBLE
                 boxContainerPb.doubleData.extend(actions)
 
@@ -363,7 +370,9 @@ class Ns3ZmqBridge(object):
                 else:
                     subcontext = None
                 # create the data within the new context
-                subData = self._pack_data(subAction, subActSpaceType, context=subcontext)
+                subData = self._pack_data(
+                    subAction, subActSpaceType, context=subcontext
+                )
 
                 subData.name = sName
                 subDataList.append(subData)
@@ -375,7 +384,9 @@ class Ns3ZmqBridge(object):
 
 
 class Ns3Env(gym.Env):
-    def __init__(self, stepTime=0, port=0, startSim=True, simSeed=0, simArgs={}, debug=False):
+    def __init__(
+        self, stepTime=0, port=0, startSim=True, simSeed=0, simArgs={}, debug=False
+    ):
         self.stepTime = stepTime
         self.port = port
         self.startSim = startSim
@@ -392,7 +403,9 @@ class Ns3Env(gym.Env):
         self.state = None
         self.steps_beyond_done = None
 
-        self.ns3ZmqBridge = Ns3ZmqBridge(self.port, self.startSim, self.simSeed, self.simArgs, self.debug)
+        self.ns3ZmqBridge = Ns3ZmqBridge(
+            self.port, self.startSim, self.simSeed, self.simArgs, self.debug
+        )
         self.ns3ZmqBridge.initialize_env(self.stepTime)
         self.action_space = self.ns3ZmqBridge.get_action_space()
         self.observation_space = self.ns3ZmqBridge.get_observation_space()
@@ -427,7 +440,9 @@ class Ns3Env(gym.Env):
             self.ns3ZmqBridge = None
 
         self.envDirty = False
-        self.ns3ZmqBridge = Ns3ZmqBridge(self.port, self.startSim, self.simSeed, self.simArgs, self.debug)
+        self.ns3ZmqBridge = Ns3ZmqBridge(
+            self.port, self.startSim, self.simSeed, self.simArgs, self.debug
+        )
         self.ns3ZmqBridge.initialize_env(self.stepTime)
         self.action_space = self.ns3ZmqBridge.get_action_space()
         self.observation_space = self.ns3ZmqBridge.get_observation_space()
@@ -436,7 +451,7 @@ class Ns3Env(gym.Env):
         obs = self.ns3ZmqBridge.get_obs()
         return obs
 
-    def render(self, mode='human'):
+    def render(self, mode="human"):
         return
 
     def get_random_action(self):
