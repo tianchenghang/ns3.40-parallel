@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Author: Tiancheng Hang <122404550@njupt.edu.cn>
+ * Author: Tiancheng Hang <1224045520@njupt.edu.cn>
  * Based on script: ./examples/tcp/tcp-variants-comparison.cc
  *
  * Topology:
@@ -310,9 +310,9 @@ main(int argc, char* argv[])
     udpSinkApp.Stop(Seconds(stop_time));
     OnOffHelper udpBurstHelper("ns3::UdpSocketFactory",
                                InetSocketAddress(d.GetRightIpv4Address(0), udpPort));
-    udpBurstHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=0.005]"));
+    udpBurstHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=0.5]"));
     udpBurstHelper.SetAttribute("OffTime",
-                                StringValue("ns3::ConstantRandomVariable[Constant=0.005]"));
+                                StringValue("ns3::ConstantRandomVariable[Constant=0.5]"));
     udpBurstHelper.SetAttribute("DataRate", StringValue("800Mbps"));
     udpBurstHelper.SetAttribute("PacketSize", UintegerValue(1472));
     ApplicationContainer udpBurstApp = udpBurstHelper.Install(d.GetLeft(0));

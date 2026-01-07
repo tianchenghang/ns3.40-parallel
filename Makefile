@@ -58,25 +58,23 @@ init: ## Initial commit
 	git push -f origin main --set-upstream
 
 .PHONY: clean
-clean: ## Remove ./build ./dist ./lib ./target ./.idea and caches
-	rm -rf ./build ./dist ./lib ./target \
-	./.idea ./.cache ./.mypy_cache ./.ruff_cache
-
-.PHONY: format
-format: build ## Format code
-	prettier --write ./ # JavaScript, TypeScript, Markdown
-	(cd ./build && ninja format) || echo 'clang-format not found'
+clean: ## Remove ./build ./cmake-cache ./logs ./.lock-ns3* and caches
+	rm -rf ./build ./cmake-cache ./logs \
+	./.idea ./.cache ./.mypy_cache ./.ruff_cache ./.lock-ns3*
 
 .PHONY: build
-build: ## Run cmake, tsc and go build
-	@echo "Make clang++/g++ binary files, output ./build"
-	rm -rf ./build
-	cmake -S . -B ./build
-	cmake --build ./build
-
-	@echo "Make tsc compiled JS files, output: ./dist"
-	rm -rf ./dist
-	pnpm build # tsc
+build: ## Build ns3, enable mtp and examples
+	@echo "Please install miniconda3"
+	sudo apt update && sudo apt full-upgrade
+	sudo apt install libzmq5 libzmq3-dev libprotobuf-dev protobuf-compiler
+	sudo apt autoclean && sudo apt autoremove
+	rm -rf ./.venv
+	conda create -p ./.venv python=3.13
+	conda activate ./.venv
+	./ns3 configure --enable-mtp --enable-examples
+	./ns3 build
+	pip3 install --user ./contrib/opengym/model/ns3gym
+	mkdir -p ./logs
 
 .PHONY: help
 help:

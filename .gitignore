@@ -58,5 +58,6 @@ vcpkg/
 **/.DS_Store
 .mypy_cache/
 .venv/
+logs/
 *.log
 **/*.flowmonitor

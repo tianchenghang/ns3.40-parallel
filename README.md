@@ -1,9 +1,14 @@
-# ns3.40
+# Gemini (ns3.40)
 
-```bash
-uv sync
-conda create -p ./.venv python=3.13
+## Makefile
+
+```txt
+$ make help
+clean                          Remove ./build ./cmake-cache ./logs ./.lock-ns3* and caches
+build                          Build ns3, enable mtp and examples
 ```
+
+## Build from source
 
 ```bash
 sudo apt update && sudo apt full-upgrade
@@ -18,21 +23,21 @@ conda activate ./.venv
 
 pip3 install --user ./contrib/opengym/model/ns3gym
 
-./ns3 run "rl-tcp --transport_prot=TcpRl"
-python ./contrib/opengym/examples/rl-tcp/test_tcp.py --start=0 &> ./rl-tcp.log
+mkdir -p ./logs
 
-./ns3 run "gemini-tcp --transport_prot=TcpGemini"
-python ./contrib/opengym/examples/gemini-tcp/test_gemini.py --start=0 --verbose &> ./gemini-tcp.log
+./ns3 run "rl-tcp --transport_prot=TcpRl" &> ./logs/rl-tcp-ns3.log
+python ./contrib/opengym/examples/rl-tcp/test_tcp.py --start=0 &> ./logs/rl-tcp-agent.log
+
+./ns3 run "gemini-tcp --transport_prot=TcpGemini" &> ./logs/gemini-tcp-ns3.log
+python ./contrib/opengym/examples/gemini-tcp/test_gemini.py --start=0 &> ./logs/gemini-tcp-agent.log
+# Optional verbose
+python ./contrib/opengym/examples/gemini-tcp/test_gemini.py --start=0 --verbose &> ./logs/gemini-tcp-agent.log
 
 cp ./contrib/opengym/examples/gemini-tcp/sim.cc ./scratch/sim.cc
-# std::string transport_prot = "TcpNewReno";
-./ns3 run scratch/sim
+./ns3 run scratch/sim &> ./logs/tcp-newreno.log
 ```
 
-# Unison for ns-3
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10077300.svg)](https://doi.org/10.5281/zenodo.10077300)
-[![CI](https://github.com/NASA-NJU/UNISON-for-ns-3/actions/workflows/per_commit.yml/badge.svg)](https://github.com/NASA-NJU/UNISON-for-ns-3/actions/workflows/per_commit.yml)
+## Unison Integration
 
 A fast and user-transparent parallel simulator implementation for ns-3.
 More information about Unison can be found in our EuroSys '24 paper (coming soon).
@@ -108,11 +113,11 @@ For hybrid simulation with MPI, you can find a minimal example in `src/mpi/examp
 
 We also provide three detailed fat-tree examples for Unison, traditional MPI parallel simulation and hybrid simulation:
 
-| Name | Location | Required configuration flags | Running commands |
-| - | - | - | - |
-| fat-tree-mtp | src/mtp/examples/fat-tree-mtp.cc | `--enable-mtp --enable-exaples` without `--enable-mpi` | `./ns3 run "fat-tree-mtp --thread=4"` |
-| fat-tree-mpi | src/mpi/examples/fat-tree-mpi.cc | `--enable-mpi --enable-exaples` without `--enable-mtp` | `./ns3 run fat-tree-mpi --command-template "mpirun -np 4 %s"` |
-| fat-tree-hybrid | src/mpi/examples/fat-tree-hybrid.cc | `--enable-mtp --enable-mpi --enable-exaples` | `./ns3 run fat-tree-mpi --command-template "mpirun -np 2 %s --thread=2"` |
+| Name            | Location                            | Required configuration flags                           | Running commands                                                         |
+| --------------- | ----------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| fat-tree-mtp    | src/mtp/examples/fat-tree-mtp.cc    | `--enable-mtp --enable-exaples` without `--enable-mpi` | `./ns3 run "fat-tree-mtp --thread=4"`                                    |
+| fat-tree-mpi    | src/mpi/examples/fat-tree-mpi.cc    | `--enable-mpi --enable-exaples` without `--enable-mtp` | `./ns3 run fat-tree-mpi --command-template "mpirun -np 4 %s"`            |
+| fat-tree-hybrid | src/mpi/examples/fat-tree-hybrid.cc | `--enable-mtp --enable-mpi --enable-exaples`           | `./ns3 run fat-tree-mpi --command-template "mpirun -np 2 %s --thread=2"` |
 
 Feel free to explore these examples, compare code changes and adjust the `-np` and `--thread` arguments.
 
