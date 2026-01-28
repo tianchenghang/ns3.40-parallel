@@ -1,0 +1,8 @@
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[08:28:06] INFO - Initializing TcpGemini congestion control algorithm
+[08:28:06] INFO - Parameters initialized: alpha=[1.1, 1.25, 1.5], gamma=4.0, lambda_loss=0.7, lambda_ecn=0.92, delta=0.5
+[08:29:30] INFO - Initializing TcpGemini congestion control algorithm
+[08:29:30] INFO - Parameters initialized: alpha=[1.1, 1.25, 1.5], gamma=4.0, lambda_loss=0.7, lambda_ecn=0.92, delta=0.5

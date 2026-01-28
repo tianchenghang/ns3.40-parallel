@@ -1,0 +1,10 @@
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+Ns3Env parameters:
+--openGymPort: 5555
+--seed: 42
+--Tcp version: ns3::TcpGemini
+Simulation process id: 811595 (parent (waf shell) id: 811587)
+Waiting for Python process to connect on port: tcp://localhost:5555
+Please start proper Python Gym Agent
+Command 'build/contrib/opengym/examples/ns3.40-gemini-tcp-debug --transport_prot=TcpGemini --access_bandwidth=50Gbps --bottleneck_bandwidth=12.5Gbps --access_delay=2us --bottleneck_delay=10us --duration=20 --nLeaf=3 --simSeed=42 --enable_udp_burst=1 --prefix_name=./logs/comparison-udp/mixed_large_flow_TcpGemini' died with <Signals.SIGSEGV: 11>.

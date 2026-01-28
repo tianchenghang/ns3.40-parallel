@@ -1,0 +1,20 @@
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[20:14:56] INFO - Initializing TcpGemini congestion control algorithm
+[20:14:56] INFO - Parameters initialized: alpha=[1.1, 1.25, 1.5], gamma=4.0, lambda_loss=0.7, lambda_ecn=0.92, delta=0.5
+[20:15:11] INFO - Initializing TcpGemini congestion control algorithm
+[20:15:11] INFO - Parameters initialized: alpha=[1.1, 1.25, 1.5], gamma=4.0, lambda_loss=0.7, lambda_ecn=0.92, delta=0.5
+[20:15:27] INFO - Initializing TcpGemini congestion control algorithm
+[20:15:27] INFO - Parameters initialized: alpha=[1.1, 1.25, 1.5], gamma=4.0, lambda_loss=0.7, lambda_ecn=0.92, delta=0.5
+startSim: False, iterationNum: 1, verbose: False
+Waiting for simulation script to connect on port: tcp://localhost:5555
+Please start proper ns-3 simulation script using ./waf --run "..."
+Observation space:  Box(0, 1000000000, (15,), uint64)
+Action space:  Box(0, 65535, (2,), uint64)
+--- Iteration 0 Start ---
+Creating Gemini Fusion Agent for Socket 1
+Creating Gemini Fusion Agent for Socket 3
+Creating Gemini Fusion Agent for Socket 5
+Done
