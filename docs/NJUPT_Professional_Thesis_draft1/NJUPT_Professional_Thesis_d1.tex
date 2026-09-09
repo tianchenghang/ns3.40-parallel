@@ -1,0 +1,113 @@
+\documentclass[oneside, master]{NJUPT-Thesis_professional-grd}
+%oneside选项表示单页打印,twoside选项表示双页打印. 默认单面 oneside。
+%建议最终论文打印时采用双页打印
+
+%专业型硕士选择NJUPT-Thesis_professional-grd，盲审将NJUPT-Thesis_professional-grd替换为NJUPT-Thesis_professional-grd_Blind
+
+\raggedbottom
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
+
+\begin{document}
+
+
+\institutenumber{10293}
+\confidential{}%这里输入密级
+\title{Swift: 基于强化学习的多信号融合自适应网络拥塞控制算法}%这里输入论文题目
+\studentnumber{1224045520}%这里输入学号
+\author{杭天铖}%这里输入姓名
+\advisor{王俊昌教授}%这里输入导师
+\major{电子信息}%这里输入专业学位类别
+%\institute{通信与信息工程学院}
+\interest{全日制}%这里输入类型
+%\school{南京邮电大学}
+\degree{计算机技术}%这里输入专业（领域）
+\defenddate{2026年3月}%这里输入论文提交日期
+
+% 英文封面内容
+\englishtitle{Swift: A Reinforcement Learning-based Multi-signal Fusion\\
+	Adaptive Network Congestion Control Algorithm}%这里输入论文英文标题
+\englishauthor{Hang Tiancheng}%这里输入作者英文名字
+\englishadvisor{Prof. Wang Junchang}%这里输入导师英文名字
+\englishdate{March~2026}%这里输入论文提交日期如：April  2018
+
+% 首页封面绘制
+% \maketitle
+
+% 中文标题页绘制
+\makeInfo
+
+% 英文标题页绘制
+%\makeEnglishInfo
+
+% 论文原创性声明和使用授权声明绘制
+%\makeDeclareOriginal
+
+%%%%%%%%%%%%前置部分%%%%%%%%%%%%
+\frontmatter
+
+% 摘要
+\include{chapters/abstract}
+
+% 加入目录
+\tableofcontents
+
+%加入图、表索引(同时取消图表索引中章之间的垂直间隔)
+
+\let\origaddvspace\addvspace
+\renewcommand{\addvspace}[1]{}
+\listoffigures
+\addcontentsline{toc}{chapter}{插图索引}
+\listoftables
+\addcontentsline{toc}{chapter}{表格索引}
+\renewcommand{\addvspace}[1]{\origaddvspace{#1}}
+
+ % 主要符号对照表
+% \input{chapters/denotation}
+% % 缩略词列表
+% \input{chapters/abbreviation}
+
+% 专用术语注释表
+\input{chapters/denotation_abbreviation}
+%本部分内容非强制性要求，如果论文中所用符号不多，可以省略《专用术语注释表》。
+
+
+%%%%%%%%%%%%正文主体部分% %%%%%%%%%%%
+\mainmatter
+% 各章正文内容
+\include{chapters/chapter1}
+\include{chapters/chapter2}
+\include{chapters/chapter3}
+\include{chapters/chapter4}
+\include{chapters/chapter5}
+\include{chapters/chapter6}
+
+
+% 参考文献，五号字，使用 BibTeX，包含参考文献文件.bib
+\bibliography{reference/Ref_Article,reference/Ref_Conference,reference/Ref_Book}
+
+
+
+
+%%%%%%%%%%%%后置部分%%%%%%%%%%%%
+% 附录(章节编号重新计算，使用字母进行编号)
+\appendix
+
+
+%(其后部分无编号)
+\backmatter
+
+% 程序清单
+\include{chapters/ProgramList}
+% 发表文章目录
+\include{chapters/pub}
+% 发表专利目录
+\include{chapters/pat}
+% 参与项目目录
+\include{chapters/pro}
+% 致谢
+\include{chapters/thanks}
+
+\end{document}

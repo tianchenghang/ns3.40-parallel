@@ -1,0 +1,30 @@
+{
+  "name": "flowmonitor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "parse": "node scripts/parse.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier -w ./ --experimental-cli"
+  },
+  "dependencies": {
+    "@lit-labs/router": "^0.1.4",
+    "@swifty.js/lit-jsx": "^0.0.2",
+    "chart.js": "^4.5.1",
+    "gsap": "^3.15.0",
+    "lit": "^3.3.3",
+    "lucide-static": "^1.39.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2"
+  }
+}

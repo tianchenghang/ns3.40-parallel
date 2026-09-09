@@ -1,0 +1,643 @@
+\chapter{实验评估}\label{Chap:chap4}
+
+本章介绍Swift算法的实验评估，包括实验环境配置、评测指标定义、对比算法、实验场景设计、数据质量审计流程以及详细的实验结果分析。本章的组织逻辑是：先说明"测什么、怎么测"，再说明"哪些数据可用、为什么"，最后在经过审计的数据集上给出定量结论，并如实披露算法的适用边界。
+
+\section{实验环境配置}
+
+\subsection{硬件环境}
+
+实验在以下硬件环境中进行：
+
+\begin{itemize}
+    \item CPU：Intel Core i7-10700K @ 3.80GHz，8核16线程
+    \item 内存：32GB DDR4 3200MHz
+    \item 存储：512GB NVMe SSD
+    \item 操作系统：Ubuntu 20.04 LTS
+\end{itemize}
+
+\subsection{软件环境}
+
+实验使用以下软件工具：
+
+\begin{itemize}
+    \item 网络仿真器：ns-3.40
+    \item 强化学习框架：OpenGym (ns3-gym)
+    \item Python版本：Python 3.8.10
+    \item 依赖库：NumPy 1.21.0, ZeroMQ 4.3.4, Protocol Buffers 3.17.3
+\end{itemize}
+
+\subsection{网络拓扑与队列配置}
+\label{sec:queue-ecn-caveat}
+
+实验采用经典的哑铃型（Dumbbell）网络拓扑，如图\ref{fig:topology}所示。该拓扑包括：
+
+\begin{itemize}
+    \item 左侧叶子节点（发送端）：$n$个节点，默认$n=3$
+    \item 右侧叶子节点（接收端）：$n$个节点
+    \item 两个核心路由器：R0（左侧）和R1（右侧）
+    \item 接入链路：连接叶子节点和路由器
+    \item 瓶颈链路：连接两个路由器
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    host/.style={rectangle, draw, fill=blue!10, minimum width=1.6cm, minimum height=0.7cm, font=\footnotesize, rounded corners=2pt},
+    router/.style={circle, draw, fill=orange!20, minimum size=1.2cm, font=\footnotesize, thick},
+    link/.style={thick, draw=gray!70},
+    bottleneck/.style={very thick, draw=red!60, double, double distance=2pt},
+]
+\node[host] (s1) at (0, 2) {Sender 1};
+\node[host] (s2) at (0, 0) {Sender 2};
+\node[host] (s3) at (0, -2) {Sender 3};
+\node[router] (r0) at (4, 0) {R0};
+\node[router] (r1) at (8, 0) {R1};
+\node[host] (d1) at (12, 2) {Receiver 1};
+\node[host] (d2) at (12, 0) {Receiver 2};
+\node[host] (d3) at (12, -2) {Receiver 3};
+\draw[link] (s1.east) -- node[above, font=\scriptsize, sloped] {接入链路} (r0.north west);
+\draw[link] (s2.east) -- (r0.west);
+\draw[link] (s3.east) -- (r0.south west);
+\draw[link] (r1.north east) -- node[above, font=\scriptsize, sloped] {接入链路} (d1.west);
+\draw[link] (r1.east) -- (d2.west);
+\draw[link] (r1.south east) -- (d3.west);
+\draw[bottleneck] (r0.east) -- node[above, font=\scriptsize] {瓶颈链路} node[below, font=\scriptsize] {(队列/AQM)} (r1.west);
+\node[font=\scriptsize, gray] at (0, -3.2) {$n$个发送端};
+\node[font=\scriptsize, gray] at (12, -3.2) {$n$个接收端};
+\end{tikzpicture}
+\caption{哑铃型（Dumbbell）实验网络拓扑}
+\label{fig:topology}
+\end{figure}
+
+瓶颈两侧网关安装队列规则，队列容量$Q = \max(BDP \times n / MTU, 100)$个数据包按各场景的瓶颈带宽与链路时延自动定尺，下界100个数据包用于保证低BDP路径上的基本缓冲能力。
+
+\textbf{关于队列规则与ECN的重要说明}。本章所引用的归档数据是在\texttt{queue\_disc\_type}默认值为\texttt{ns3::PfifoFastQueueDisc}时生成的。\texttt{PfifoFastQueueDisc}是纯FIFO丢尾队列，\emph{永不设置CE码点}；同时当时的\texttt{sim.cc}仅对TcpSwift置\texttt{TcpSocketBase::UseEcn}为\texttt{On}、对其余三种协议置为\texttt{Off}。这两项配置共同导致一个必须明确交代的后果：\textbf{在归档数据中协议栈上报的ecnState始终停留在ECN\_IDLE，第~\ref{Chap:chap3}章所述的ECN分支及其0.75保留因子从未被触发}。因此本章结果刻画的是Swift在\emph{纯丢包信号}条件下的行为，ECN机制的贡献无法由本章数据评估，相关结论一律不得归因于ECN。
+
+需要同时指出，"仅对Swift开启ECN"这一非对称设置在归档运行中并未造成可观测偏差：由于丢尾队列不产生CE标记，开启ECN协商仅使数据包被标记为ECT，而没有任何设备会将其改写为CE，其行为与关闭ECN一致。该设置是一处潜在偏差源而非已实现的偏差。当前版本的\texttt{sim.cc}已将默认队列规则改为\texttt{ns3::RedQueueDisc}（$MinTh = 0.3Q$、$MaxTh = 0.9Q$、\texttt{UseEcn}为真）并对全部四种协议对称开启ECN，以便后续重跑能够真正激活并公平评估ECN通路；相关论证见第~\ref{Chap:chap3}章第3.1节。
+
+每条TCP流由\texttt{BulkSendHelper}产生持续饱和的单向长流，三条流分别在0、100、200 ms错开启动，以避免同步启动带来的人为同相位效应；接收端为\texttt{PacketSink}。反向路径仅承载ACK。
+
+\subsection{仿真参数}
+
+默认仿真参数配置如表\ref{tab:params}所示：
+
+\begin{table}[htbp]
+\centering
+\caption{默认仿真参数}
+\label{tab:params}
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{参数} & \textbf{取值} & \textbf{说明} \\
+\hline
+仿真时长 & 20秒 & 每次实验的仿真时间 \\
+叶子节点数 & 3 & 发送端和接收端各3个节点 \\
+MTU & 1500字节 & 以太网标准MTU \\
+TCP段大小 & 1440字节 & $1500 - 20 - (20+20)$ \\
+收发缓冲区 & 16 MB & 保证高BDP路径不受窗口通告限制 \\
+SACK & 启用 & \texttt{TcpSocketBase::Sack} \\
+延迟确认 & 2 & \texttt{TcpSocket::DelAckCount} \\
+队列规则 & PfifoFast & 丢尾队列，$Q=\max(BDP\times n/MTU,100)$包 \\
+ECN & 仅Swift协商 & 丢尾队列不标记CE，故ECN分支未触发 \\
+随机种子 & 单一默认种子 & 见第~\ref{subsec:seed-caveat}节的说明 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{随机种子与重复性说明}
+\label{subsec:seed-caveat}
+
+批量实验脚本\texttt{main.py}提供\texttt{--num-seeds}参数，可对同一(场景, 协议)组合以不同的\texttt{RngRun}重复运行，产物按\texttt{<场景>\_<协议>\_s<种子>}命名，统计阶段按种子求算术平均。然而，\emph{本章所引用的数据集是在该多种子机制引入之前生成的}：\path{logs/comparison/}与\path{logs/comparison-udp/}下的全部产物均不带\texttt{\_s<种子>}后缀，即每个(场景, 协议, 设置)三元组仅对应一次仿真运行。
+
+如实说明这一点是必要的：单次运行意味着本章报告的差异不附带跨种子置信区间，因此本章在解释结论时遵循两条自律规则。第一，只把\emph{量级明确、机理可解释}的差异作为结论——例如零丢包与非零丢包的定性差异、微秒级RTT场景中数量级级别的排队延迟差异、以及GEO链路上数十个百分点的吞吐量差异；对于百分之零点几量级的吞吐量差异，本章只报告"等价"而不解读方向。第二，凡属"单点数值恰好更优"性质的观察，一律不写入结论性论述。ns-3的离散事件仿真在给定\texttt{RngRun}下完全确定，因此上述单次运行结果是可精确复现的，但其对随机实现的稳健性有待后续多种子重跑确认，该项已列入第~\ref{Chap:chap5}章的后续工作。
+
+\subsection{UDP Burst 干扰流量与实验矩阵}
+\label{sec:udp-burst-matrix}
+
+在真实的端到端传输路径上，共享瓶颈链路普遍同时承载突发性的非响应式UDP流量——移动终端的视频流与实时会议、远程过程调用、运维巡检探测、游戏控制信令等都属于此类。这些跨流量不服从TCP的拥塞反馈环，会与TCP长流竞争瓶颈队列容量并放大RTT抖动，是异构终端共享接入链路时的常态而非例外。为了系统性评估Swift在此类干扰下的鲁棒性，仿真器\path{contrib/opengym/examples/swift-tcp/sim.cc}在哑铃拓扑的发送端0与接收端0之间提供了可选的UDP Burst旁路通道，由命令行参数\texttt{enable\_udp\_burst}（默认false）控制启停。启用时，该通道在瓶颈链路上并发启动一路1024字节的OnOff UDP源，数据率800\,Mbps，占空比50\%（On 0.5\,s / Off 0.5\,s），与TCP长流共享同一瓶颈队列。由此构成两类严格对照的实验设置：
+
+\begin{itemize}
+\item \textbf{纯TCP设置（无UDP Burst）}：\texttt{enable\_udp\_burst=false}，瓶颈链路仅承载3条TCP长流，产物位于\path{logs/comparison/}，用于评估稳态性能。
+\item \textbf{UDP Burst 干扰设置}：\texttt{enable\_udp\_burst=true}，在同一瓶颈并发运行800\,Mbps、50\%占空比的UDP突发源，产物位于\path{logs/comparison-udp/}，用于评估跨流量鲁棒性。
+\end{itemize}
+
+两类设置共享完全相同的场景拓扑、瓶颈带宽、接入带宽、链路时延、队列调度策略与随机种子，仅\texttt{enable\_udp\_burst}取值不同，因而构成严格的A/B对照。第~\ref{sec:results-analysis}节的主实验结果基于\emph{纯TCP设置}；跨流量鲁棒性结果在第~\ref{sec:udp-burst-robustness}节专题报告。需要注意的是，UDP流量本身在统计时被排除在指标之外（见第~\ref{sec:metrics}节），因此"吞吐量下降"衡量的是TCP长流在竞争下\emph{实际获得}的容量份额，而非瓶颈链路的总利用率。
+
+\section{评测指标}
+\label{sec:metrics}
+
+本文全部指标均由ns-3 FlowMonitor模块采集的逐流统计量导出。指标定义中有一处方法学要点必须先行澄清，否则数值不可比。
+
+\subsection{指标的流向界定}
+\label{subsec:direction}
+
+哑铃拓扑上每条TCP连接在FlowMonitor中登记为\emph{两条}流：前向流（\texttt{10.1.$x$}$\rightarrow$\texttt{10.2.$x$}）承载应用数据，反向流（\texttt{10.2.$x$}$\rightarrow$\texttt{10.1.$x$}）仅承载纯ACK。二者的统计特征截然不同：前向流经过被填满的瓶颈队列，其单包时延包含完整的排队分量；反向流的ACK包极小、几乎不排队，其时延近似等于路径传播时延。
+
+若把两个方向不加区分地纳入聚合，则平均时延退化为$(\overline{D}_{data} + D_{prop})/2$，即被系统性地压低近一半；吞吐量则被额外计入约1.7\%的ACK速率。本文因此\textbf{仅在前向数据流上定义全部指标}，并由\path{logs/summary/kpi_forward.csv}给出重新导出的结果。该文件是本章所有数值的唯一数据源，其每一行都记录了对应的原始\texttt{.flowmonitor}产物路径以便逐项溯源。第~\ref{subsec:audit}节说明这一修正相对既有汇总文件的影响。
+
+\subsection{吞吐量（Throughput）}
+
+吞吐量定义为单位时间内成功接收的数据量。单条前向流的吞吐量按该流自身的活跃区间归一：
+
+\begin{equation}
+Throughput_i = \frac{rxBytes_i \times 8}{t_{lastRx,i} - t_{firstTx,i}} \quad (\text{单位：Mbps})
+\end{equation}
+
+本文报告3条并发前向流的聚合吞吐量，以反映TCP总体获得的瓶颈容量份额：
+
+\begin{equation}
+AggregateThroughput = \sum_{i=1}^{n} Throughput_i
+\end{equation}
+
+由于三条流错开启动、各自的活跃区间略有差异，聚合值可能略高于瓶颈标称带宽（本文数据中最大超出0.5\%）。该偏差对四种协议同向且同量级，不影响协议间比较。
+
+\subsection{延迟（Latency）}
+
+延迟定义为数据包从发送端到接收端的单向端到端传输时间。单条前向流的平均时延由FlowMonitor的\texttt{delaySum}除以\texttt{rxPackets}得到，场景级指标取三条前向流的算术平均：
+
+\begin{equation}
+AverageLatency = \frac{1}{n}\sum_{i=1}^{n} \frac{delaySum_i}{rxPackets_i} \quad (\text{单位：ms})
+\end{equation}
+
+延迟包含传播延迟和排队延迟两个成分。传播延迟由链路配置决定、不可压缩，本文在场景表中一并给出各场景的基线单向传播时延，读者可据此分离出排队分量：排队延迟约等于平均时延减去基线单向传播时延。这一分解对解释结果至关重要——在微秒级RTT场景中排队占端到端时延的绝大部分，而在GEO卫星场景中传播时延占绝对主导，同样幅度的排队优化在两类场景中的相对效果相差两个数量级。
+
+\subsection{丢包率（Loss Rate）}
+
+丢包率定义为前向流丢失数据包总数与发送数据包总数的比值：
+
+\begin{equation}
+LossRate = \frac{\sum_i PacketsLost_i}{\sum_i PacketsSent_i} \times 100\%
+\end{equation}
+
+\subsection{公平性（Fairness）}
+
+在多流场景下，公平性衡量各流之间带宽分配的均衡程度。本文采用Jain公平性指数\upcite{fairness}，在三条并发前向流的吞吐量上计算：
+
+\begin{equation}
+JainIndex = \frac{(\sum_{i=1}^{n} x_i)^2}{n \cdot \sum_{i=1}^{n} x_i^2}
+\end{equation}
+
+其中$x_i$是第$i$个前向流的吞吐量，$n=3$。取值范围为$[1/n, 1]$，越接近1表示分配越均衡。
+
+\section{对比算法}
+
+本文将Swift算法与以下三种主流拥塞控制算法进行对比。三者分别代表基于丢包的经典AIMD、基于丢包的高BDP优化以及基于带宽/时延模型的速率控制，共同覆盖了当前实际部署中的主要设计范式。
+
+\subsection{TCP NewReno}
+
+TCP NewReno\upcite{newreno}是经典的基于丢包拥塞控制算法，采用AIMD（加性增乘性减）策略，是RFC 6582定义的标准算法之一。无丢包时每个RTT增加一个MSS，检测到丢包时窗口减半。它构成了"拥塞信号滞后"这一问题的基准参照：窗口只有在缓冲区实际溢出后才收缩。
+
+\subsection{TCP CUBIC}
+
+TCP CUBIC\upcite{cubic}是Linux自2.6.19版本以来的默认拥塞控制算法。CUBIC采用三次函数模型调整窗口，其增长与RTT无关，因此在高带宽延迟积网络中收敛更快，但代价是在瓶颈附近维持更长时间的高窗口，排队驻留通常比NewReno更深。
+
+\subsection{TCP BBR}
+
+TCP BBR\upcite{bbr}是Google于2016年提出的基于瓶颈带宽与最小RTT估计的拥塞控制算法，以BDP为目标调整发送速率。BBR理论上能同时逼近高吞吐与低时延，但其周期性带宽探测在极短RTT路径和存在非响应式跨流量时容易失真。本文在第~\ref{subsec:audit}节中将说明，BBR在部分微秒级RTT高速场景中的表现属于仿真实现层面的退化而非策略层面的结果，因此这些数据点被排除在对照之外。
+
+\section{实验场景设计}
+
+\subsection{场景矩阵与覆盖范围}
+
+完整实验矩阵包含36个网络场景，覆盖近端高速低RTT链路、收敛比受限的共享链路、无线局域网接入、蜂窝移动接入、城域与跨域广域网以及卫星通信；每个场景在两类实验设置下各运行四种协议，共$36 \times 4 \times 2 = 288$次仿真。场景的瓶颈带宽跨越10\,Mbps至100\,Gbps共四个数量级，基线往返时延跨越8\,$\mu$s至640\,ms共五个数量级，用以检验同一套控制参数在异构路径条件下的适应能力。
+
+原始矩阵中并非所有场景都能支撑严格的四协议对照。第~\ref{subsec:audit}节说明审计规则，审计后可用于跨协议比较的场景为：纯TCP设置19个、UDP Burst设置15个（且后者是前者的子集）。表\ref{tab:scenarios}给出这19个场景的配置。
+
+\begin{table}[htbp]
+\centering
+\caption{审计后保留的19个对照场景配置}
+\label{tab:scenarios}
+\small
+\begin{tabular}{|c|l|l|r|r|c|}
+\hline
+\textbf{编号} & \textbf{场景名称} & \textbf{网络类型} & \textbf{瓶颈(Mbps)} & \textbf{基线RTT(ms)} & \textbf{Burst对照} \\
+\hline
+S1 & \texttt{intra\_rack\_10g} & 近端高速 & 10000 & 0.008 & 是 \\
+S2 & \texttt{intra\_rack\_25g} & 近端高速 & 25000 & 0.008 & 是 \\
+S3 & \texttt{leaf\_spine\_20g} & 近端跨层 & 20000 & 0.018 & 是 \\
+S4 & \texttt{asymmetric\_high} & 非对称接入 & 1000 & 0.024 & 是 \\
+S5 & \texttt{congested\_heavy} & 重度收敛 & 1000 & 0.018 & 是 \\
+S6 & \texttt{symmetric\_low} & 对称千兆 & 1000 & 0.060 & 是 \\
+S7 & \texttt{dc\_500m} & 500M共享 & 500 & 0.018 & 是 \\
+S8 & \texttt{dc\_100m} & 100M共享 & 100 & 0.018 & 是 \\
+S9 & \texttt{cross\_dc\_wan} & 跨域WAN & 1000 & 10.040 & -- \\
+S10 & \texttt{wan\_metro} & 城域WAN & 1000 & 4.400 & 是 \\
+S11 & \texttt{wifi\_ac} & WiFi 11ac & 400 & 14.000 & -- \\
+S12 & \texttt{wifi\_ax} & WiFi 11ax & 600 & 10.000 & -- \\
+S13 & \texttt{wifi\_n} & WiFi 11n & 50 & 28.000 & 是 \\
+S14 & \texttt{wifi\_legacy} & WiFi 传统 & 10 & 60.000 & 是 \\
+S15 & \texttt{nr\_5g\_embb} & 5G eMBB & 500 & 14.000 & -- \\
+S16 & \texttt{nr\_5g\_edge} & 5G 边缘 & 100 & 28.000 & 是 \\
+S17 & \texttt{lte\_good} & LTE 良好 & 50 & 60.000 & 是 \\
+S18 & \texttt{lte\_poor} & LTE 弱覆盖 & 10 & 140.000 & 是 \\
+S19 & \texttt{satellite\_geo} & GEO 卫星 & 10 & 640.000 & 是 \\
+\hline
+\end{tabular}
+\end{table}
+
+按路径特征，这19个场景可归为六类。\textit{S1--S3（近端高速低RTT）}的瓶颈带宽为10--25\,Gbps、基线RTT在10\,$\mu$s量级，排队延迟占端到端时延的绝大部分，是检验排队抑制能力的最敏感场景。\textit{S4--S8（收敛比受限的共享链路）}的瓶颈为100\,Mbps--1\,Gbps、基线RTT仍在数十微秒量级，其特点是缓冲区相对BDP显著偏深，因此是检验"窗口是否长期驻留在队列中"的关键场景。\textit{S9--S10（广域网）}引入毫秒级传播时延，考察BDP估计在长路径上的稳定性。\textit{S11--S14（无线局域网接入）}覆盖从600\,Mbps到10\,Mbps的四档速率，链路时延从10\,ms到60\,ms递增，模拟笔记本与移动终端在不同代际WiFi下的接入条件。\textit{S15--S18（蜂窝移动接入）}覆盖5G eMBB、5G边缘、LTE良好与LTE弱覆盖，是异构终端场景中路径条件差异最剧烈的一组。\textit{S19（GEO卫星）}的基线RTT达640\,ms，单次重传的代价为一个完整RTT，是检验"零丢包能否转化为吞吐优势"的判别性场景。
+
+\subsection{数据质量审计与排除规则}
+\label{subsec:audit}
+
+在引用任何数值之前，本文对288次仿真的产物执行了系统性审计，逐项检查流数完整性、吞吐量与瓶颈带宽的物理相容性、时延是否低于基线传播时延、丢包率与Jain指数的取值域、场景配置能否回溯到仿真驱动，以及\texttt{.flowmonitor}产物与汇总文件的一致性。审计确认全部288次运行均包含完整的3条前向流，无空文件或格式损坏，无时延低于传播下界的物理不可能值，无Jain指数越界，也无吞吐量以不可解释的方式超过瓶颈带宽。但审计同时发现四类必须处理的问题，全部记录于\path{logs/error.txt}。
+
+\textbf{规则A——指标定义修正}。既有汇总文件\path{logs/plots/summary.csv}与\path{logs/plots-udp/summary.csv}在聚合时未区分流向，把反向ACK流一并计入时延平均与吞吐求和（机理见第~\ref{subsec:direction}节）。该缺陷对四种协议同向作用且在场景内部是单调变换，因此协议间的排序未被破坏，但绝对数值不可作为"数据路径时延"引用。处理方式是从原始\texttt{.flowmonitor}产物重新导出仅含前向流的指标，写入\path{logs/summary/kpi_forward.csv}，本章全部数值改用该文件。
+
+\textbf{规则B——同一场景内混用了两个仿真器修订版本}。审计发现产物的接收端口号存在5000与50000两种取值，对应\texttt{sim.cc}的两个不同修订。当同一场景下不同协议的产物来自不同修订时，跨协议差异中混入了仿真器变更的影响，比较不再受控；此类端口混用情形共27个(设置, 场景)组合。另有7个组合（纯TCP设置下的\texttt{oversub\_2to1\_25g}、\texttt{oversub\_2to1\_50g}、\texttt{oversub\_4to1\_40g}，以及Burst设置下的上述三者与\texttt{congested\_light}）虽然内部端口一致，但整组产自已被取代的旧修订，与保留集合不具备跨场景可比性，同样按本规则排除。两类合计使以下场景退出对比：\texttt{congested\_light}、\texttt{congested\_medium}、\texttt{cross\_pod\_10g}、\texttt{cross\_pod\_20g}、\texttt{dc\_100g}、\texttt{leaf\_spine\_50g}、\texttt{mixed\_large\_flow}、\texttt{mixed\_small\_flow}、\texttt{oversub\_4to1\_10g}、\texttt{oversub\_2to1\_25g}、\texttt{oversub\_2to1\_50g}、\texttt{oversub\_4to1\_40g}、\texttt{rdma\_like\_25g}、\texttt{rdma\_like\_50g}、\texttt{wan\_longhaul}，以及仅在UDP Burst设置下失配的\texttt{cross\_dc\_wan}、\texttt{nr\_5g\_embb}、\texttt{wifi\_ac}、\texttt{wifi\_ax}。这正是纯TCP设置保留19个场景而Burst设置仅保留15个的原因。
+
+\textbf{规则C——重复的场景配置}。审计发现\texttt{dc\_oversub\_10to1}与\texttt{congested\_heavy}在数据生成时的链路参数完全相同（10\,Gbps接入/1\,Gbps瓶颈/2\,$\mu$s/5\,$\mu$s），\texttt{satellite\_leo}与\texttt{lte\_good}亦完全相同（100\,Mbps/50\,Mbps/5\,ms/20\,ms）；由于ns-3在相同配置与相同种子下完全确定，两组产物分别逐字节相同。处理方式是各保留一个（保留\texttt{congested\_heavy}与\texttt{lte\_good}），另一个作为冗余排除。\textbf{须特别指出}：\texttt{satellite\_leo}这一名称与其实际链路参数不符——它被配置为一条50\,Mbps、单向30\,ms的链路，并不具备LEO卫星的时延与带宽特征。因此\emph{本文不基于当前数据集提出任何关于LEO卫星场景的结论}；卫星相关结论仅来自GEO场景（S19），其640\,ms基线RTT与10\,Mbps瓶颈确实对应地球同步轨道链路的典型参数。
+
+\textbf{规则D——BBR基线在微秒级RTT高速路径上的退化}。在五个微秒级RTT高速场景（\texttt{intra\_rack\_10g}、\texttt{intra\_rack\_25g}、\texttt{rdma\_like\_25g}、\texttt{rdma\_like\_50g} 与 \texttt{dc\_100g}）中，BBR的聚合吞吐量仅约2\,Mbps，即瓶颈带宽的0.01\%--0.02\%。该数值不能解释为"BBR策略在此类路径上的表现"：在8\,$\mu$s级基线RTT下，ns-3.40的BBR实现所依赖的最小RTT测量与pacing时间粒度已与RTT本身同阶，带宽估计因而失去意义，属于仿真实现层面的失效。此类数据点被排除，其所在场景（在保留集合内为S1与S2）因此降级为三协议对照。这一处理与Hock等\upcite{bbrfairness}报告的BBR在极短RTT下的测量噪声问题方向一致，但本文不将其作为BBR的算法缺陷证据，仅作为不可用数据点处理。
+
+\textbf{证据边界}。还有一项范围限制必须前置声明：\path{logs/}下的全部产物均生成于本文算法实现的v3.0.0修订\emph{之前}。该修订替换了投递速率估计器（由单次确认公式改为时间窗口差分）、启用了RED的ECN标记通路与全协议对称ECN、修正了ECE/CWR事件的信号归类，并把奖励自适应改为基线相对判据（详见第~\ref{Chap:chap3}章与仓库\texttt{CHANGELOG.md}）。因此本章的定量结果刻画的是修订前实现的行为，其中最需要注意的一项是ECN分支在归档数据中从未被触发（详见第~\ref{sec:queue-ecn-caveat}节），故本章不得将任何结果归因于ECN。这一点对结果解读有直接影响：S9（跨域WAN）中Swift吞吐量的回落，正是修订前投递速率估计器在长RTT路径上系统性低估带宽所留下的痕迹，其机理已在第~\ref{Chap:chap3}章第3.6.1节给出定量推导。本章在相应位置逐一标注该关联，并将全矩阵重跑列为后续工作。
+
+图\ref{fig:audit-funnel}以漏斗形式汇总上述审计的量化结果：288个仿真产物对应72个(设置, 场景)组合，规则B先后移除27个修订混用组合与7个整组旧修订组合，规则C再移除4个重复配置组合，最终保留34个可用组合——即纯TCP设置的19个场景与Burst设置的15个场景；规则A对全部保留组合重写指标定义，规则D在保留集合内部另行排除4个退化的BBR数据点。该漏斗的每一步均可在\path{logs/error.txt}中找到逐条对应的记录；绘图管线\path{docs/plots/main.py}在每次重新生成图表时自动重算此漏斗，并断言保留集合与表\ref{tab:scenarios}的S1--S19完全一致，从而保证图、表、审计日志三者不发生漂移。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.88\textwidth]{../plots/fig05_audit_funnel.pdf}
+\caption{数据集审计漏斗：72个(设置, 场景)组合经规则B（修订混用、整组旧修订）与规则C（重复配置）逐级过滤后保留34个组合；规则A对保留组合重写指标定义，规则D另行排除4个退化的BBR数据点}
+\label{fig:audit-funnel}
+\end{figure}
+
+\section{实验方法论}
+
+\subsection{实验设计原则}
+
+本文的实验设计遵循以下原则：（1）\textbf{对照实验原则}——四种算法在完全相同的拓扑、链路参数、队列规则、缓冲区配置与随机种子下运行；归档运行中ECN仅对Swift协商，但因丢尾队列不产生CE标记，该非对称设置未造成可观测偏差（见第~\ref{sec:queue-ecn-caveat}节）；（2）\textbf{变量控制原则}——场景之间仅改变带宽与时延，跨流量开关构成唯一的第二自变量；（3）\textbf{数据可溯源原则}——每个被引用的数值都能定位到\path{logs/summary/kpi_forward.csv}中的具体行及其对应的原始产物文件；（4）\textbf{排除留痕原则}——每一次数据排除都在\path{logs/error.txt}中记录时间、来源、场景、协议、理由与受影响指标，不作静默丢弃；（5）\textbf{场景多样性原则}——覆盖跨越四个带宽数量级与五个时延数量级的路径条件。
+
+\subsection{统计分析方法}
+
+实验结果采用描述性统计与相对比较进行分析。对于吞吐量与时延，报告Swift相对NewReno/CUBIC两者均值的百分比差异；选择这两个协议作为参照基准，是因为它们是当前实际部署中的主流算法，且在本文保留的场景中均未出现实现层面的退化。跨流量鲁棒性分析采用配对比较：对同一(场景, 协议)在两种设置下的指标做比值，从而消除场景间绝对量级差异的影响。受第~\ref{subsec:seed-caveat}节所述单种子限制，本章不报告标准差与置信区间。
+
+\section{实验结果分析}
+\label{sec:results-analysis}
+
+本节报告\textbf{纯TCP设置（无UDP Burst）}下的稳态性能，数据源为\path{logs/summary/kpi_forward.csv}中\texttt{Setting=tcp\_only}的记录，覆盖表\ref{tab:scenarios}的19个场景。跨流量鲁棒性另见第~\ref{sec:udp-burst-robustness}节。
+
+\subsection{吞吐量对比}
+
+表\ref{tab:throughput_summary}汇总19个场景的聚合前向吞吐量。最后一列报告Swift相对NewReno/CUBIC均值的差异。S1、S2的BBR列按规则D排除。
+
+\begin{table}[htbp]
+\centering
+\caption{聚合前向吞吐量对比（Mbps）}
+\label{tab:throughput_summary}
+\small
+\begin{tabular}{|c|r|r|r|r|c|}
+\hline
+\textbf{场景} & \textbf{Swift} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} & \textbf{vs NR/CU} \\
+\hline
+S1 & 10038.0 & 10038.0 & 10038.0 & -- & $+0.00$\% \\
+S2 & 25095.0 & 25095.0 & 25095.0 & -- & $+0.00$\% \\
+S3 & 20059.2 & 20059.2 & 20059.1 & 7414.7 & $+0.00$\% \\
+S4 & 1003.6 & 1003.6 & 1003.6 & 510.2 & $+0.00$\% \\
+S5 & 1003.6 & 1003.6 & 1003.6 & 507.9 & $+0.00$\% \\
+S6 & 1003.6 & 1003.6 & 1003.6 & 482.8 & $+0.00$\% \\
+S7 & 501.8 & 501.8 & 501.8 & 257.1 & $+0.00$\% \\
+S8 & 100.4 & 100.4 & 100.4 & 51.5 & $+0.00$\% \\
+S9 & 709.7 & 998.4 & 1000.0 & 1001.5 & $-28.97$\% \\
+S10 & 1000.3 & 1001.7 & 1002.3 & 1005.0 & $-0.17$\% \\
+S11 & 398.7 & 398.9 & 399.7 & 398.9 & $-0.16$\% \\
+S12 & 598.4 & 599.4 & 600.3 & 600.9 & $-0.24$\% \\
+S13 & 49.9 & 49.8 & 49.9 & 48.9 & $+0.08$\% \\
+S14 & 9.9 & 9.9 & 9.9 & 9.8 & $+0.00$\% \\
+S15 & 497.7 & 498.5 & 499.5 & 499.9 & $-0.27$\% \\
+S16 & 99.6 & 99.3 & 99.6 & 98.8 & $+0.14$\% \\
+S17 & 49.5 & 49.2 & 49.4 & 46.3 & $+0.29$\% \\
+S18 & 9.8 & 9.8 & 9.8 & 9.3 & $+0.20$\% \\
+S19 & 8.6 & 5.6 & 7.6 & 2.8 & $+29.85$\% \\
+\hline
+\end{tabular}
+\end{table}
+
+图\ref{fig:goodput-clean}以对数坐标将表\ref{tab:throughput_summary}的全部数据点并列呈现：四个带宽数量级上的柱组高度几乎逐场景重合，仅S9的Swift柱与S19的协议间差异肉眼可辨，这正是下文三种模式划分的直观依据。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{../plots/fig01_goodput_clean.pdf}
+\caption{19个审计后场景的聚合前向吞吐量（对数坐标）。S1、S2的BBR数据点按规则D排除，图中以"BBR excl."标注}
+\label{fig:goodput-clean}
+\end{figure}
+
+结果呈现三种清晰不同的模式。
+
+\textbf{饱和等价（S1--S8、S10--S18，共17个场景）}。在这17个场景中，Swift与NewReno/CUBIC的吞吐量差异全部不超过0.3\%，最大偏差为S15的$-0.27$\%；在S1、S2与S4--S8这七个场景中，三者的聚合吞吐量在报告位数上完全一致，S3的差异也仅为CUBIC低0.1\,Mbps。这一等价性本身是有意义的结论：它说明Swift为压低排队延迟所付出的窗口保守化代价，并未换来管道利用率的损失。当瓶颈被三条长流持续填满时，链路容量而非窗口策略成为约束，此时算法的差异只体现在队列驻留深度上——这正是下一小节的主题。
+
+\textbf{长RTT链路上的吞吐优势（S19）}。在GEO卫星场景中，Swift聚合吞吐量为8.6\,Mbps，相对NewReno（5.6\,Mbps）、CUBIC（7.6\,Mbps）、BBR（2.8\,Mbps）分别提升52.8\%、12.9\%与205.0\%，相对NewReno/CUBIC均值提升29.85\%。该优势的机理是可判定的：S19的基线RTT为640\,ms，单次丢包所触发的重传至少花费一个完整RTT才能恢复，而恢复期内窗口已被乘性缩减；因此在长RTT链路上，丢包率对有效吞吐量的边际影响远大于短RTT链路。表\ref{tab:loss_summary}显示该场景中NewReno丢包0.59\%、CUBIC丢包1.26\%、BBR丢包9.83\%，而Swift为零，吞吐量差异与丢包差异在方向和量级上完全对应。
+
+\textbf{跨域WAN场景的吞吐回落（S9）}。在\texttt{cross\_dc\_wan}中，Swift聚合吞吐量709.7\,Mbps，相对NewReno/CUBIC均值回落28.97\%，是本文观察到的最显著负面结果，必须如实报告。同一场景中Swift的时延为四者最低（5.04\,ms，见表\ref{tab:latency_summary}）且丢包为零，说明窗口偏小而非拥塞失控。结合第~\ref{Chap:chap3}章第3.6.1节的推导，该现象与修订前投递速率估计器的偏差完全吻合：该估计器把单次确认字节数除以整个RTT，低估倍数约等于每RTT的确认个数，在10\,ms基线RTT、1\,Gbps瓶颈的路径上这一倍数可达数百，BDP估计随之崩塌，$\alpha \times BDP$目标窗口长期低于实际需要，窗口被压在$\max(4 \times BDP, 200 \times MSS)$退化为常量后的$200 \times MSS$兜底上界附近，聚合吞吐量因而被锁定在约$3 \times 200 \times MSS / RTT \approx 688$\,Mbps的水平，与实测的709.7\,Mbps相差约3\%。v3.0.0已将该估计器替换为时间窗口差分形式，其效果需在全矩阵重跑后验证。
+
+关于BBR：在S4--S8这五个共享链路场景中，BBR的吞吐量约为其他三者的一半（48\%--51\%），在S3中为37\%利用率；而在S10--S18的中低速接入场景中与其他协议接近。这一模式与BBR在浅缓冲、短RTT条件下的已知行为一致。S1、S2的BBR数据点按规则D排除。
+
+\subsection{延迟对比}
+
+表\ref{tab:latency_summary}汇总19个场景的平均单向前向时延。最后一列报告Swift相对NewReno/CUBIC均值的变化，负值表示降低。读者可结合表\ref{tab:scenarios}的基线RTT列分离排队分量。
+
+\begin{table}[htbp]
+\centering
+\caption{平均单向前向时延对比（ms）}
+\label{tab:latency_summary}
+\small
+\begin{tabular}{|c|r|r|r|r|c|}
+\hline
+\textbf{场景} & \textbf{Swift} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} & \textbf{vs NR/CU} \\
+\hline
+S1 & 0.71 & 3.94 & 4.51 & -- & $-83.3$\% \\
+S2 & 0.28 & 3.79 & 4.39 & -- & $-93.1$\% \\
+S3 & 0.35 & 3.81 & 4.44 & 0.01 & $-91.6$\% \\
+S4 & 6.97 & 5.87 & 5.49 & 0.13 & $+22.7$\% \\
+S5 & 6.97 & 5.87 & 5.49 & 0.13 & $+22.7$\% \\
+S6 & 6.95 & 5.94 & 5.52 & 0.07 & $+21.3$\% \\
+S7 & 10.72 & 6.98 & 6.67 & 0.16 & $+57.0$\% \\
+S8 & 35.42 & 16.25 & 15.48 & 1.37 & $+123.3$\% \\
+S9 & 5.04 & 8.88 & 9.56 & 10.73 & $-45.3$\% \\
+S10 & 4.93 & 7.02 & 7.18 & 5.26 & $-30.5$\% \\
+S11 & 10.86 & 12.10 & 13.02 & 16.12 & $-13.6$\% \\
+S12 & 6.93 & 9.56 & 10.17 & 12.28 & $-29.8$\% \\
+S13 & 78.16 & 38.22 & 39.76 & 73.95 & $+100.4$\% \\
+S14 & 242.23 & 135.63 & 164.09 & 111.73 & $+61.6$\% \\
+S15 & 7.33 & 11.48 & 12.43 & 17.38 & $-38.7$\% \\
+S16 & 44.69 & 26.63 & 29.22 & 64.42 & $+60.0$\% \\
+S17 & 80.61 & 50.51 & 70.10 & 66.80 & $+33.7$\% \\
+S18 & 310.79 & 174.19 & 188.00 & 172.22 & $+71.6$\% \\
+S19 & 391.42 & 365.15 & 420.22 & 612.08 & $-0.3$\% \\
+\hline
+\end{tabular}
+\end{table}
+
+图\ref{fig:delay-clean}将各协议的平均单向时延与该场景的基线传播时延（黑色短划线）并置。柱顶到短划线的距离即排队分量：S1--S3中Swift的柱体几乎落在短划线上而NewReno/CUBIC高出两到三个数量级，S4--S8与S13--S18中Swift柱体反超基线协议的代价区间同样一目了然。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{../plots/fig02_delay_clean.pdf}
+\caption{19个场景的平均单向前向时延（对数坐标）。黑色短划线为各场景的基线单向传播时延，柱顶与短划线之间的距离即排队分量}
+\label{fig:delay-clean}
+\end{figure}
+
+时延结果具有强烈的场景依赖性，且这种依赖性的分界线是清晰可解释的：\textbf{Swift在瓶颈带宽较高、缓冲区相对BDP不过深的路径上显著降低时延，而在低速率、深缓冲路径上以时延为代价换取零丢包}。
+
+\textbf{显著优势区间（S1--S3、S9--S12、S15）}。在近端高速低RTT场景中，基线单向传播时延仅4--9\,$\mu$s，NewReno/CUBIC的3.8--4.5\,ms时延几乎全部是排队分量。Swift把时延压到0.28--0.71\,ms，降幅83.3\%--93.1\%，而吞吐量与两者完全一致。以S2为例：NewReno/CUBIC的排队分量约3.8--4.4\,ms，Swift的排队分量约0.28\,ms，下降超过一个数量级。
+
+机理在于两类算法对"窗口该停在哪里"给出了不同答案。NewReno与CUBIC在拥塞避免阶段单调增窗，直到丢包才收缩，因此其稳态在途数据量由\emph{缓冲区容量}决定——缓冲区越深，稳态排队越深，这是丢包驱动算法的结构性特征。Swift则把窗口约束在$\alpha \times BDP$目标附近：高于目标时按超出量的一半逐个ACK回落，低于目标时以$\max(\gamma \times MSS, MSS, gap/16)$有界拉升，并受$\max(4 \times BDP, 200 \times MSS)$上界约束。由于这些约束都以\emph{路径能力}而非缓冲区容量为参照，Swift的稳态在途数据量不随缓冲区加深而增长，排队分量因而显著低于基线。同时，降窗后冻结4个ACK事件抑制了收缩后的立即反弹，避免残留队列与新注入数据叠加。需要强调的是，如第~\ref{sec:queue-ecn-caveat}节所述，归档运行中ECN分支从未触发，因此上述时延优势\emph{完全来自窗口层面的有界控制}，与ECN早期预警无关。
+
+在毫秒级传播时延的S9--S12与S15中，排队优化空间随传播占比上升而收窄，Swift的降幅相应收敛到13.6\%--45.3\%，其中5G eMBB（S15）为$-38.7$\%、WiFi 11ax（S12）为$-29.8$\%、城域WAN（S10）为$-30.5$\%。
+
+\textbf{时延代价区间（S4--S8、S13、S14、S16--S18）}。在这十个场景中Swift的时延高于NewReno/CUBIC，幅度从S6的$+21.3$\%到S8的$+123.3$\%。这些场景的共同特征是瓶颈带宽较低（10--1000\,Mbps）而缓冲区按$\max(BDP \times n/MTU, 100)$定尺时触及了100个数据包的下界保护，导致缓冲区容量相对BDP过深：以S8（100\,Mbps、基线RTT 18\,$\mu$s）为例，BDP仅约225字节，而100个数据包的缓冲区达150\,kB，二者相差近三个数量级。此时$\alpha \times BDP$的目标窗口机制失去了有效约束力——由于BDP估计极小，窗口实际由$200 \times MSS$的兜底上界主导，而该下界远大于BDP，于是窗口稳态驻留在队列中。换言之，这一时延代价不是$\alpha$上界过大所致，而是"当BDP远小于兜底上界时，目标窗口机制被该常量旁路"这一结构性问题所致。这一诊断把优化方向从"调小$\alpha$"修正为"使兜底上界与BDP估计相协调"，相关讨论见第~\ref{Chap:chap5}章。
+
+\textbf{传播主导区间（S19）}。GEO卫星场景的基线单向传播时延为320\,ms，占端到端时延的80\%以上，排队优化对总时延的影响被稀释。Swift时延391.42\,ms，与NewReno/CUBIC均值（392.69\,ms）基本持平（$-0.3$\%），而BBR因高丢包引发的重传等待达612.08\,ms。
+
+\subsection{丢包率与公平性对比}
+
+表\ref{tab:loss_summary}汇总丢包率与Jain公平性指数。
+
+\begin{table}[htbp]
+\centering
+\caption{丢包率（\%）与Jain公平性指数对比}
+\label{tab:loss_summary}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|c|cccc|cccc|}
+\hline
+& \multicolumn{4}{c|}{\textbf{丢包率（\%）}} & \multicolumn{4}{c|}{\textbf{Jain 公平性指数}} \\
+\textbf{场景} & \textbf{Swift} & \textbf{NR} & \textbf{CUBIC} & \textbf{BBR} & \textbf{Swift} & \textbf{NR} & \textbf{CUBIC} & \textbf{BBR} \\
+\hline
+S1 & 0.00 & 0.01 & 0.00 & -- & 1.000 & 1.000 & 1.000 & -- \\
+S2 & 0.00 & 0.00 & 0.01 & -- & 1.000 & 1.000 & 1.000 & -- \\
+S3 & 0.00 & 0.00 & 0.01 & 0.00 & 1.000 & 1.000 & 1.000 & 1.00 \\
+S4 & 0.00 & 0.00 & 0.00 & 0.00 & 1.000 & 1.000 & 1.000 & 1.00 \\
+S5 & 0.00 & 0.00 & 0.00 & 0.00 & 1.000 & 1.000 & 1.000 & 1.00 \\
+S6 & 0.00 & 0.00 & 0.00 & 0.00 & 1.000 & 1.000 & 1.000 & 0.68 \\
+S7 & 0.00 & 0.01 & 0.00 & 0.00 & 1.000 & 1.000 & 1.000 & 0.69 \\
+S8 & 0.00 & 0.07 & 0.02 & 0.00 & 1.000 & 1.000 & 1.000 & 1.00 \\
+S9 & 0.00 & 0.00 & 0.00 & 0.00 & 1.000 & 1.000 & 1.000 & 0.89 \\
+S10 & 0.00 & 0.00 & 0.00 & 0.00 & 1.000 & 1.000 & 1.000 & 0.67 \\
+S11 & 0.00 & 0.00 & 0.00 & 0.03 & 1.000 & 1.000 & 1.000 & 0.89 \\
+S12 & 0.00 & 0.00 & 0.00 & 0.01 & 1.000 & 1.000 & 1.000 & 0.89 \\
+S13 & 0.00 & 0.04 & 0.05 & 0.14 & 1.000 & 0.998 & 1.000 & 0.38 \\
+S14 & 0.00 & 0.13 & 2.11 & 0.07 & 0.999 & 0.979 & 1.000 & 0.98 \\
+S15 & 0.00 & 0.00 & 0.00 & 0.02 & 1.000 & 0.999 & 1.000 & 0.89 \\
+S16 & 0.00 & 0.01 & 0.02 & 0.08 & 1.000 & 0.986 & 1.000 & 0.39 \\
+S17 & 0.00 & 0.03 & 1.05 & 0.77 & 1.000 & 0.991 & 1.000 & 0.93 \\
+S18 & 0.00 & 0.17 & 1.80 & 1.79 & 1.000 & 1.000 & 0.965 & 0.59 \\
+S19 & 0.00 & 0.59 & 1.26 & 9.83 & 1.000 & 0.823 & 0.912 & 0.93 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Swift在全部19个场景中丢包率均为0.00\%，是四种协议中唯一做到这一点的算法}。作为对照，NewReno的最大丢包率为0.59\%（S19）、均值0.058\%；CUBIC最大2.11\%（S14）、均值0.334\%；BBR最大9.83\%（S19）、均值0.749\%，且仅在6个场景中达到零丢包。
+
+零丢包并非偶然，但其成因必须归于\emph{归档运行中实际生效的机制}。如第~\ref{sec:queue-ecn-caveat}节所述，当时的队列规则为丢尾队列且不产生CE标记，ECN分支从未触发，因此零丢包不能归因于ECN早期预警；真正起作用的是窗口层面的三重约束。第一，拥塞避免阶段的窗口以$\alpha \times BDP$为目标，超出目标时逐个ACK按超额的一半回落，因此窗口不会像丢包驱动算法那样单调增长至缓冲区溢出。第二，最终窗口被夹紧在$\max(4 \times BDP, 200 \times MSS)$以内，这一上界与缓冲区容量无关，从而为在途数据量设置了独立于队列深度的硬性天花板。第三，一旦发生降窗，连续缩减保护（$D_{max}=3$）与降窗后冻结4个ACK事件共同抑制了"收缩—反弹—二次排队"的振荡，使窗口不会在恢复过程中重新冲过溢出点。
+
+值得注意的是，\textbf{零丢包与第~\ref{sec:results-analysis}节所述的时延代价实际上是同一现象的两面}。在缓冲区相对BDP过深的场景中，Swift的窗口稳定在一个"足以填满队列但不足以溢出队列"的水平：填满带来了排队时延，不溢出带来了零丢包。这一解释同时说明了为何两项指标在场景维度上高度反相关——S8的时延抬升最大（$+123.3$\%），而其丢包率与NewReno的0.07\%、CUBIC的0.02\%相比同样是零。相比之下，NewReno与CUBIC必须以周期性丢包为代价把队列清空，因而在时延统计上"受益"于丢包。
+
+关于ECN机制的实际价值，本章数据无法给出评价。第~\ref{Chap:chap3}章从信号时序角度论证了ECN应当能在队列溢出前提供更早的收缩触发，从而有可能在保持零丢包的同时降低稳态队列水位——即缓解上述权衡。该假设的检验需要在启用RED标记与对称ECN的条件下重跑全矩阵，属于后续工作。
+
+公平性方面，Swift在18个场景中Jain指数为1.000，在S14为0.999，是四者中最均衡的；NewReno均值0.988（最低0.823，出现在S19）、CUBIC均值0.993（最低0.912，同样在S19）。BBR的公平性明显偏低，均值0.812，在S13与S16降至0.38--0.39，即三条并发流的带宽分配严重倾斜。Swift公平性稳定的结构性原因是：三条流各自独立估计BDP并各自向$\alpha \times BDP$收敛，在共享同一瓶颈时它们的BDP估计趋于一致，因此目标窗口天然对称；而基于丢包的算法依赖丢包事件在流间的随机分布，长RTT下这种分布的方差显著放大，S19中NewReno与CUBIC公平性的下降正源于此。
+
+\subsection{延迟抖动对比}
+
+表\ref{tab:jitter_summary}汇总前向流的平均延迟抖动，反映时延的稳定性。抖动由FlowMonitor的\texttt{jitterSum}除以$(rxPackets - 1)$得到。
+
+\begin{table}[htbp]
+\centering
+\caption{平均延迟抖动对比（ms）}
+\label{tab:jitter_summary}
+\small
+\begin{tabular}{|c|r|r|r|r|}
+\hline
+\textbf{场景} & \textbf{Swift} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} \\
+\hline
+S1 & 0.0036 & 0.0036 & 0.0036 & -- \\
+S2 & 0.0014 & 0.0014 & 0.0014 & -- \\
+S3 & 0.0018 & 0.0018 & 0.0018 & 0.0000 \\
+S7 & 0.0846 & 0.0711 & 0.0712 & 0.0088 \\
+S8 & 0.4302 & 0.2724 & 0.3549 & 0.0563 \\
+S10 & 0.0357 & 0.0348 & 0.0356 & 0.0024 \\
+S12 & 0.0199 & 0.0452 & 0.0591 & 0.0042 \\
+S15 & 0.0240 & 0.0462 & 0.0674 & 0.0053 \\
+S16 & 0.4084 & 0.1734 & 0.2673 & 0.0597 \\
+S19 & 1.3180 & 1.6995 & 1.6750 & 1.3823 \\
+\hline
+\end{tabular}
+\end{table}
+
+抖动结果与时延结果同向：在Swift降低时延的场景中抖动同样降低（S12的0.0199\,ms对NewReno的0.0452\,ms、S15的0.0240\,ms对0.0462\,ms、S19的1.3180\,ms对1.6995\,ms），在Swift时延偏高的场景中抖动也相应偏高（S8、S16）。这一同向性说明抖动差异主要来自队列长度的稳态水位而非控制回路的震荡：稳态队列越浅，包间排队时间的方差越小。在近端高速低RTT场景中四种协议的抖动均在0.004\,ms以下，差异不具实质意义。
+
+\section{深入分析}
+
+\subsection{场景分类讨论}
+
+按Swift相对基线的表现，19个场景可分为三类。这一分类的价值在于其分界线由\emph{路径的BDP与缓冲区容量之比}决定，因而具有可外推的预测力。图\ref{fig:tradeoff-clean}的利用率--时延散点为这一分类提供了整体视角：绝大多数数据点聚集在"满利用"水平带内，协议间的真实差异体现在水平方向的时延位置上——Swift的S1--S3数据点位于0.3--0.7\,ms一带，比同场景基线协议左移约一个数量级；已在前文诊断的S9（利用率71\%）与S19（86\%）两个例外点清晰可辨；BBR则在共享链路场景聚集于50\%利用率带，与表\ref{tab:throughput_summary}的减半现象一致。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.72\textwidth]{../plots/fig03_tradeoff_clean.pdf}
+\caption{19个场景的瓶颈利用率--平均单向时延散点（时延为对数坐标）。左上方为"低时延、满利用"的理想区域；图中标注正文重点讨论的S8、S9与S19}
+\label{fig:tradeoff-clean}
+\end{figure}
+
+\subsubsection{A类——排队主导且缓冲区与BDP匹配（S1--S3、S9--S12、S15）}
+
+该类场景的共同特征是瓶颈带宽较高，按BDP定尺的缓冲区容量未触及100个数据包的下界保护，因此$\alpha \times BDP$目标窗口是窗口的实际约束者。Swift在该类场景中同时实现三项目标：吞吐量与NewReno/CUBIC等价（差异$\leq 0.3$\%，S9除外）、时延降低13.6\%--93.1\%、丢包为零。
+
+以S2（25\,Gbps、基线RTT 8\,$\mu$s）为代表分析机理。NewReno与CUBIC在拥塞避免阶段持续增窗直至队列溢出，其稳态在途数据量由缓冲区容量决定，平均排队时延3.8--4.4\,ms。Swift的窗口则以$\alpha \times BDP$为目标、并受$\max(4 \times BDP, 200 \times MSS)$上界约束；在该场景中$4 \times BDP$构成有效上界，因此窗口随路径能力而非缓冲区深度确定，稳态排队时延降至约0.28\,ms。关键在于吞吐量未受损失：窗口虽被约束在较低水位，但该水位仍足以覆盖路径的BDP，管道始终保持填充，且零丢包意味着没有任何重传恢复带来的管道空隙，因此吞吐量差异为0.00\%。这构成了"以路径能力而非缓冲区容量确定窗口、从而在不牺牲利用率的前提下压低队列驻留"的完整证据链。
+
+S9是该类中的例外，其吞吐回落已在前节归因于修订前的投递速率估计器偏差，机理独立于场景分类。
+
+\subsubsection{B类——缓冲区相对BDP过深（S4--S8、S13、S14、S16--S18）}
+
+该类场景的瓶颈带宽为10--1000\,Mbps，按BDP计算的缓冲区需求远小于100个数据包的下界，因此实际缓冲区容量相对BDP过深。同时，由于BDP估计值极小，Swift的窗口被$200 \times MSS = 288$\,kB的兜底上界主导而非被$\alpha \times BDP$约束。
+
+这一结构导致Swift在该类场景中呈现一致的权衡模式：吞吐量与基线等价或略优（S13 $+0.08$\%、S16 $+0.14$\%、S17 $+0.29$\%、S18 $+0.20$\%），丢包率为零（而CUBIC在S14达2.11\%、S17达1.05\%、S18达1.80\%），但时延高出21.3\%--123.3\%。从应用视角看，这是一个真实的取舍而非单纯的缺陷：对于要求零重传的传输（如对尾时延敏感的短事务、不可重传的实时流），零丢包的价值可能超过排队时延的增加；但对于时延敏感的交互式业务，该权衡方向并不理想。第~\ref{Chap:chap5}章据此提出使兜底上界与BDP估计相协调的改进方向。
+
+\subsubsection{C类——传播时延主导（S19）}
+
+GEO卫星场景的基线RTT为640\,ms，传播时延占端到端时延的80\%以上。该类场景的判别性在于：丢包的代价被RTT放大，因此零丢包能够直接转化为吞吐量优势。Swift聚合吞吐量8.6\,Mbps，相对NewReno提升52.8\%、相对CUBIC提升12.9\%、相对BBR提升205.0\%，相对NewReno/CUBIC均值提升29.85\%；同时其Jain公平性为1.000，而NewReno降至0.823、CUBIC降至0.912。时延方面Swift与基线均值持平（$-0.3$\%），说明该优势并非以排队为代价换取。这是本文中"多信号融合的早期拥塞感知在远距离传输场景中价值最高"这一论点的最直接证据。
+
+\subsection{机制有效性分析}
+
+\subsubsection{差异化响应机制}
+
+当前实现将普通丢包、ECN与超时分别映射为0.70、0.75、0.50的窗口保留因子，体现了拥塞信号语义的分层。在归档数据中，只有丢包分支（$\rho_{loss}=0.70$）与超时分支（$\rho_{timeout}=0.50$）被实际触发，因此本节只能对这两者给出实验层面的判断。
+
+可以判断的是：$\rho_{loss}=0.70$相比传统的窗口减半更为温和，而A类场景中吞吐量与基线完全一致、且全部场景零丢包，说明这一温和程度在\emph{有界窗口约束存在}的前提下并未导致队列失控——窗口上界与目标窗口回落机制承担了主要的拥塞抑制职责，乘性递减因子只需负责丢包后的快速让出。这也解释了为何本算法能够采用高于0.5的保留因子而不牺牲稳定性：其稳定性来源与传统AIMD算法不同。
+
+无法判断的是ECN分支（$\rho_{ecn}=0.75$）与ECE/CWR归类修正的效果。前者在归档运行中从未触发（第~\ref{sec:queue-ecn-caveat}节），后者属于v3.0.0变更而数据生成于修订之前。第~\ref{Chap:chap3}章已从语义层面论证：若不做该归类修正，ECN驱动的CWR会被误按$\rho_{loss}=0.70$处理，ECN的时序优势在响应环节被部分抵消。两者的定量效果均需在启用RED标记与对称ECN的重跑后确认。
+
+\subsubsection{连续递减保护与降窗后冻结}
+
+在连续拥塞事件中，窗口经3次$\rho_{loss}=0.70$收缩后约保留$0.70^3 \approx 0.34$倍原窗口（若为ECN分支的$\rho=0.75$则约保留0.42倍），已完成显著退让；若继续无约束缩减，恢复需要多个RTT，在长RTT链路上代价尤为高昂——S19的一个RTT即为640\,ms。因此$D_{max}=3$的保护阈值在长距离场景中的意义远大于短RTT场景。降窗后冻结机制的效果可在A类场景的时延数据中间接观察到：若无冻结，降窗后立即恢复增长会使残留队列与新注入数据叠加，稳态队列水位将高于观测值。
+
+\subsubsection{$\alpha$自适应机制}
+
+当前实现采用$\alpha \in [0.85, 1.30]$、初始值1.10，由最小RTT感知的动态阈值、奖励信号的基线相对偏离与连续增长趋势共同调节。与固定阈值相比，最小RTT感知阈值在远距离链路上容纳合理的传播时延波动，在近端与无线接入场景中保持较强的排队抑制能力。
+
+本文不报告$\alpha$的消融实验：\path{logs/}目录下没有保存固定$\alpha$、固定RTT阈值或不同$\alpha$边界的完整对照结果，任何此类数字都将是无来源的。这一自我限制也影响了对B类场景时延代价的归因——前节的结构性诊断（窗口被兜底上界主导）是基于BDP与缓冲区容量的量级计算得出的，而非基于参数扫描；其验证同样需要专门的对照实验。
+
+\subsection{关键参数的作用边界}
+
+本节从当前实现出发说明关键参数的作用边界，不引入未由日志支撑的参数扫描结果。需要区分参数的"设计意图"与"本章可验证的范围"：ECN保留因子0.75对应早期拥塞预警下的温和但充分的退让，但在归档运行中未被触发，故属于设计意图；普通丢包保留因子0.70在实际丢包发生后更快释放队列压力，超时保留因子0.50对应最严重的拥塞或路径异常，二者均在归档运行中生效。$\alpha$边界$[0.85, 1.30]$限制拥塞避免阶段目标窗口相对BDP的扩张幅度。BDP估计采用40个投递速率样本的窗口化最大值与全局最小RTT组合，在远距离与突发跨流量条件下提供估计稳定性。窗口安全区间$[4 \times MSS, \max(4 \times BDP, 200 \times MSS)]$的下界保证基本传输能力、上界限制BDP估计陈旧时的窗口膨胀——但如B类场景分析所示，$200 \times MSS$的兜底上界在低BDP路径上会成为窗口的实际主导者，这是当前参数体系中最值得重新审视的一处。
+
+\section{UDP Burst 跨流量鲁棒性评估}
+\label{sec:udp-burst-robustness}
+
+共享瓶颈链路上的非响应式突发流量是异构终端接入场景中的常态。本节在第~\ref{sec:udp-burst-matrix}节定义的A/B矩阵下评估Swift的鲁棒性，数据源为\path{logs/summary/kpi_forward.csv}中\texttt{Setting=udp\_burst}的记录。按第~\ref{subsec:audit}节的规则，可用于配对比较的场景为15个（表\ref{tab:scenarios}中标注"是"的场景），S1、S2的BBR列按规则D排除。
+
+\subsection{聚合鲁棒性指标}
+
+表\ref{tab:udp-burst-agg}给出四种协议在15个配对场景上的聚合鲁棒性指标。$\Delta T$为相对纯TCP设置的吞吐量下降百分比，$\Delta D$为平均时延增幅，$\Delta L$为新增丢包率，零丢包场景数统计Burst条件下丢包率低于0.01\%的场景个数。
+
+\begin{table}[htbp]
+\centering
+\caption{UDP Burst 跨流量鲁棒性聚合指标}
+\label{tab:udp-burst-agg}
+\small
+\begin{tabular}{|l|c|r|r|r|r|c|}
+\hline
+\textbf{协议} & \textbf{$n$} & \textbf{均值$\Delta T$} & \textbf{中位$\Delta T$} & \textbf{最差$\Delta T$} & \textbf{均值$\Delta D$} & \textbf{零丢包场景} \\
+\hline
+TcpSwift    & 15 & \textbf{19.46\%} & 23.75\% & \textbf{33.49\%} & $+$14.33\% & \textbf{15/15} \\
+TcpNewReno  & 15 & 24.14\% & 23.76\% & 64.53\% & $+$4.32\%  & 7/15 \\
+TcpCubic    & 15 & 21.22\% & 23.75\% & 46.25\% & $+$3.22\%  & 8/15 \\
+TcpBbr      & 13 & 60.93\% & 63.98\% & 90.31\% & $+$50.78\% & 7/13 \\
+\hline
+\end{tabular}
+\end{table}
+
+由表\ref{tab:udp-burst-agg}可得三项结论。
+
+\textbf{第一，Swift是唯一在全部15个场景中维持零丢包的算法}。四种协议中，NewReno仅在7个场景零丢包、CUBIC 8个、BBR 7个（共13个可比场景）。新增丢包率的最大值分别为：CUBIC $+5.92$个百分点（S18，由1.80\%恶化至7.71\%）、BBR $+2.57$个百分点（S13，由0.14\%恶化至2.27\%）、NewReno $+0.46$个百分点（S14，由0.13\%恶化至0.59\%）。CUBIC的恶化幅度最大这一点值得注意：它在无干扰条件下已有较深的稳态队列，突发流量注入后队列更易溢出，二者叠加放大了丢包。Swift的零丢包在跨流量条件下依然成立，说明其成因——以路径能力而非缓冲区容量确定窗口上界——不依赖于流量的平稳性：外部突发抬高了队列水位，但并未改变Swift自身在途数据量的天花板，因此队列的溢出裕度仍由Swift未占用的那部分缓冲区提供。
+
+\textbf{第二，Swift的吞吐量回落幅度最小且最集中}。均值$\Delta T$为19.46\%，优于CUBIC的21.22\%与NewReno的24.14\%，远优于BBR的60.93\%。更具说服力的是最差情形：Swift的最大回落为33.49\%（S19），而NewReno为64.53\%、CUBIC为46.25\%、BBR为90.31\%。即Swift不仅平均表现更好，其\emph{尾部行为}也更可控。BBR的脆弱性源于其带宽探测机制——UDP Burst在On期间挤占瓶颈带宽，BBR的探测周期将该干扰误认为真实瓶颈能力从而持续低估可用带宽，形成自我强化的退化；在S4--S7等千兆级链路上BBR吞吐量下降约89\%--90\%。Swift的BDP估计采用40样本窗口化最大值滤波，对Burst的On/Off交替具有固有的低通特性：Off期间采集到的高投递速率样本在窗口内被保留为最大值，使BDP估计锚定在真实瓶颈能力附近而非被On期间的低速率样本拖低。
+
+\textbf{第三，Swift的时延抬升幅度高于NewReno/CUBIC}。均值$\Delta D$为$+14.33$\%，而NewReno为$+4.32$\%、CUBIC为$+3.22$\%（BBR为$+50.78$\%）。这一现象与第~\ref{sec:results-analysis}节B类场景的时延代价同源：Swift维持零丢包意味着它不通过丢包来清空队列，因此突发流量注入的排队必须靠窗口收缩逐步排空；而NewReno/CUBIC在队列溢出时发生丢包，丢包本身即构成一次强制的队列清空，其时延统计因而"受益"于丢包。换言之，$\Delta D$与$\Delta L$在这两组协议之间不是独立指标，二者的对比必须联合解读：Swift用14.33\%的时延抬升换取了零丢包与最小的吞吐回落。
+
+图\ref{fig:udp-burst-clean}按场景展开上述聚合结论。上半幅为吞吐量变化：Swift（蓝色）在全部15个场景的回落集中于$-2\%$至$-34\%$的窄带内，没有BBR式的深坑；下半幅为新增丢包（符号对数坐标）：Swift在15个场景中均无可见柱体——新增丢包严格为零，而NewReno、CUBIC与BBR在无线与卫星场景（S13--S19）出现十分之一至个位数百分点级的新增丢包。两个面板联合读出的正是"回落窄带 + 零新增丢包"这一Swift区别于全部三个基线的组合特征。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{../plots/fig04_udp_burst_clean.pdf}
+\caption{15个配对场景的跨流量鲁棒性：UDP Burst引起的吞吐量变化（上）与新增丢包（下，符号对数坐标）。Swift无新增丢包，故下半幅不存在蓝色柱体；S1、S2的BBR按规则D排除}
+\label{fig:udp-burst-clean}
+\end{figure}
+
+\subsection{配对场景逐一验证}
+
+表\ref{tab:udp-burst-headline}给出15个配对场景的吞吐量变化与Burst条件下的丢包率，供逐场景核对。
+
+\begin{table}[htbp]
+\centering
+\caption{15个配对场景的吞吐量变化$\Delta T$（\%）与Burst丢包率$L$（\%）}
+\label{tab:udp-burst-headline}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|c|rrrr|cccc|}
+\hline
+& \multicolumn{4}{c|}{\textbf{吞吐量变化 $\Delta T$（\%）}} & \multicolumn{4}{c|}{\textbf{Burst 丢包率 $L$（\%）}} \\
+\textbf{场景} & \textbf{Swift} & \textbf{NR} & \textbf{CUBIC} & \textbf{BBR} & \textbf{Swift} & \textbf{NR} & \textbf{CUBIC} & \textbf{BBR} \\
+\hline
+S1 & $-3.9$ & $-3.9$ & $-3.9$ & -- & 0.00 & 0.01 & 0.00 & -- \\
+S2 & $-1.6$ & $-1.6$ & $-1.6$ & -- & 0.00 & 0.00 & 0.01 & -- \\
+S3 & $-2.0$ & $-2.0$ & $-2.0$ & $+0.2$ & 0.00 & 0.00 & 0.01 & 0.00 \\
+S4 & $-19.7$ & $-19.9$ & $-19.8$ & $-89.0$ & 0.00 & 0.01 & 0.00 & 0.00 \\
+S5 & $-19.7$ & $-19.9$ & $-19.8$ & $-88.9$ & 0.00 & 0.01 & 0.00 & 0.00 \\
+S6 & $-20.8$ & $-21.0$ & $-21.0$ & $-89.8$ & 0.00 & 0.01 & 0.00 & 0.00 \\
+S7 & $-23.8$ & $-23.8$ & $-23.8$ & $-89.1$ & 0.00 & 0.02 & 0.00 & 0.00 \\
+S8 & $-23.8$ & $-24.8$ & $-23.8$ & $-75.2$ & 0.00 & 0.12 & 0.03 & 0.00 \\
+S10 & $-19.9$ & $-20.0$ & $-19.9$ & $-28.0$ & 0.00 & 0.00 & 0.00 & 0.00 \\
+S13 & $-24.1$ & $-29.6$ & $-25.6$ & $-90.3$ & 0.00 & 0.06 & 0.09 & 2.27 \\
+S14 & $-25.4$ & $-33.3$ & $-26.4$ & $-52.5$ & 0.00 & 0.59 & 4.00 & 2.64 \\
+S16 & $-24.0$ & $-30.1$ & $-25.6$ & $-56.3$ & 0.00 & 0.03 & 0.04 & 0.32 \\
+S17 & $-24.8$ & $-32.9$ & $-26.6$ & $-64.0$ & 0.00 & 0.19 & 2.96 & 0.93 \\
+S18 & $-25.1$ & $-35.0$ & $-32.2$ & $-33.2$ & 0.00 & 0.36 & 7.71 & 4.14 \\
+S19 & $-33.5$ & $-64.5$ & $-46.2$ & $-35.9$ & 0.00 & 0.18 & 0.40 & 12.34 \\
+\hline
+\end{tabular}
+\end{table}
+
+逐场景核对可得以下具体观察。
+
+\textbf{（1）Swift在14个场景中吞吐量领先，唯一例外是S10}。在Burst条件下Swift的绝对吞吐量在15个场景中的14个为四协议最高；S10（城域WAN）中Swift为801.1\,Mbps，略低于CUBIC的803.0\,Mbps与NewReno的801.9\,Mbps，差距$-0.17$\%，属于等价范围而非实质劣势。领先幅度最大的是S19（GEO卫星）：Swift 5.70\,Mbps对NewReno 1.99、CUBIC 4.08、BBR 1.80\,Mbps。
+
+\textbf{（2）GEO卫星场景的吞吐优势在跨流量下显著放大}。S19中Swift相对NewReno/CUBIC均值的优势由无干扰时的$+29.85$\%扩大到$+87.81$\%。放大的原因可从表中直接读出：NewReno的吞吐量回落64.5\%、CUBIC回落46.2\%，而Swift仅回落33.5\%；同时二者的丢包率在Burst下仍为非零（0.18\%与0.40\%），在640\,ms的RTT下每次丢包都要付出一个完整RTT的恢复代价。这一场景是"零丢包在长距离链路上价值最高"这一论点在压力条件下的再次验证。
+
+\textbf{（3）中低速接入场景的吞吐优势在跨流量下由等价转为领先}。在无干扰条件下，S13、S14、S16--S18中Swift与基线的吞吐量差异均在0.3\%以内；加入Burst后，Swift的相对优势扩大到$+4.97$\%（S13）、$+6.30$\%（S14）、$+5.48$\%（S16）、$+7.45$\%（S17）、$+13.08$\%（S18）。机理是这些场景的基线协议在Burst下丢包率显著上升（CUBIC在S18达7.71\%、S17达2.96\%、S14达4.00\%），重传与窗口收缩共同侵蚀了有效吞吐量，而Swift的零丢包使其免疫于该项损失。这说明Swift在B类场景中所付出的时延代价，在存在跨流量干扰时换来了吞吐量维度的回报。
+
+\textbf{（4）近端高速低RTT场景受Burst影响甚微，且时延优势完整保留}。S1--S3中四种协议的吞吐量回落均在4\%以内，因为800\,Mbps的Burst相对10--25\,Gbps的瓶颈占比很小。Swift相对NewReno/CUBIC均值的时延降幅在Burst条件下仍为$-82.4$\%（S1）、$-93.0$\%（S2）、$-91.2$\%（S3），与无干扰条件下的$-83.3$\%、$-93.1$\%、$-91.6$\%基本一致，说明有界窗口控制带来的排队抑制不因外部突发而失效。
+
+\textbf{（5）BBR在千兆级链路上出现系统性崩塌}。S4--S7中BBR吞吐量回落89\%--90\%（例如S4由510.2\,Mbps降至55.9\,Mbps），S13回落90.3\%。该退化与其带宽探测机制在非响应式跨流量下的已知脆弱性一致。
+
+\subsection{鲁棒性机理分析}
+
+Swift在UDP Burst下的鲁棒性源于三项机制的协同，且三者分别对应不同的失效模式。第一，\textbf{以路径能力为参照的窗口上界}（$\max(4 \times BDP, 200 \times MSS)$）配合目标窗口回落，使Swift的在途数据量不随缓冲区被外部突发填充而增长，从而始终为队列保留溢出裕度；这解释了零丢包结果。需要说明的是，按设计意图该职责应由ECN早期响应承担，但归档运行中ECN分支未被触发（第~\ref{sec:queue-ecn-caveat}节），故此处只能归因于窗口约束。第二，\textbf{差异化丢包响应}（$\rho_{loss}=0.70$、$\rho_{timeout}=0.50$）在确有丢包时按严重程度精细收缩，配合$D_{max}=3$的连续缩减保护，避免了在Burst的On期间因连续事件而过度退避；这解释了吞吐量回落幅度最小且尾部可控。第三，\textbf{BDP窗口化最大值滤波}对Burst的On/Off交替具有低通特性，使带宽估计锚定于Off期间观测到的真实瓶颈能力；这解释了Swift未出现BBR式的估计崩塌。三项机制指向同一设计原则：在信号不确定的条件下，宁可保守地\emph{延迟}对拥塞的确认，也不要错误地\emph{下调}对路径能力的估计。
+
+\subsection{算法优势与适用边界总结}
+
+\begin{table}[htbp]
+\centering
+\caption{Swift算法优势与适用边界}
+\label{tab:pros_cons}
+\small
+\begin{tabular}{|p{6.4cm}|p{6.4cm}|}
+\hline
+\textbf{优势} & \textbf{适用边界} \\
+\hline
+排队主导场景时延降低13.6\%--93.1\%（S1--S3、S9--S12、S15） & 缓冲区相对BDP过深的低速场景时延抬升21.3\%--123.3\%（S4--S8、S13、S14、S16--S18） \\
+纯TCP设置19/19场景、Burst设置15/15场景全部零丢包，为四协议中唯一 & 跨流量下平均时延抬升14.33\%，高于NewReno/CUBIC的3\%--4\% \\
+饱和场景吞吐量与NewReno/CUBIC等价（差异$\leq$0.3\%） & 跨域WAN场景吞吐量回落28.97\%（S9），源于修订前的投递速率估计器 \\
+GEO卫星吞吐量$+29.85$\%，跨流量下扩大至$+87.81$\% & 结论基于单一随机种子的单次运行，稳健性待多种子重跑确认 \\
+Jain公平性均值1.000，为四协议最高 & ECN分支在归档数据中未被激活，其贡献待重跑验证 \\
+跨流量下吞吐回落最小（均值19.46\%、最差33.49\%） & $200 \times MSS$兜底上界在低BDP路径上会旁路$\alpha \times BDP$目标机制 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{本章小结}
+
+本章在36场景$\times$4协议$\times$2设置共288次仿真的基础上，经系统性数据质量审计筛选出纯TCP设置19个、UDP Burst设置15个可用于严格四协议对照的场景，对Swift与NewReno、CUBIC、BBR进行了对比评估。审计过程识别并处理了四类问题——反向ACK流污染指标定义、同一场景内混用两个仿真器修订、重复的场景配置（其中\texttt{satellite\_leo}被确认为名称与参数不符的\texttt{lte\_good}副本，据此撤除了全部LEO卫星相关论述）、以及BBR在微秒级RTT路径上的实现层面退化——全部排除记录留存于\path{logs/error.txt}，本章数值统一取自重新导出的\path{logs/summary/kpi_forward.csv}。
+
+稳态实验结果表明：（1）在排队主导且缓冲区与BDP匹配的场景中，Swift在吞吐量与NewReno/CUBIC等价（差异$\leq 0.3$\%）的同时将平均时延降低13.6\%--93.1\%，其中近端高速低RTT场景达83.3\%--93.1\%；（2）Swift在全部19个场景中丢包率为0.00\%，是四协议中唯一实现全场景零丢包者，且Jain公平性均值1.000为四者最高；（3）在GEO卫星长距离场景中，零丢包转化为相对NewReno/CUBIC均值$+29.85$\%的吞吐量优势。跨流量鲁棒性实验表明：（4）Swift在全部15个配对场景中维持零丢包，吞吐量回落幅度的均值（19.46\%）与最差值（33.49\%）均为四协议最小，且在14个场景中吞吐量领先；（5）GEO卫星场景的吞吐优势由$+29.85$\%放大至$+87.81$\%。
+
+本章同时如实披露三项负面或混合结果：跨域WAN场景（S9）吞吐量回落28.97\%，其机理已定位为修订前投递速率估计器的系统性低估；缓冲区相对BDP过深的十个低速场景中时延抬升21.3\%--123.3\%，其结构性原因是$200 \times MSS$兜底上界在低BDP路径上旁路了$\alpha \times BDP$目标机制；跨流量条件下平均时延抬升14.33\%，高于NewReno/CUBIC，该指标须与零丢包联合解读。上述边界与相应的改进方向在第~\ref{Chap:chap5}章展开讨论。

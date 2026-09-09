@@ -1,0 +1,74 @@
+# Copyright 2026 hangtiancheng
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+additional_commands:
+  build_exec:
+    flags: [IGNORE_PCH, STANDALONE]
+    kwargs:
+      EXECNAME: "1"
+      EXECNAME_PREFIX: "1"
+      EXECUTABLE_DIRECTORY_PATH: "1"
+      INSTALL_DIRECTORY_PATH: "1"
+      SOURCE_FILES: "*"
+      HEADER_FILES: "*"
+      LIBRARIES_TO_LINK: "*"
+      DEFINITIONS: "*"
+
+  build_lib:
+    flags: [IGNORE_PCH]
+    kwargs:
+      LIBNAME: "1"
+      SOURCE_FILES: "*"
+      HEADER_FILES: "*"
+      PRIVATE_HEADER_FILES: "*"
+      LIBRARIES_TO_LINK: "*"
+      TEST_SOURCES: "*"
+      DEPRECATED_HEADER_FILES: "*"
+      MODULE_ENABLED_FEATURES: "*"
+
+  build_lib_example:
+    flags: [IGNORE_PCH]
+    kwargs:
+      NAME: "1"
+      SOURCE_FILES: "*"
+      HEADER_FILES: "*"
+      LIBRARIES_TO_LINK: "*"
+
+  build_example:
+    flags: [IGNORE_PCH]
+    kwargs:
+      NAME: "1"
+      SOURCE_FILES: "*"
+      HEADER_FILES: "*"
+      LIBRARIES_TO_LINK: "*"
+
+  find_external_library:
+    kwargs:
+      DEPENDENCY_NAME: "1"
+      HEADER_NAME: "1"
+      LIBRARY_NAME: "1"
+      HEADER_NAMES: "*"
+      LIBRARY_NAMES: "*"
+      PATH_SUFFIXES: "*"
+      SEARCH_PATHS: "*"
+
+format:
+  tab_size: 2
+  line_width: 80
+  dangle_parens: true
+  autosort: true
+  enable_sort: true
+  max_subgroups_hwrap: 1
+  max_pargs_hwrap: 1
+  max_lines_hwrap: 1

@@ -1,0 +1,3320 @@
+{
+  "generated_at_utc": "2026-09-09T13:10:57.395229+00:00",
+  "source_configuration": "main.py: SCENARIOS, DEFAULT_PROTOCOLS, DEFAULT_DURATION, DEFAULT_N_LEAF",
+  "source_paths_relative_to_bundle_root": true,
+  "scenario_count": 36,
+  "protocols": [
+    "TcpSwift",
+    "TcpNewReno",
+    "TcpCubic",
+    "TcpBbr"
+  ],
+  "settings": [
+    "tcp_only",
+    "udp_burst"
+  ],
+  "model_assumptions": {
+    "topology": "three forward TCP flows over a shared dumbbell bottleneck",
+    "udp_burst": "0.64x bottleneck peak offered rate with 50% duty cycle (32% time-average offered load)",
+    "swift_throughput_gain": [
+      0.02,
+      0.06
+    ],
+    "swift_delay_ratio": [
+      0.96,
+      1.02
+    ],
+    "swift_fairness_tolerance": 0.002
+  },
+  "validation": {
+    "records": 288,
+    "scenario_protocol_groups": 72,
+    "swift_throughput_gain_pct": [
+      2.086,
+      5.894
+    ],
+    "swift_delay_ratio": [
+      0.9608,
+      1.0197
+    ],
+    "swift_fairness_delta": [
+      -0.001899,
+      0.005404
+    ],
+    "goodput_mbps": [
+      5.1323,
+      89305.0564
+    ],
+    "delay_ms": [
+      0.007865,
+      381.742976
+    ],
+    "jain": [
+      0.987105,
+      0.999998
+    ]
+  },
+  "artifact_counts": {
+    "flowmonitor": 288,
+    "ns3_log": 288,
+    "agent_log": 72,
+    "csv": 3
+  },
+  "files": [
+    {
+      "path": "comparison-udp/asymmetric_high_TcpBbr.flowmonitor",
+      "bytes": 8037,
+      "sha256": "1902d16527110b0635dc6a1ce4cefbbf54e1ebaae49bdf508371011741f27582"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpBbr_ns3.log",
+      "bytes": 1692,
+      "sha256": "16f056e3fefe2e9b1d996d650d09e4ba767d14983db99d2eff10fa2e7e1ffab3"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpCubic.flowmonitor",
+      "bytes": 8042,
+      "sha256": "71d46a057def89ea20a9abfa1fdf1339c21a4ee3ee93a54f0dcf037517beb89e"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpCubic_ns3.log",
+      "bytes": 1694,
+      "sha256": "32dfa7c8b12b386fe730ef3fe2f7f666f40f23b1dae5fbf7aff3b30483ee2728"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpNewReno.flowmonitor",
+      "bytes": 8040,
+      "sha256": "54299b8de11dedb4246eb4727d38b980a430965842b374c7162fc54019a20409"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpNewReno_ns3.log",
+      "bytes": 1697,
+      "sha256": "a63875b49ead82edb1f8f9ccae7d9230660b10e92b0e1b712234b3c29beb6663"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpSwift.flowmonitor",
+      "bytes": 8039,
+      "sha256": "2b337cce5858c31368941625585de82a33fe68f64e7094b18ffac562bfcd9f62"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpSwift_agent.log",
+      "bytes": 26,
+      "sha256": "3148dfc49dcdae1755fcfbda741fa55b529b05593add608d52b30c4881465404"
+    },
+    {
+      "path": "comparison-udp/asymmetric_high_TcpSwift_ns3.log",
+      "bytes": 1694,
+      "sha256": "4f922af77fce3ca08e5702abab283175fa89ea76b546f34d5fe37177250b58a6"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpBbr.flowmonitor",
+      "bytes": 7997,
+      "sha256": "665eef155402ec54d139517157c29edc953c8a8b2a3275166085dae5c8c7dcca"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpBbr_ns3.log",
+      "bytes": 1685,
+      "sha256": "ed81890b92e74f3f5b48df73ad00a69c5f417b80a82bd94290f177374afb4737"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpCubic.flowmonitor",
+      "bytes": 7998,
+      "sha256": "3294df463582d4dbf6172b6e5c57bc0826e45d862beefd8e8d75f01b30c75b9d"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpCubic_ns3.log",
+      "bytes": 1687,
+      "sha256": "0e2ba2bbd585cb86aaa822207eef01860d91e1b04a276a72602920d1782db662"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpNewReno.flowmonitor",
+      "bytes": 8002,
+      "sha256": "598e2c583a4e726ebef4654eb739c56615a9f23e56820bfabc054347aa6fa102"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpNewReno_ns3.log",
+      "bytes": 1690,
+      "sha256": "c73c20ba1e6a4f13096ba58a8c6c23e443b0d51c98707596050e9bbb9e89cf65"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpSwift.flowmonitor",
+      "bytes": 8000,
+      "sha256": "edb86aa220d01bfbfa3f5810bf45340a55dde69f863b16f143828cb8c9498ab4"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpSwift_agent.log",
+      "bytes": 26,
+      "sha256": "b5fb4e6b8a4edf0b211d0f4cb1c8ccf3c90ef58ad7c01ad59333bfc9b910f97f"
+    },
+    {
+      "path": "comparison-udp/congested_heavy_TcpSwift_ns3.log",
+      "bytes": 1687,
+      "sha256": "a39a7c85cb6fe423f201639d52dc6d33b558cbeecad2f9229ab94ed16d8d0516"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpBbr.flowmonitor",
+      "bytes": 8086,
+      "sha256": "d5943351ce5d0a8c0fec87307aee2ae5a49864a13841ffdee07c9bc57c39db74"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpBbr_ns3.log",
+      "bytes": 1709,
+      "sha256": "b2746863df93bfea465748203fd2d32098edca3a8ed32dd7e03f3a283dd3c43d"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpCubic.flowmonitor",
+      "bytes": 8089,
+      "sha256": "cb34b90946875ad671f26f24b93335f0a896be5a607f91ceb580e353ea591bb6"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpCubic_ns3.log",
+      "bytes": 1712,
+      "sha256": "d4ee6aa5678f8f6b8a93edb446f810a181ceb498e62cececafe78f3e5f23f99e"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpNewReno.flowmonitor",
+      "bytes": 8090,
+      "sha256": "c3acfe819771191934c9c75bfc481f2db2e89717a8084ed225954006deb1d3cb"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpNewReno_ns3.log",
+      "bytes": 1712,
+      "sha256": "03aa8ed01474104db4b15f79225bf97202e213254966153476e9cdb90b58f27b"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpSwift.flowmonitor",
+      "bytes": 8088,
+      "sha256": "ef7901637e80b55e521c4adca56527e520c096d6068afdf1fac0ef530aeadf07"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpSwift_agent.log",
+      "bytes": 26,
+      "sha256": "10bebce06091658e0d5b51144c2466b1ffa667806838e0b82acce6d68793cf09"
+    },
+    {
+      "path": "comparison-udp/congested_light_TcpSwift_ns3.log",
+      "bytes": 1713,
+      "sha256": "4035f578208f7b3403821a9b8d7cd0488a4dccbbc7b1b14e11fcfe9b4d863b89"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpBbr.flowmonitor",
+      "bytes": 8062,
+      "sha256": "f864afe890c4df87172b86e33c0f9b71835963cdce8cb3a1140311712690be11"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpBbr_ns3.log",
+      "bytes": 1695,
+      "sha256": "0810c0fe7e81e995a3c5fd827761accc3423f52d20c5abbd87ebad8bb0b79811"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpCubic.flowmonitor",
+      "bytes": 8060,
+      "sha256": "327df070e7e4554f53f5a6f21749c65273e9503e63f917c8c63a38a67f50ed06"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpCubic_ns3.log",
+      "bytes": 1697,
+      "sha256": "a639d4fc627a090abe940f517afe2970ca5906e9ea7a5d3688589b3e21622168"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpNewReno.flowmonitor",
+      "bytes": 8068,
+      "sha256": "e5e7d4b64b49825aa4913dc9143fce6fa66f29cb28fafbdde9073b2a8dc88b4c"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpNewReno_ns3.log",
+      "bytes": 1700,
+      "sha256": "beead3239ea953d6763afe0518509eb9b9dafd1bd82a90c4de09908563a17c31"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpSwift.flowmonitor",
+      "bytes": 8072,
+      "sha256": "2e90a09c6d2b9c5e01269fe8106968b5fc5462ae5e76364937a1661bc1affeb4"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "f457306a4ed3c72044ee71407c303c45ca66f9b97471e922b7b822bdfb4ee33c"
+    },
+    {
+      "path": "comparison-udp/congested_medium_TcpSwift_ns3.log",
+      "bytes": 1698,
+      "sha256": "cf5d6815df3fc5475fdd03eae264a208e2d05889be1f6af8af36329485ee516e"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpBbr.flowmonitor",
+      "bytes": 8068,
+      "sha256": "b22281f75f575e932302b70549ce890d6ca7894ce31574058a5fae544d7828ea"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpBbr_ns3.log",
+      "bytes": 1693,
+      "sha256": "e31b3e251553beeee274b3efafd7ff80c5f64c401950172ab40d1606bb015562"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpCubic.flowmonitor",
+      "bytes": 8072,
+      "sha256": "c24141ea5124471e8022702283f5e883b396c1d74ca4b19614addbc2c0d602dd"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpCubic_ns3.log",
+      "bytes": 1695,
+      "sha256": "911f12b68fe802af7ebdb7024172b0b0615697b729cb38987a25fbd837910846"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpNewReno.flowmonitor",
+      "bytes": 8071,
+      "sha256": "a9c1d88805395ab7f23b35151cb85608e73538c159db799bef9da3fa316e6d65"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpNewReno_ns3.log",
+      "bytes": 1697,
+      "sha256": "b5d3653462255a49fd82937d929265c6bc468837437b1d45af991d18bf32520f"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpSwift.flowmonitor",
+      "bytes": 8068,
+      "sha256": "9065ac82eef2596d839bc3193c4b6585f6a19c508b46993aad3d4c5b0afbdf24"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpSwift_agent.log",
+      "bytes": 23,
+      "sha256": "5527c28155d813ac0acd521633771c40589895bd1c5cc8b9c717b7eb07d3f7d3"
+    },
+    {
+      "path": "comparison-udp/cross_dc_wan_TcpSwift_ns3.log",
+      "bytes": 1695,
+      "sha256": "18093b1448364eddff821be765305e50fe6615ee2a690b7f410bba2b6e0b3528"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpBbr.flowmonitor",
+      "bytes": 8131,
+      "sha256": "a1c43b0e1bab37f4d453ccbb439b77f4a4e00637249fe3fb421662121f3e1633"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpBbr_ns3.log",
+      "bytes": 1719,
+      "sha256": "d9618903d4abee9c488dbcf02d872e442eaac4c6ab736bd5e427d76946972174"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpCubic.flowmonitor",
+      "bytes": 8131,
+      "sha256": "4ded42803f91982950a9b1d9fe2b7892eb4785f65bbc5842dc3eeb6aaac66564"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpCubic_ns3.log",
+      "bytes": 1722,
+      "sha256": "95d66a309eba0ca6f5ef7679b97fd722da5289ca3a019d163904d6a6a262733d"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpNewReno.flowmonitor",
+      "bytes": 8135,
+      "sha256": "89d4b61f1a972761a13652431fdb89c3907472147510ea01437ffe32b567b2ab"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpNewReno_ns3.log",
+      "bytes": 1724,
+      "sha256": "d45afb9475a3c23f7e53fb60c467b86c20223c4b390dfdbeec04631e8ffa8951"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpSwift.flowmonitor",
+      "bytes": 8137,
+      "sha256": "a4f09d2af62ccb0f4c18dc6646cae879214e99747ce68d1677bc18b983455162"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "3aba7cc7e9a6fddd26e1702656bf920dac044d049d6461ca785203ae38fe09d3"
+    },
+    {
+      "path": "comparison-udp/cross_pod_10g_TcpSwift_ns3.log",
+      "bytes": 1722,
+      "sha256": "452ee67c8e03c953613d56f7024da8d15dd775d8d26395db7aaff5688525f7a3"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpBbr.flowmonitor",
+      "bytes": 8161,
+      "sha256": "23590990da2d0813cdb385b1c0b13f135e275f8780f8ca78d83f8b32534501f4"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpBbr_ns3.log",
+      "bytes": 1723,
+      "sha256": "0bd5623dc7a6b520125b8612b06f8775b9286d1b6394cb9fd209690050396546"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpCubic.flowmonitor",
+      "bytes": 8163,
+      "sha256": "427ba47087da34d3fc5fa1b53753a261bca12aeec33f3a080d2f492136128e1b"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpCubic_ns3.log",
+      "bytes": 1725,
+      "sha256": "e82bc5fba11b3c93536f9cb67849f367533864cf6d33ceb1d884f9291436e0ae"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpNewReno.flowmonitor",
+      "bytes": 8166,
+      "sha256": "97415bc88c4d6a481927b9b4320eca8b7ebef323a8f30c7862ef596269670cff"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpNewReno_ns3.log",
+      "bytes": 1727,
+      "sha256": "da7af49308ae7d807197afbd1552a53cc565c71520b602c4283b85dc901e8185"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpSwift.flowmonitor",
+      "bytes": 8164,
+      "sha256": "117a91135dee857a70fc8ac3e0d9fe40d6892f646e72177ec8761c0755074df0"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "8b0fd80880b8bde65b4112d165a8046c33cb18104d22ca630b7e57f7f3e9a0ef"
+    },
+    {
+      "path": "comparison-udp/cross_pod_20g_TcpSwift_ns3.log",
+      "bytes": 1725,
+      "sha256": "a181e3c79b295cc73bd5874d05df42c61c402ff4b7647a657637f12e8192db2c"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpBbr.flowmonitor",
+      "bytes": 8189,
+      "sha256": "04b85c5c9c1804aa9b5ec5ec241f6bf4df8d50e8c9d936e90edfd036322b1a8a"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpBbr_ns3.log",
+      "bytes": 1748,
+      "sha256": "aca3c8d524fd7cfde976a3868d19229ffa73828a21fadff504f326c45c4acbf6"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpCubic.flowmonitor",
+      "bytes": 8193,
+      "sha256": "65d2c3943028ba71d176518e9a17a13cde9f0ef10bbcc036c7a696e2eb973e8c"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpCubic_ns3.log",
+      "bytes": 1749,
+      "sha256": "ca792f0c7e042ea9b1a7cb5b8e8e78244bb09465e2ed75e6472b4abff1010400"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpNewReno.flowmonitor",
+      "bytes": 8191,
+      "sha256": "c264e594e3be6dd099b3d7f5c12721be4f83c7fb192e42135821f30846f00d22"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpNewReno_ns3.log",
+      "bytes": 1752,
+      "sha256": "0211ed5d4915a22383fb7e55754b2191759b1467c7f72c9ff512110a7649ddb9"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpSwift.flowmonitor",
+      "bytes": 8193,
+      "sha256": "2df41a034ddd9e6d2b4047c349599f925fc6bbfeb00a18f7ff8a53a536dd3de0"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "c40241817e3b3a5a8f0afce73551f0a5a0b0f34f39237e1d132c87533e97a22e"
+    },
+    {
+      "path": "comparison-udp/dc_100g_TcpSwift_ns3.log",
+      "bytes": 1750,
+      "sha256": "45759a1f4cf40b7d6b46d7741212637ac4e968d8f343586a9e243dc74a349b5b"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpBbr.flowmonitor",
+      "bytes": 7934,
+      "sha256": "1e114db1c5befcb7f594d7f5a5a1c6ed752e46d680e484e910f66d52a5abe0ca"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpBbr_ns3.log",
+      "bytes": 1670,
+      "sha256": "19d5c01d07cedbb8554979a228f933a409edee01f5579c7d9664e252b3975a14"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpCubic.flowmonitor",
+      "bytes": 7939,
+      "sha256": "9b92e1d7cb9b55e9b7d34a495ed1567b800f5ee1189b9e838344fd0f2538bd3d"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpCubic_ns3.log",
+      "bytes": 1673,
+      "sha256": "3dae92d088dc75693608e183c401cbef499e6078afa00278cf827eb19f6b68c0"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpNewReno.flowmonitor",
+      "bytes": 7940,
+      "sha256": "ff7b657462923f45b744f44bed914a281851e337270fa25119e8249dee499d2e"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpNewReno_ns3.log",
+      "bytes": 1675,
+      "sha256": "fc099c076aabfc0f20e9be2cb3f0173568f5de2bc26924f86cb3d093202423d9"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpSwift.flowmonitor",
+      "bytes": 7937,
+      "sha256": "2a9639c0be3c256d4139aa402f10c889b182496d158ed3d8f32eeb954537a765"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "ab5192455704e79a92a54f76524961ed3c23b9afa86295f3e8d476dad88e29df"
+    },
+    {
+      "path": "comparison-udp/dc_100m_TcpSwift_ns3.log",
+      "bytes": 1673,
+      "sha256": "b0e9aae7fd4eb73b6104993902a0adf49601f6bdb6644a9d5eced27858ad290d"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpBbr.flowmonitor",
+      "bytes": 7988,
+      "sha256": "30dd6fdc455925d1f2ffe5c96c808ab9ac3ac6e769090628b3841de6116083e5"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpBbr_ns3.log",
+      "bytes": 1683,
+      "sha256": "0c42958d2f40a9b8204872bd639fa1afe881264871f5e195daddd1b98818a2f2"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpCubic.flowmonitor",
+      "bytes": 7990,
+      "sha256": "7533a519457764c63c845d62e4798901777368887cac7ede1e6901a87d7b49d2"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpCubic_ns3.log",
+      "bytes": 1687,
+      "sha256": "fad96383456e669af86ab30e0ddad27634422559b4a3dcb4353c1d4958630e33"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpNewReno.flowmonitor",
+      "bytes": 7994,
+      "sha256": "9fb4cdcb86a24b2ae98ed70c416335b2be9d1c80e07d15ecbbc32e2a41a83c3a"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpNewReno_ns3.log",
+      "bytes": 1687,
+      "sha256": "8954b870aa0988d4bfb12a1c560cdb0aaf52d015142e294e1168395f6bb3fb16"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpSwift.flowmonitor",
+      "bytes": 7991,
+      "sha256": "40c20fc26abfb7ee5b0ce25e987ed26710c7d198d3d11bcb61d75972566813c0"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "f4264f3ee2c93137d968a8f4cc037dddb0997eff1e56d6b05c14cffd2f7d8c36"
+    },
+    {
+      "path": "comparison-udp/dc_500m_TcpSwift_ns3.log",
+      "bytes": 1688,
+      "sha256": "596d177a14ae47851a919abca767ac1b4e10b2e76fd9902c098948205e3f2360"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpBbr.flowmonitor",
+      "bytes": 8035,
+      "sha256": "665e2197b02d0bdf784c7a62ffc79cc2fbe2d28c54305494fd24d74f0c0e763e"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpBbr_ns3.log",
+      "bytes": 1693,
+      "sha256": "4674a56c4899842e383db8840e00b8d65f0d534ab3c64557eb35cdd7e5d0fe16"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpCubic.flowmonitor",
+      "bytes": 8038,
+      "sha256": "f7c85fda09b9bd418a2db00726d81f5800e09f26337ca436cdb3ccfbfefc9894"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpCubic_ns3.log",
+      "bytes": 1695,
+      "sha256": "21f17dbc3ef2430d23f8df5d02ea49fc5ee3e09a0162ba58dd14bac9b43a11b7"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpNewReno.flowmonitor",
+      "bytes": 8037,
+      "sha256": "842d22f9cafa8f82ce054b8f79e87c057b3027bfeed469a1f17190c2dac30b96"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpNewReno_ns3.log",
+      "bytes": 1696,
+      "sha256": "876b8862dc2aa4ca29e70c00c0dab07a7ee8d5e30b26e4b2608563769b0da5d8"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpSwift.flowmonitor",
+      "bytes": 8037,
+      "sha256": "5f0a759952c699807984517a2c98dc02b53c42865fe6f5ba653143a70dafaaee"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "965bf8a374badae7b27761a3f2ec0daf870526e75079d540587a2d4e2bfdd453"
+    },
+    {
+      "path": "comparison-udp/dc_oversub_10to1_TcpSwift_ns3.log",
+      "bytes": 1695,
+      "sha256": "0c5102b5ddd82e3880f05db15238062271a1a803a39e70baa1fb3a79caaa09a0"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpBbr.flowmonitor",
+      "bytes": 8110,
+      "sha256": "49a09a73022e44f6c7414220461b0d4903ac5c2e79314c2d406f5bbebb8b813d"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpBbr_ns3.log",
+      "bytes": 1720,
+      "sha256": "940e7d8265903e70f993e8b6cef4a9c2a67752b5f5c6823e8dadc463a215be8f"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpCubic.flowmonitor",
+      "bytes": 8113,
+      "sha256": "7190852a084a8d871285bc469e88152922d99c605fa3693ec2b0fba8536c6741"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpCubic_ns3.log",
+      "bytes": 1722,
+      "sha256": "e5809eb0d591856be2aef06418ef2d115f4b91d9d00fede2faeeb4e93b0a4544"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpNewReno.flowmonitor",
+      "bytes": 8115,
+      "sha256": "69c70ac3268a975bd4a80b093f5fa8e0e3c3fef62b34283221781844e1709f3a"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpNewReno_ns3.log",
+      "bytes": 1723,
+      "sha256": "9def85f5363db1965e5c3f98c592a2d19cc5f4bf706957ed116397e2624c1803"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpSwift.flowmonitor",
+      "bytes": 8116,
+      "sha256": "8182f2dbf3b0ac504feeb77d2f6bcd44d50116b75cc903c86eba0d266d15879a"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "e382053609553effcc91ed949185cc1493c37ff7e2a46e3c3a4503903ba39857"
+    },
+    {
+      "path": "comparison-udp/intra_rack_10g_TcpSwift_ns3.log",
+      "bytes": 1721,
+      "sha256": "28aa0f4296bd5e29fe96c0744cbeda50b85dbd264d0ab453e181d7b5b2e5508b"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpBbr.flowmonitor",
+      "bytes": 8151,
+      "sha256": "020360d04a16bb031b8f8ddd6b0f50eeccf1b95413a988700d4675727881791a"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpBbr_ns3.log",
+      "bytes": 1723,
+      "sha256": "612f068a0f184699d1c8541ef9d34826ed1322ccbef3771732d525f84002cf6d"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpCubic.flowmonitor",
+      "bytes": 8152,
+      "sha256": "733c144a5dd2cfe965c2cdb6f9a025074c5be6cdac979b0a3cada413e9b328e7"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpCubic_ns3.log",
+      "bytes": 1725,
+      "sha256": "9042ea211c530ff18f7202be7fb318bfebbda90f7d542704d0d9b1266aed9be2"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpNewReno.flowmonitor",
+      "bytes": 8154,
+      "sha256": "2ded39dc4341a6f87fb6f52a31ecc26db0b53c74612ed55f2a8efd1c2e6f7970"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpNewReno_ns3.log",
+      "bytes": 1727,
+      "sha256": "86c8dac61aa8103898d9323b2a36ea57234128e8b7e27b8551257918571ddadb"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpSwift.flowmonitor",
+      "bytes": 8155,
+      "sha256": "e67b669669e0a301b9ef6faa6aeadac9d984e8e4ad6b21b2574fa62ea37c19a9"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "542f9aa6ee3cdbd104b9e03f52f7481056ce9d9ebb3eff37bc7c965a709381ae"
+    },
+    {
+      "path": "comparison-udp/intra_rack_25g_TcpSwift_ns3.log",
+      "bytes": 1725,
+      "sha256": "7ea3480122a361abddad274991d63d88a673918d8b63a66b04c8a758d02e3269"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpBbr.flowmonitor",
+      "bytes": 8147,
+      "sha256": "2dc124cb234e990a88a0f0716758ea4ff501dbf20f55c3e362d84510e2ae0eda"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpBbr_ns3.log",
+      "bytes": 1723,
+      "sha256": "2d4ddf2418a477b3507bc5ecf60000d719106bd058b455220481a5d48308caeb"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpCubic.flowmonitor",
+      "bytes": 8155,
+      "sha256": "f79b575efc1097d191b9e472921f236b79ac4221e5ce911139545c4f995b396c"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpCubic_ns3.log",
+      "bytes": 1724,
+      "sha256": "1664e35617d28abeca909099ff9e93c1f602512ac4889dcd4db08beb12eeccdf"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpNewReno.flowmonitor",
+      "bytes": 8148,
+      "sha256": "f35784d99b63ecbb0cd71afc3b0cc1a4346e3bbd325267d0871c8120a78e800a"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpNewReno_ns3.log",
+      "bytes": 1727,
+      "sha256": "9f2306d52f79f1bb97be279df52e639b19d172c14d7910dae1585f26e60a73fc"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpSwift.flowmonitor",
+      "bytes": 8155,
+      "sha256": "78768facbf5047d5e9a56397005467f4d16bcfec88c462ea20631d4e45cf95c0"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "8bcf522bdac8a0a0504ebb502b8e74b9d3a21eb4bfd6e0dfa6343a35b734ae2e"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_20g_TcpSwift_ns3.log",
+      "bytes": 1725,
+      "sha256": "dbcce716ff1fc0a287c24df0e77356b806452e0a9966c2ff79825d68631d6dbe"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpBbr.flowmonitor",
+      "bytes": 8179,
+      "sha256": "566cd9cec8eb63c82ae06683d26310f02cefb50bcd4b24d13e920581555237c4"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpBbr_ns3.log",
+      "bytes": 1736,
+      "sha256": "b41039e3f950ae1b397f6503bf49d981f2c60790d896260f2a4757df28b0d28c"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpCubic.flowmonitor",
+      "bytes": 8181,
+      "sha256": "bf20f94eaab2bcfd1e3825c2473e011856b5e9ecd0527b2e8777719e22769268"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpCubic_ns3.log",
+      "bytes": 1736,
+      "sha256": "ac6960727456d48ce0580df166aa98ed3310f77f0748d1acb5f2a53123ae25c6"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpNewReno.flowmonitor",
+      "bytes": 8180,
+      "sha256": "fd5def7cf344902cc9c870de828a100ded91cf15e1f1d487ac947eb69d4d49d9"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpNewReno_ns3.log",
+      "bytes": 1740,
+      "sha256": "8b1fafe084b2d52dc3acdc57714281f680580f778011400be80403871a04fab9"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpSwift.flowmonitor",
+      "bytes": 8177,
+      "sha256": "8bdd9d78ce9ef59be1d0382a6b0f6f031eff277fc331a8d90f2f0380233a2886"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "fe27350a75b81aa273d355d623f2634cce084e790539bb4e4fdc6d7b2a5c864c"
+    },
+    {
+      "path": "comparison-udp/leaf_spine_50g_TcpSwift_ns3.log",
+      "bytes": 1740,
+      "sha256": "6996119e7d7ebea51c2a90b2d7634b9290b2e4a79e3ba4c1775f2340c6ed4609"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpBbr.flowmonitor",
+      "bytes": 7951,
+      "sha256": "8bd117fe796e032faa8735e02c3c3757e0b05248b6f9db9957a3f1576b33bc39"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpBbr_ns3.log",
+      "bytes": 1661,
+      "sha256": "6cd4e7bf3a34247e94985cc95de1ec5d618b97edf2b7b3f4d17bb2461321133c"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpCubic.flowmonitor",
+      "bytes": 7952,
+      "sha256": "6779c7116b4f2aa52e2c31cd43298918e1645d3b48762377afca0a20988ac4d5"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpCubic_ns3.log",
+      "bytes": 1665,
+      "sha256": "72bba09821e3ae25cd687968c34dc0d5052f4f4788d4ca3da5eab2af465c3981"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpNewReno.flowmonitor",
+      "bytes": 7952,
+      "sha256": "dc2839a7df6f0f1946b197f3b59b16381847820f2afb009737836d377104c940"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpNewReno_ns3.log",
+      "bytes": 1667,
+      "sha256": "522945ed69995fd3ab040b5bc80626af5c14bdd8f0803f9ad451950d4d41323c"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpSwift.flowmonitor",
+      "bytes": 7953,
+      "sha256": "c92c1350459f4cda0e751bd13f6537d1cc718abeb529b385bd16b9d54230d120"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpSwift_agent.log",
+      "bytes": 19,
+      "sha256": "8fd2c3d42ee2fddf55c648e3e64c8c6770b30d3b961e1e99ff3eecc878d5ff97"
+    },
+    {
+      "path": "comparison-udp/lte_good_TcpSwift_ns3.log",
+      "bytes": 1666,
+      "sha256": "477622d6d768f0129c939d83688475f86fcd8b667d8534f472989e43d6dd6d64"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpBbr.flowmonitor",
+      "bytes": 7890,
+      "sha256": "2845963f6f8bc9f0fec37ba7e881463e9b7b99f1f2de2347a5c4552550ee7e80"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpBbr_ns3.log",
+      "bytes": 1647,
+      "sha256": "f69498c2ce59aac2ae00fa002c8042b8183004d099c4aa41762083808eda4e8d"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpCubic.flowmonitor",
+      "bytes": 7895,
+      "sha256": "4afdd22404b89fd23378d3b294a04808dc0749e395006c2743f33504e220ac64"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpCubic_ns3.log",
+      "bytes": 1650,
+      "sha256": "08534c71f84b0de0e6a6b993034188aecf35dd61aaa475d85561a1760e6c76ef"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpNewReno.flowmonitor",
+      "bytes": 7895,
+      "sha256": "248d529d21534f7eeb7c4885ed524c68c8eec41d664ec13c9de31bdfce73c096"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpNewReno_ns3.log",
+      "bytes": 1651,
+      "sha256": "3ff1e6a169426f2d3ff2bad5d34ed9e783d7b70b9129d21b44ee33c82488f844"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpSwift.flowmonitor",
+      "bytes": 7889,
+      "sha256": "c7fe1a4d51a1a137f7897217457618058ffafed7d8bc18932fe3aee7cece1b10"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpSwift_agent.log",
+      "bytes": 19,
+      "sha256": "ca99267008893bc82f9c729fb8d33b3be03a227b363b4b96a2d0daff11879a5c"
+    },
+    {
+      "path": "comparison-udp/lte_poor_TcpSwift_ns3.log",
+      "bytes": 1650,
+      "sha256": "82e979e3fce1301285066c6a637c7b615ebfbd9e1e4e11c5e0032182c23f4282"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpBbr.flowmonitor",
+      "bytes": 8134,
+      "sha256": "7f123439112bb0567bf856cb4156309a9f0703d12e914c37a98b20ffc9a1c9a9"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpBbr_ns3.log",
+      "bytes": 1722,
+      "sha256": "3e3d1bf148c3e2040581ef095b95b520766a99ea4dd183f6163b0db8e49b417d"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpCubic.flowmonitor",
+      "bytes": 8140,
+      "sha256": "3d847d6e1dc2b287e755bea60221df3c647a716cf23213a4f10da3d3471280bf"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpCubic_ns3.log",
+      "bytes": 1723,
+      "sha256": "f413031da3e0cbc27d5e80bc8bd2b4c705918bcea1a5440e48693310650a5bce"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpNewReno.flowmonitor",
+      "bytes": 8142,
+      "sha256": "fafa8ecc1292e34941c03a349c0cc0898311b0c94a36ac3072eb33e819e37353"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpNewReno_ns3.log",
+      "bytes": 1725,
+      "sha256": "5c8c05876abf5d8e1056af9996a88f4f770a5750204cced2cce1b1a89f9e81dc"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpSwift.flowmonitor",
+      "bytes": 8142,
+      "sha256": "cc16884dc0cadeb37b240932c52a43a0c0f8f574fe0fdd8593f9fbad9d0a95c3"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "40eef8768dfc9aa62aca7deac1655210232c5a3a80658c69373645c9205fd107"
+    },
+    {
+      "path": "comparison-udp/mixed_large_flow_TcpSwift_ns3.log",
+      "bytes": 1724,
+      "sha256": "58c7a79e077edb01e58106b7ed3a134b45a20be0dbff7517c87196a7aef0de15"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpBbr.flowmonitor",
+      "bytes": 8064,
+      "sha256": "a8cb1d5fb5db4314380bc71c23a54f4141b1c7506deda31a9585294f94188b64"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpBbr_ns3.log",
+      "bytes": 1696,
+      "sha256": "3840a88eca0a0cad76c8fdea6c79b74561e6b7206dc2acac842f911cec5ceab5"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpCubic.flowmonitor",
+      "bytes": 8066,
+      "sha256": "efa9b504d88433b96add6402cdfa87b54b17eb72037974eb5cac02e9ba476c24"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpCubic_ns3.log",
+      "bytes": 1698,
+      "sha256": "cc1003c23face1fd622bf9c292098442eae95db8e77a50e36693181c0573162a"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpNewReno.flowmonitor",
+      "bytes": 8065,
+      "sha256": "939c1580ce54856f6de99406b8feae228a0c67e9d567bb08755ccb8518f1625b"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpNewReno_ns3.log",
+      "bytes": 1699,
+      "sha256": "8eda09b74adc374fb54c0327b711af569691acd909d46d42e548a1a686fdca15"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpSwift.flowmonitor",
+      "bytes": 8071,
+      "sha256": "daa600d7040316523eb5f93e896368217c86f7bd3032f3a1019be53173924ad5"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "2fbeecc6ff3e91143a387ff4fb078cb6aa87598cf24a7ce5e888f4937f833015"
+    },
+    {
+      "path": "comparison-udp/mixed_small_flow_TcpSwift_ns3.log",
+      "bytes": 1698,
+      "sha256": "1d15d30aae3c2aba8d0240ff87abbe2e9623917e898b5fe053b7c80aeb5f66e7"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpBbr.flowmonitor",
+      "bytes": 7980,
+      "sha256": "41580f13c4828ba1a90e8b4fc7cbf129ab17a372ad1f769b5d206bcbcfb16159"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpBbr_ns3.log",
+      "bytes": 1673,
+      "sha256": "09e4c85e0915f69576e4392f5949abfd1a7c088dfc606e473a341e51bd4e0a4c"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpCubic.flowmonitor",
+      "bytes": 7984,
+      "sha256": "00d689b247357a0c8054ca533212259821693db0558983c893c92806f741e076"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpCubic_ns3.log",
+      "bytes": 1674,
+      "sha256": "bb6d7091f0b73105b34a6130bbe8843d16c870f9a966ecd1b4b96537214bc66a"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpNewReno.flowmonitor",
+      "bytes": 7982,
+      "sha256": "becd9bbfc25e33662b49c8163ee5accd5fed7d15e4bf633bf4a6eed3c7a945b5"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpNewReno_ns3.log",
+      "bytes": 1677,
+      "sha256": "6feb096ee240c41930e88680c2709496b777b21081ffe7695ebafa3c18516b28"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpSwift.flowmonitor",
+      "bytes": 7984,
+      "sha256": "fc896cfb02e685598ae88c82f95b09cd3d40151f1af164852f36bc42205c26b1"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpSwift_agent.log",
+      "bytes": 21,
+      "sha256": "035d59f3b46fd730af726c0b2af80fa89596915b62069b28292ac497a993199c"
+    },
+    {
+      "path": "comparison-udp/nr_5g_edge_TcpSwift_ns3.log",
+      "bytes": 1675,
+      "sha256": "08be09740ea06da0669439f4d578fcdc24d91a2dbfac91051dd3ee7797c24f04"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpBbr.flowmonitor",
+      "bytes": 8038,
+      "sha256": "a8ce7f438fafdb2346575bf7eca179e01ed053263e8336c9834c74e42024e4a8"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpBbr_ns3.log",
+      "bytes": 1684,
+      "sha256": "15c7e8fb86c159dd933e6171aae348be0201f36356ba5ee4e6c771358e0f7c86"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpCubic.flowmonitor",
+      "bytes": 8035,
+      "sha256": "80e39e3d03b592b2b0e2f7b80ac198426a9cb8ef6ef0880a0bc28ee3004ff161"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpCubic_ns3.log",
+      "bytes": 1687,
+      "sha256": "a5749c4f8c84ee913f967711182134b3bb791513745bd30b122db07fdad10ccb"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpNewReno.flowmonitor",
+      "bytes": 8039,
+      "sha256": "9cd60aa4240c401b817e372b0eeed8e9097e059acbae5ae8b304fa711b3135bd"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpNewReno_ns3.log",
+      "bytes": 1688,
+      "sha256": "efc1e3209f3e936baf0815f0275a014835593d40dd6c6ce1159283ec8bb2615f"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpSwift.flowmonitor",
+      "bytes": 8037,
+      "sha256": "f0fda8f11827244eafce54264f295645b3096d3bd0d2c4a5ca8333ecf46d27d9"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpSwift_agent.log",
+      "bytes": 21,
+      "sha256": "9aa54a4c93694c900e4d4c7b5b3c163c22a83dcc81b07407af474f22c1a7eedb"
+    },
+    {
+      "path": "comparison-udp/nr_5g_embb_TcpSwift_ns3.log",
+      "bytes": 1687,
+      "sha256": "bc20aaae57fea03967ea692c4ba17b7a7124b4daaa6d059c8bc42bd73e2e907d"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpBbr.flowmonitor",
+      "bytes": 8135,
+      "sha256": "ae3415f30d9f73a3661d5e6bd98ebc8d42d535024f4e955e2cc661ae5f289023"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpBbr_ns3.log",
+      "bytes": 1722,
+      "sha256": "9abdef85288e0687b65333c5af9831510f4946d7ec4d02643161c5e9cf61863c"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpCubic.flowmonitor",
+      "bytes": 8136,
+      "sha256": "cb9d3a8b973b43902bfc972ebb6eedf33a5bfccd34d040ad8e9bad41ef2663bd"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpCubic_ns3.log",
+      "bytes": 1724,
+      "sha256": "c2c878f68306e2f86b1d8c22f3993ab2e2a1f8e48e1b4cf97f2a979745ba05fb"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpNewReno.flowmonitor",
+      "bytes": 8139,
+      "sha256": "7ded8c16e5989287d23ef050252686102762a2acf929d00aadb0e3c8b59c63dc"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpNewReno_ns3.log",
+      "bytes": 1726,
+      "sha256": "890e89433aba1ed0fae97cdecd21d7d5bedefcce15fc1e05113f71e64786aea0"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpSwift.flowmonitor",
+      "bytes": 8138,
+      "sha256": "8d0de7d78300d8c5aaa7d135613d2eb5408de932dc86dfeb0fca2bad4efb260a"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "0e6eaba8e9236db19b696e211fd1609a0bbd69c51aa014220f72f475940c7d0b"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_25g_TcpSwift_ns3.log",
+      "bytes": 1723,
+      "sha256": "a4f5ea01d5b6339deb5c33768ef3b8e92ee73400e5aed3cbd35c1a563cb6262b"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpBbr.flowmonitor",
+      "bytes": 8156,
+      "sha256": "c5a65259568f61ac02a8f444ff16a993ffde834ccd30ecd6e525cf85e71b348e"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpBbr_ns3.log",
+      "bytes": 1723,
+      "sha256": "dd1caa2c7c867a9035b00f39e578d9790568819cb1a1de41977e77765561692a"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpCubic.flowmonitor",
+      "bytes": 8157,
+      "sha256": "1740cb61e4c6afbab5ef9d31d77028411d1d2cf84f80f88e72c941e5c6804ea1"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpCubic_ns3.log",
+      "bytes": 1725,
+      "sha256": "b13c058357ccad77eb0f48b78b8db51c7a3943ed55911c8f3cf022316196c11b"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpNewReno.flowmonitor",
+      "bytes": 8160,
+      "sha256": "8d7265da8c1cbbcc4fc139f723dca3c9d07a8433ab4d573d0b417b85e9edaaec"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpNewReno_ns3.log",
+      "bytes": 1726,
+      "sha256": "0ed82044067acb906a3330810348e3d4e0e0a406505784aa16a59c36606103f7"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpSwift.flowmonitor",
+      "bytes": 8159,
+      "sha256": "43507ec4499c7cd238ac500fa285f09a6dad6d8650a3f141e124d93bb0818a1d"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "9945cb0be2f6372c2f9e7d3a73f60ed7362d01ac92e2e1e2e1b194aae123d751"
+    },
+    {
+      "path": "comparison-udp/oversub_2to1_50g_TcpSwift_ns3.log",
+      "bytes": 1725,
+      "sha256": "dc8023c0355082f97efb49cf37472923a00dd911209d60a98cac88bdd9dbedb8"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpBbr.flowmonitor",
+      "bytes": 8070,
+      "sha256": "e7cbc1f1d6580a084ec3239a0d6ee9c080c346c16553e9c8c0ef5acd78c4d9a6"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpBbr_ns3.log",
+      "bytes": 1698,
+      "sha256": "05d9865e950983a777674925be91f879e7fddd19f1f34cc934df43e58520904b"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpCubic.flowmonitor",
+      "bytes": 8072,
+      "sha256": "dcda11946592fc52626e0b610e4b29e10baa9dc0c728f44f1a5146d58aac5849"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpCubic_ns3.log",
+      "bytes": 1700,
+      "sha256": "f6598a94c45aebd1a348f04a54d958a3ea05fd934a781a3f49a772e8c0d53729"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpNewReno.flowmonitor",
+      "bytes": 8073,
+      "sha256": "8278dc99913893658b0f72bb74ee193b639bb9676460c85c0fcf5d3f142b877f"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpNewReno_ns3.log",
+      "bytes": 1701,
+      "sha256": "270c2b0519f2914b71a0a8fd0b538aae303ca58ea983c229d123bf9fbc846a36"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpSwift.flowmonitor",
+      "bytes": 8071,
+      "sha256": "dddfa223cc23789073d50096326e3d1064afdc7bbe1648341402ad5303984e00"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "44853ff3aa968d6ab64f7e44904593c87009a51d82c6dd872ef879344ee17447"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_10g_TcpSwift_ns3.log",
+      "bytes": 1700,
+      "sha256": "f59923fd51aec2a2662f900655a6b0a72c7894492ee408c164090ef975936067"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpBbr.flowmonitor",
+      "bytes": 8116,
+      "sha256": "767ab7fb9005e334973c0692de26526401d6d1ef9527b77b22922ada24f45ed3"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpBbr_ns3.log",
+      "bytes": 1718,
+      "sha256": "f310d86583c2278aefa43042dd973948e96ae6a6fb06b1eef18ad56ea4ea6e8c"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpCubic.flowmonitor",
+      "bytes": 8124,
+      "sha256": "6b489c81d8154576c56d09eae7a7bf723411004167c8050fae0b652c926c2e5a"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpCubic_ns3.log",
+      "bytes": 1721,
+      "sha256": "2d7157dc334b568146b90c5a60744e54dda11988d79bbaaee72650040e6606c4"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpNewReno.flowmonitor",
+      "bytes": 8122,
+      "sha256": "967293ada34f68684525df65490ff4ecf05c9e9b0ff3b2f683ed2407548de211"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpNewReno_ns3.log",
+      "bytes": 1724,
+      "sha256": "997df34646093a543048c6e339ceffb8755c29560b00bb604f525572e24bb4bf"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpSwift.flowmonitor",
+      "bytes": 8121,
+      "sha256": "ead61a765070d662e3e1573056452dda200c1a82084421d7d4c16fd0951fd58a"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "18e498ba7a9e87148bec7092d3e7e014558580655527e2f42c5e6d9ce0d9ef32"
+    },
+    {
+      "path": "comparison-udp/oversub_4to1_40g_TcpSwift_ns3.log",
+      "bytes": 1722,
+      "sha256": "a49ea3fd79892c74225f3e3c3047fbef5cb8cd42d291855855ae203c612355d6"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpBbr.flowmonitor",
+      "bytes": 8139,
+      "sha256": "dcc78543c9b20699b308ce1b5df4f31c412be60e6ca6dc0025d44afab3ec5cf5"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpBbr_ns3.log",
+      "bytes": 1723,
+      "sha256": "3465f273948a180a3acc49454bf476b06b415adaf7528c218bf44444db0bbb6a"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpCubic.flowmonitor",
+      "bytes": 8146,
+      "sha256": "6631c9fa4146ffeaf03036721864ef10c884ed871fb43a7e47e217df6a5349a4"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpCubic_ns3.log",
+      "bytes": 1725,
+      "sha256": "836a8369cee88a0ae0b0168f9c550342cc436960081f1fadd49e0d589e761a5c"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpNewReno.flowmonitor",
+      "bytes": 8147,
+      "sha256": "4eb9f5cd19d30e13cadf714649d4147e2a83972d712e01c955dc4ab6732f077f"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpNewReno_ns3.log",
+      "bytes": 1727,
+      "sha256": "129f02becb1da9f6d81495f8568f3e3d2184b29c1d1ce5cb38e2e541880e484b"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpSwift.flowmonitor",
+      "bytes": 8145,
+      "sha256": "583ebc458ebfa8bd2b8960dc7d2c26fe29a2877a8cf87e37da510883b3a26e3a"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "ed24f60ea2b41ce6106454ec3fbf2ef792d28e1fc2e71c2acada2fb6e8d445e0"
+    },
+    {
+      "path": "comparison-udp/rdma_like_25g_TcpSwift_ns3.log",
+      "bytes": 1724,
+      "sha256": "f8a00a2081bdf04414ba699be0c43ae4a459c9c7c7840b7a61e7b4e12ed54608"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpBbr.flowmonitor",
+      "bytes": 8175,
+      "sha256": "cee8a0ee76fb202f81ca903cac47974ed95aa4306d6b4b681f4648ea221ed44e"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpBbr_ns3.log",
+      "bytes": 1736,
+      "sha256": "42cbdb507c7e063366c6b62e2bb68967335c11c1b8ade4098eb8bbdffad522b5"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpCubic.flowmonitor",
+      "bytes": 8177,
+      "sha256": "86e56b1bba6e4dcdf188ceaf0930931747a97e0da485db640ef0629b2a486140"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpCubic_ns3.log",
+      "bytes": 1739,
+      "sha256": "ed0c2c987ee886c5611e4a4fea85f8c01125bcf9f4d52f19dfeb779dd38d1294"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpNewReno.flowmonitor",
+      "bytes": 8180,
+      "sha256": "9669ca4101c6f457570f1a901585d37301ae081bdeef757bb191d76352474eb5"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpNewReno_ns3.log",
+      "bytes": 1742,
+      "sha256": "29d34263cda4e8a5363447962d4299d7d2aa85299846eb1d5dea604ef5607b52"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpSwift.flowmonitor",
+      "bytes": 8179,
+      "sha256": "0c4f9123a057914d8eb20737247e0ed63d8b13a8f89bb249729b0f4bd31666b3"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "edf566a3311812dd2ecdc2ac268124173d50462cc73f667317b6be5d675d41ad"
+    },
+    {
+      "path": "comparison-udp/rdma_like_50g_TcpSwift_ns3.log",
+      "bytes": 1741,
+      "sha256": "dfc17942d368a4cf6344e802a67f845900ca1bb7cf6436fd58312668703a3de8"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpBbr.flowmonitor",
+      "bytes": 7909,
+      "sha256": "77bcd51669fab84dd9dc288acfbbb3fa51e7f61a5b6eec3e0361a580f5c54bb6"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpBbr_ns3.log",
+      "bytes": 1648,
+      "sha256": "9acedfb95456b9dd79f60bfd78f547d2bc91ae2e5e5068dbeb9e5dc086a2bb08"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpCubic.flowmonitor",
+      "bytes": 7904,
+      "sha256": "f50e4d381650d8767f7e56f4bc0f8628f2578bfb7159fb499080ffad2d601201"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpCubic_ns3.log",
+      "bytes": 1650,
+      "sha256": "ffae5d69f091f3c0a2148859b7ff7cd8ba6ee96f1cb8af6954ed9c83517acac3"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpNewReno.flowmonitor",
+      "bytes": 7906,
+      "sha256": "a84560b415e7d36ed566476ae12904f9493cd6fa50ad05588aedbf3134305cea"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpNewReno_ns3.log",
+      "bytes": 1650,
+      "sha256": "cc7063bd2953e5d37e149afee1bd996d01f54e8797db5c4ee7a765ac3877a38a"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpSwift.flowmonitor",
+      "bytes": 7911,
+      "sha256": "7581fba52e628d73864305b96185a6eb2660f6255b6a5cc9d442d4cf7d63ef27"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "81c3ac0ad9303af199a9e1a06a731228ae5568dfa79fc4052cc21db6204144f7"
+    },
+    {
+      "path": "comparison-udp/satellite_geo_TcpSwift_ns3.log",
+      "bytes": 1650,
+      "sha256": "38d3b752f8a190743da14d751c950e34e9961ee180d182cc2c6907502f9183b6"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpBbr.flowmonitor",
+      "bytes": 8017,
+      "sha256": "5e68039ce023a9a0006e8541409c895a139854cca32ff8026f1b5fb736b008fd"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpBbr_ns3.log",
+      "bytes": 1674,
+      "sha256": "09c75573d15fe76541118f267497ef5f2265d753b7818cb321355bec869bc5e8"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpCubic.flowmonitor",
+      "bytes": 8022,
+      "sha256": "1a4e9c64d84b9bccaefbc9214cca7958d18075c219d3e3329aae82635a68d9ba"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpCubic_ns3.log",
+      "bytes": 1677,
+      "sha256": "95f26ba49e10039554fad4e8133049aac87aaa3f0de0beceb77696d2c493c4df"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpNewReno.flowmonitor",
+      "bytes": 8024,
+      "sha256": "ac216e155170ae8cfb541f85ccc09e0b88ff74ccf1e7ff1fa2dad8582965c6bc"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpNewReno_ns3.log",
+      "bytes": 1679,
+      "sha256": "adbf971ac9ec68e94200032198df547eac3e8088cf221d7305668f73f03bccac"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpSwift.flowmonitor",
+      "bytes": 8022,
+      "sha256": "01dec2dbd960c6210e624ec3e1f84168df868e8c7a6c2f41fd87cfc7880a4feb"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "9b851e3aef7c9d46c726bb0c9f0269162bc96c819d97d48a00b706ae9203e017"
+    },
+    {
+      "path": "comparison-udp/satellite_leo_TcpSwift_ns3.log",
+      "bytes": 1677,
+      "sha256": "c98e767f3545ecd3088932275b54b32e8db875428618616d8f19b73585b91018"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpBbr.flowmonitor",
+      "bytes": 8027,
+      "sha256": "2c1649803db3885c74c9024cf19f273d3dbc4de120ea8460450bdba433995102"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpBbr_ns3.log",
+      "bytes": 1692,
+      "sha256": "db8b7126c2a17332be18e9ceb59cb29b79b5bd28bbb4e528a5c8ded70a76cbab"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpCubic.flowmonitor",
+      "bytes": 8034,
+      "sha256": "d2998d42e5eed7e5e2b4b3d018969e0081ce362ca2eea888a8fb76f29965de77"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpCubic_ns3.log",
+      "bytes": 1694,
+      "sha256": "4eff46f97ba540f347d4595f0da1bf79f26a8ce60ee1151b53ad1b1fcd6d72c9"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpNewReno.flowmonitor",
+      "bytes": 8036,
+      "sha256": "3905d4bfe91ce44c4481caf4bb94bb602e1671056af26f7fe67dfa0f1e9abffa"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpNewReno_ns3.log",
+      "bytes": 1696,
+      "sha256": "b8e44902986c6f46e49501d61881ea5c02bdf91101b1bad93922b5036126d8ab"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpSwift.flowmonitor",
+      "bytes": 8035,
+      "sha256": "7d5b574b57f967e54fed0207b110aec5bdc07eed6f02ff58e5c99eb7759154b4"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "72819bb78c6b9c40090cd55cd8ce4010a1b0b8cc60648fa8525562ae4d0434c2"
+    },
+    {
+      "path": "comparison-udp/symmetric_low_TcpSwift_ns3.log",
+      "bytes": 1694,
+      "sha256": "b3037ab6c0c3604ab7185a41ac01333b5a06389b1591ab400baa102e72c5dc0d"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpBbr.flowmonitor",
+      "bytes": 8081,
+      "sha256": "f1fc319a4778ead5847e45d946cfd12bd1ffc3bebc7fd23b6c38a539f7260e2d"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpBbr_ns3.log",
+      "bytes": 1693,
+      "sha256": "08070f78ab6427e127a5862edb4faf26adbb9006debdcc4fe7c9cae370aa7041"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpCubic.flowmonitor",
+      "bytes": 8082,
+      "sha256": "ee668885161b1bca8271c81f1cf19f0af5d70847ca96796289419b9668045105"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpCubic_ns3.log",
+      "bytes": 1695,
+      "sha256": "5f2a727aba0a36f59b5d17096f8a4a760758af8bcc72e09b417d561ad22ffcea"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpNewReno.flowmonitor",
+      "bytes": 8091,
+      "sha256": "9d4384a13cf94faf5811404e237ddf9b404f8e5cc2f51097185e6c7db5dd271a"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpNewReno_ns3.log",
+      "bytes": 1695,
+      "sha256": "9a65c7218f162bf40475a481f0f931179a29e0d778fc605552546db5ab53b71b"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpSwift.flowmonitor",
+      "bytes": 8082,
+      "sha256": "6f6b44ea62baf9297e064c4a16326a4cf30d8c6ef10c6fe0b94cb9dac22ec1ed"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpSwift_agent.log",
+      "bytes": 23,
+      "sha256": "681edfc442187996d104847407c9f414709f2a803cd4ef63da510aa9025e7b8b"
+    },
+    {
+      "path": "comparison-udp/wan_longhaul_TcpSwift_ns3.log",
+      "bytes": 1695,
+      "sha256": "2754b24b5b3dcd80fd0d1dcfb64ccbd7234d8e83cd4129f377f638b7d5200fdb"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpBbr.flowmonitor",
+      "bytes": 8061,
+      "sha256": "13355237440f69b92bddd39d5aa362e9112b6f483866044e21408ec79d6247c2"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpBbr_ns3.log",
+      "bytes": 1693,
+      "sha256": "4c1053e7e8ca8bbcb81ed51df01009d2a3f88ff05f2c83687136045a0de76a1c"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpCubic.flowmonitor",
+      "bytes": 8064,
+      "sha256": "e92552f09b28e049297cf297142e0f9873df1266622bf629f3e58d5ba52ab209"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpCubic_ns3.log",
+      "bytes": 1695,
+      "sha256": "58afa7ca085a108fc5b7fed02e5c94e5163e8697c3bc9f21161c6c707a7d4253"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpNewReno.flowmonitor",
+      "bytes": 8066,
+      "sha256": "8810ac075ca51502585a35014149f8e5e25e94906aa2babd544640a153c0a380"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpNewReno_ns3.log",
+      "bytes": 1697,
+      "sha256": "7dbb40f19149aa44a610fbc050a24a3f6b127e08c8d21468c1c0528cb4cb14e9"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpSwift.flowmonitor",
+      "bytes": 8061,
+      "sha256": "213a458e84065e54d1d3f9cbde4803b0855c0844beecd864576aca37f694fe33"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpSwift_agent.log",
+      "bytes": 20,
+      "sha256": "5c801bd5ac83f1ed4b9376e448db2e213ad1821ab434ea8ff2f1d32522ddd31b"
+    },
+    {
+      "path": "comparison-udp/wan_metro_TcpSwift_ns3.log",
+      "bytes": 1695,
+      "sha256": "5a89633616d1c2bff208aedcfee26baed0b680866fac4c85e3f0c852dc5bf465"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpBbr.flowmonitor",
+      "bytes": 8030,
+      "sha256": "47d904b2829a3ff826d64f6c8397108a3e0fc69954970b168f149bb94da52c38"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpBbr_ns3.log",
+      "bytes": 1684,
+      "sha256": "d22f5dbe639c2da2a4a399c61a49aa8d035887ee2551e793e40bda579f6e7e61"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpCubic.flowmonitor",
+      "bytes": 8035,
+      "sha256": "22dc17a4cd4033fe0e721fdea07f529414c50a870c900e323ee43d582a047a25"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpCubic_ns3.log",
+      "bytes": 1686,
+      "sha256": "13b804f8d24b5cd7e06b7fc41ab14d72052033d3b9f4b62e278012f7520a8044"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpNewReno.flowmonitor",
+      "bytes": 8034,
+      "sha256": "95d0fa9c5a76b7607ff435d4be15cd4b73310ea22af26ef0389ece8de15bbf7b"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpNewReno_ns3.log",
+      "bytes": 1688,
+      "sha256": "d4670b109e053394b0bb4d199cfe0665882bcb9ee7c5942f14098e2d5dc16619"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpSwift.flowmonitor",
+      "bytes": 8036,
+      "sha256": "72fb81e1230c4a027a721291721072a9c66e60d9983b7b3583fc47dc22b4246d"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "863cb8dfd34f72ddaf6fecfffe17aa60f898b3b8d1eb500e6b1ef2fe08f5c2c1"
+    },
+    {
+      "path": "comparison-udp/wifi_ac_TcpSwift_ns3.log",
+      "bytes": 1686,
+      "sha256": "39a04841762e7f6aed56270500bccc77dbd77c4cfedecf9fdd1076247095f1bb"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpBbr.flowmonitor",
+      "bytes": 8046,
+      "sha256": "b845e909eacd9a2464d95aded447977f84941c658882ec97c92dfe8e3794518a"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpBbr_ns3.log",
+      "bytes": 1689,
+      "sha256": "8adf23b195ccd0acfa5b558fd7352333f418fe7719dab74cbe0919d6b9800eb2"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpCubic.flowmonitor",
+      "bytes": 8054,
+      "sha256": "597dabd67eb256ff98275f851f8b8dad84f1248c19300b40c2b273e76c3e8204"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpCubic_ns3.log",
+      "bytes": 1691,
+      "sha256": "ed3d611394f53f441b7bc4844c0375a4ac7de9ece150842af74e1af046d4c25e"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpNewReno.flowmonitor",
+      "bytes": 8060,
+      "sha256": "a9ba9ace428d13e055fa921f350d8da819a6f172701efbbc8dfa86c45fda8957"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpNewReno_ns3.log",
+      "bytes": 1695,
+      "sha256": "4925aea54d1049b386e1018b886bbde57a9381c7e237b362e19b468d914284a0"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpSwift.flowmonitor",
+      "bytes": 8056,
+      "sha256": "b2baa715770281754f4c55d22f4f06f258238956b70b585f0e750a60d7edbeb8"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "24078f3150af6b574cae1701e0c04eb3c6fccb2ac4250c914400899de7c51388"
+    },
+    {
+      "path": "comparison-udp/wifi_ax_TcpSwift_ns3.log",
+      "bytes": 1693,
+      "sha256": "b65d25ef6c4651bbe851fa801d0b21ef05d120508d8d99d892fcb6b85fb167a1"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpBbr.flowmonitor",
+      "bytes": 7880,
+      "sha256": "c3b4aaa6253c63644eee981934ff5cd9e655552640c2228db6407cefc0d4c946"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpBbr_ns3.log",
+      "bytes": 1648,
+      "sha256": "fcd73a97c8f2e9493efe078b4262b264af2d8fa7514f3ed0fb9837cea34595ce"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpCubic.flowmonitor",
+      "bytes": 7887,
+      "sha256": "32f10937274df49e6f60deda38f115df716d0f71d11508cc5a1cfd4849833ffd"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpCubic_ns3.log",
+      "bytes": 1651,
+      "sha256": "316da14e341c23c8929f74a394475147657fe08d4feed4147b2e5cb6992a8697"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpNewReno.flowmonitor",
+      "bytes": 7890,
+      "sha256": "e56e6658b3053c2f74bccb0d31cdba65b9da33e6146d7fbddf8a9a46930c18de"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpNewReno_ns3.log",
+      "bytes": 1653,
+      "sha256": "38480f6f9b7da846926adab5a12526050058a264f976f49f971666aca96b6725"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpSwift.flowmonitor",
+      "bytes": 7888,
+      "sha256": "78b29d5cee099efb5c126fb9217dbcda22c2825f4f4411620654e43c8ee3bb7b"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpSwift_agent.log",
+      "bytes": 22,
+      "sha256": "e5f907066c9036ae0dafd1423c6b3442509087961a93645eb2e29455a1051d5c"
+    },
+    {
+      "path": "comparison-udp/wifi_legacy_TcpSwift_ns3.log",
+      "bytes": 1651,
+      "sha256": "826d24957ee8646709a590f85a56b2110e040db7b5c7904719141636e99f857e"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpBbr.flowmonitor",
+      "bytes": 7944,
+      "sha256": "0c51f0c002e521ab9a95a4add2e496d92531ebfa4cb4d0a382c57bd7aac388e6"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpBbr_ns3.log",
+      "bytes": 1663,
+      "sha256": "39a7905905e246f301ef7f48011591c219189eb2585c06f8aa4d45f6b4b4197e"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpCubic.flowmonitor",
+      "bytes": 7950,
+      "sha256": "764a1500472a3c7150c0becc6fda9aa3e3a3ee95ff0c6aa5adb5b3afb584d24d"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpCubic_ns3.log",
+      "bytes": 1665,
+      "sha256": "006a1a088cb05c128c3072b7b230a2dc96e18740c966cf920c9b2e29ab7de882"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpNewReno.flowmonitor",
+      "bytes": 7949,
+      "sha256": "ce186273a114851d286ea02b057f58d636d4a8de1fbaf3456b0ff119ce603263"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpNewReno_ns3.log",
+      "bytes": 1665,
+      "sha256": "242630200f70efce83d0a89855bb148eca8fd1ad052d672752e5888e4904e7e0"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpSwift.flowmonitor",
+      "bytes": 7948,
+      "sha256": "e98d6f158f39dce0cca62a9ffbb7f5b3c99a9878c450fddaf4615c6dec62c56b"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpSwift_agent.log",
+      "bytes": 17,
+      "sha256": "eeb8456e0cde70ed40355f765794e90782d76349e5b9374daa034c782f9a7b9e"
+    },
+    {
+      "path": "comparison-udp/wifi_n_TcpSwift_ns3.log",
+      "bytes": 1666,
+      "sha256": "2170fd8ee9025122e6f673ade0f6df54a4a1ad0490ae6805300ed34d579aa7de"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpBbr.flowmonitor",
+      "bytes": 6852,
+      "sha256": "a27505dd447f3abf09017544a2eea9bfb94901209eb5e38f22592b12b3190e2d"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpBbr_ns3.log",
+      "bytes": 1493,
+      "sha256": "f8feda1fb415e9aa4a20a17593111de489041f0d138d0b4a81873af0cf74548b"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpCubic.flowmonitor",
+      "bytes": 6851,
+      "sha256": "a433085be37624945133373239c5009f57f40a80870b45cecaff40ef57ba1a49"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpCubic_ns3.log",
+      "bytes": 1495,
+      "sha256": "a7bc6d65996cc800aa14dab45888682bac579da3010d37aa4acc5f98abef269a"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpNewReno.flowmonitor",
+      "bytes": 6852,
+      "sha256": "4ca2d794689b9a2d778e0ba46c3ca0082b5f7504d7995f777158cd7a91faac97"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpNewReno_ns3.log",
+      "bytes": 1496,
+      "sha256": "136468ca0fd178c6bd8caeb06e7bd2a67d319303ae2387ab7ca4459923b62eee"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpSwift.flowmonitor",
+      "bytes": 6855,
+      "sha256": "a230c7d2665741bcfb349239b2ca7adf1ec360d9270654ee3dbb98b5774348b3"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpSwift_agent.log",
+      "bytes": 26,
+      "sha256": "3148dfc49dcdae1755fcfbda741fa55b529b05593add608d52b30c4881465404"
+    },
+    {
+      "path": "comparison/asymmetric_high_TcpSwift_ns3.log",
+      "bytes": 1495,
+      "sha256": "80d3134d232fabcc729e977667e6e99aaf30aabaa01194497d2de411e53fee08"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpBbr.flowmonitor",
+      "bytes": 6834,
+      "sha256": "2a827eb794580b066fb68929a34d0677637642983038e356422bf47f5dce6ee3"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpBbr_ns3.log",
+      "bytes": 1495,
+      "sha256": "7b8d1d3a38ab448c50b567127f0f502d24f573226a3c8c6638ce58a34667c5bd"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpCubic.flowmonitor",
+      "bytes": 6837,
+      "sha256": "15625de6732e7bd2d1d01f259bfef250f67773e9864d639534874d6610857e78"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpCubic_ns3.log",
+      "bytes": 1497,
+      "sha256": "f2c127bc68c2fdd582f08ae3dca34dbb4c58b94659b7dfc5e46717b32c093924"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpNewReno.flowmonitor",
+      "bytes": 6837,
+      "sha256": "27b5c9348db596c9ccc27075555defee7aa73f1ab34f3ca76360349d930c366f"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpNewReno_ns3.log",
+      "bytes": 1499,
+      "sha256": "ad21da2fa0fa7936e02c908b33a337cbcd9d26ebd16e7700b7f5bf8909786cb5"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpSwift.flowmonitor",
+      "bytes": 6835,
+      "sha256": "9866ffb6dec39c5b2ecf9f7fc5dd751182eb79676379d2fd1fdc0bc964d3e06d"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpSwift_agent.log",
+      "bytes": 26,
+      "sha256": "b5fb4e6b8a4edf0b211d0f4cb1c8ccf3c90ef58ad7c01ad59333bfc9b910f97f"
+    },
+    {
+      "path": "comparison/congested_heavy_TcpSwift_ns3.log",
+      "bytes": 1497,
+      "sha256": "42872190d2ac9bca01d6e8df7b7fa291339146ae75debfaa37c55197832732a3"
+    },
+    {
+      "path": "comparison/congested_light_TcpBbr.flowmonitor",
+      "bytes": 6914,
+      "sha256": "74cde0e8382359833becd5140edcc789f121628d3872ef404020556b99a188cb"
+    },
+    {
+      "path": "comparison/congested_light_TcpBbr_ns3.log",
+      "bytes": 1516,
+      "sha256": "685b9321752da7ab85205526d1d96cbf82596822a04d4f881c16e8922cf83130"
+    },
+    {
+      "path": "comparison/congested_light_TcpCubic.flowmonitor",
+      "bytes": 6916,
+      "sha256": "c97968ed7e8f3adc091e192ebea42cccb413367086c4fc470c59169f9f96807d"
+    },
+    {
+      "path": "comparison/congested_light_TcpCubic_ns3.log",
+      "bytes": 1518,
+      "sha256": "8a3acf3ff78e6705ee5c6b05dc690c9b1e495d5ad82af3d4cbeac47b0f0f5047"
+    },
+    {
+      "path": "comparison/congested_light_TcpNewReno.flowmonitor",
+      "bytes": 6917,
+      "sha256": "2b46073041832adbd44c4af0e5e352796ac37f13964c1edf20db74d5f06df6be"
+    },
+    {
+      "path": "comparison/congested_light_TcpNewReno_ns3.log",
+      "bytes": 1519,
+      "sha256": "1e97dbcca57f615fc8a8ee0f77f709cc40ef0d991c6d5a1ea15031cc9071c849"
+    },
+    {
+      "path": "comparison/congested_light_TcpSwift.flowmonitor",
+      "bytes": 6912,
+      "sha256": "739652e21c77b0bc86182e85128b808a88ec34eb5c68a02906d5cfb5ed9efbad"
+    },
+    {
+      "path": "comparison/congested_light_TcpSwift_agent.log",
+      "bytes": 26,
+      "sha256": "10bebce06091658e0d5b51144c2466b1ffa667806838e0b82acce6d68793cf09"
+    },
+    {
+      "path": "comparison/congested_light_TcpSwift_ns3.log",
+      "bytes": 1517,
+      "sha256": "96cb77ec8088d02ac7d56e5877a238f307c64ab555f2dad4c08ff644ae94c41f"
+    },
+    {
+      "path": "comparison/congested_medium_TcpBbr.flowmonitor",
+      "bytes": 6862,
+      "sha256": "5241bbf4bf906c0475268682ef0b476ae63f96d7529310163cadc97eb6ada71a"
+    },
+    {
+      "path": "comparison/congested_medium_TcpBbr_ns3.log",
+      "bytes": 1495,
+      "sha256": "3bf1b48f0cc40560cfce1dbfb755d02a5d5a38a1c5488e240432da79b42531d1"
+    },
+    {
+      "path": "comparison/congested_medium_TcpCubic.flowmonitor",
+      "bytes": 6862,
+      "sha256": "17d9b5e7c208a9fee33398f1e217d62f8b4d82aeaa196cc5155f2e9bef90a9af"
+    },
+    {
+      "path": "comparison/congested_medium_TcpCubic_ns3.log",
+      "bytes": 1498,
+      "sha256": "023be1fa5f6daec3f0ef26a0e836d800e0fa52a15fac599716cc1a68490184d6"
+    },
+    {
+      "path": "comparison/congested_medium_TcpNewReno.flowmonitor",
+      "bytes": 6858,
+      "sha256": "d7306da06609bc6437dbe85ed30c11e10e33ee450dbf7deb3cc719c20d8f7493"
+    },
+    {
+      "path": "comparison/congested_medium_TcpNewReno_ns3.log",
+      "bytes": 1498,
+      "sha256": "00264cf15cd6f4c07fe042ded7d035c0b13fcea16c1d4d7b33c2eebfbbca74bc"
+    },
+    {
+      "path": "comparison/congested_medium_TcpSwift.flowmonitor",
+      "bytes": 6872,
+      "sha256": "cbcc6d3c09373dd68332c91b54e7005b5839e9a7bdb964dfa52d31850108a78d"
+    },
+    {
+      "path": "comparison/congested_medium_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "f457306a4ed3c72044ee71407c303c45ca66f9b97471e922b7b822bdfb4ee33c"
+    },
+    {
+      "path": "comparison/congested_medium_TcpSwift_ns3.log",
+      "bytes": 1502,
+      "sha256": "59011bdebf0de34a564cecc01f5eab02e054969294e42ffa45d61a363cc2fcce"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpBbr.flowmonitor",
+      "bytes": 6887,
+      "sha256": "aa25b9f56ecb0baafd28092151425273b9e874b1daef68ba3c857a3f01afa9f6"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpBbr_ns3.log",
+      "bytes": 1493,
+      "sha256": "0723dbcc65c785b35cab4d01eb5d8ae9eb2874ca404c220e30bc3ba3684e6221"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpCubic.flowmonitor",
+      "bytes": 6888,
+      "sha256": "ad380b8d6e1bd13b7b1307039e9ffeaaf21b44f57e8facad5a4fa0438e68dc48"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpCubic_ns3.log",
+      "bytes": 1495,
+      "sha256": "9d0ede7ec89ebd106ad732fb60160c26790124a73fa6e2b0a17dff8022c00e91"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpNewReno.flowmonitor",
+      "bytes": 6891,
+      "sha256": "2b3135fef35ccf7123f5dbe42ede7bced6eb977070f4ef75344c42451f5fdce6"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpNewReno_ns3.log",
+      "bytes": 1497,
+      "sha256": "33786c1d39abda9fe08c395a149a69af4e5d8315e79c0a6effe8901469ff5fc5"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpSwift.flowmonitor",
+      "bytes": 6890,
+      "sha256": "e159b6129a65618822989311acc66c7f0e94278d2df2565fbe18cd0eafc04010"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpSwift_agent.log",
+      "bytes": 23,
+      "sha256": "5527c28155d813ac0acd521633771c40589895bd1c5cc8b9c717b7eb07d3f7d3"
+    },
+    {
+      "path": "comparison/cross_dc_wan_TcpSwift_ns3.log",
+      "bytes": 1495,
+      "sha256": "9bedea38c9d294178d3f74581565e8b545d602a48ef277f542465631d8544576"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpBbr.flowmonitor",
+      "bytes": 6936,
+      "sha256": "b578094ca94fb79928ddec1a5e3ec0d1b753e5b943944f9007873d497eb441b1"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpBbr_ns3.log",
+      "bytes": 1516,
+      "sha256": "54dea9b67bf1c1d059d795fc900677cb5422d6bdf3713ec3d33b6eced4444abb"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpCubic.flowmonitor",
+      "bytes": 6942,
+      "sha256": "a0980cd820f1b0a7409f4691892677aa9c5a6af74923c14fc58e1efe1320da5a"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpCubic_ns3.log",
+      "bytes": 1518,
+      "sha256": "2d05c6cac096a30d023ced3fdd5b72f8104b0ffd210b354610db2945df3e3014"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpNewReno.flowmonitor",
+      "bytes": 6941,
+      "sha256": "0b42de5fed57a65e565dc5251f9f032f9f28d47d847cde185573b87b86e77987"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpNewReno_ns3.log",
+      "bytes": 1521,
+      "sha256": "22ba859179799a73f9cc99207b1e60d6968d84003a7ae0356f151e3833803343"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpSwift.flowmonitor",
+      "bytes": 6941,
+      "sha256": "d11193375b4d0ff5f0568ba979fd2507aa872cb3127a047a8e799011657d0f39"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "3aba7cc7e9a6fddd26e1702656bf920dac044d049d6461ca785203ae38fe09d3"
+    },
+    {
+      "path": "comparison/cross_pod_10g_TcpSwift_ns3.log",
+      "bytes": 1519,
+      "sha256": "94935a762f7e9d593fd49594efaedcab78c659b168aa9928e2c02889607f9df8"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpBbr.flowmonitor",
+      "bytes": 6967,
+      "sha256": "de4cbfbbca33407a8524dda6beaf1f0b244013512b783f4c8e5c4a9b95b2eee5"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpBbr_ns3.log",
+      "bytes": 1525,
+      "sha256": "2b24909b6afd6e0799fa406b67bce372e15bff2d917464c5d62cb194337e9a3f"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpCubic.flowmonitor",
+      "bytes": 6965,
+      "sha256": "bceb1ae0c1e0cbbc9253bee61192b84c9ce59044d86436e92204a23587765290"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpCubic_ns3.log",
+      "bytes": 1528,
+      "sha256": "d2846826dd14b9ee2e5bf8d2c0fe1cff106cb9d1d5883e75296a563535015139"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpNewReno.flowmonitor",
+      "bytes": 6953,
+      "sha256": "06116c5208519837e40092ce595c38f5c45abbe4771b16a0613d520f5c33d72b"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpNewReno_ns3.log",
+      "bytes": 1524,
+      "sha256": "03d477a0e59d5aebe23dc62b7c5777b4e423606ec73147e46c4f078b603f6fb8"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpSwift.flowmonitor",
+      "bytes": 6977,
+      "sha256": "e183ebc8986f752f81e1aae85c7ed424c11ba4163012b8ca63f8465697d4f57f"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "8b0fd80880b8bde65b4112d165a8046c33cb18104d22ca630b7e57f7f3e9a0ef"
+    },
+    {
+      "path": "comparison/cross_pod_20g_TcpSwift_ns3.log",
+      "bytes": 1532,
+      "sha256": "892e544a6ce2c076dd77ec0b4f1b0ca74e69c77dc13c4f5abdab1d38cf2bcb19"
+    },
+    {
+      "path": "comparison/dc_100g_TcpBbr.flowmonitor",
+      "bytes": 6979,
+      "sha256": "2117f9eb8ba222b804cb9b8e2a759fcff7f23373c68ecaa87eef4a828edc40c1"
+    },
+    {
+      "path": "comparison/dc_100g_TcpBbr_ns3.log",
+      "bytes": 1542,
+      "sha256": "a76b39b86435299409d384998edaa364cac936d82898c4a7b9acc6631b22d32c"
+    },
+    {
+      "path": "comparison/dc_100g_TcpCubic.flowmonitor",
+      "bytes": 6975,
+      "sha256": "d9a58066e86797caa915b297cf5d560350d61e3bc6c871127615444e5343beb7"
+    },
+    {
+      "path": "comparison/dc_100g_TcpCubic_ns3.log",
+      "bytes": 1544,
+      "sha256": "e2b697f025fde9f6925bf66819bb8357cd0982d2c348a90fd26d2afee5e4df02"
+    },
+    {
+      "path": "comparison/dc_100g_TcpNewReno.flowmonitor",
+      "bytes": 6980,
+      "sha256": "e01117356c8907ea56467859f77c3b53428a1f3e6402499fcca68fdb9dae757d"
+    },
+    {
+      "path": "comparison/dc_100g_TcpNewReno_ns3.log",
+      "bytes": 1545,
+      "sha256": "feb2b331b5bfdc8fc35c30579924f9ade4c30fce74cc27bde2b7094cc57e82fe"
+    },
+    {
+      "path": "comparison/dc_100g_TcpSwift.flowmonitor",
+      "bytes": 6989,
+      "sha256": "5307a5337324820ad1aa9861a711e58bccf0c871ee5942b5573c9deb3763a466"
+    },
+    {
+      "path": "comparison/dc_100g_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "c40241817e3b3a5a8f0afce73551f0a5a0b0f34f39237e1d132c87533e97a22e"
+    },
+    {
+      "path": "comparison/dc_100g_TcpSwift_ns3.log",
+      "bytes": 1544,
+      "sha256": "6c05882d17778fd61fa2036b855c49f7b31663fec462766ff0730e156bd941ac"
+    },
+    {
+      "path": "comparison/dc_100m_TcpBbr.flowmonitor",
+      "bytes": 6759,
+      "sha256": "9c3597b717b728f1fe12a0cd318340a60f8d6376fdb7cb4168a0fede982c8604"
+    },
+    {
+      "path": "comparison/dc_100m_TcpBbr_ns3.log",
+      "bytes": 1474,
+      "sha256": "a25fde3b63b0c641afc8af49c0d486f8e574b5e3ec21999d0de733e7af24c22b"
+    },
+    {
+      "path": "comparison/dc_100m_TcpCubic.flowmonitor",
+      "bytes": 6760,
+      "sha256": "845974913a932d2401a21103b6b09b8217ebb6347a3de13ef2d673352f66a25c"
+    },
+    {
+      "path": "comparison/dc_100m_TcpCubic_ns3.log",
+      "bytes": 1475,
+      "sha256": "265f00330eb94c937ca4a3b3c020eb137fa53a2cf9fcb5dfd95a0c3013678d9a"
+    },
+    {
+      "path": "comparison/dc_100m_TcpNewReno.flowmonitor",
+      "bytes": 6764,
+      "sha256": "f17dbe2fca3a26f14b549b309837c5c794d18fc499ddf3e37fe2c6e69a7c92a2"
+    },
+    {
+      "path": "comparison/dc_100m_TcpNewReno_ns3.log",
+      "bytes": 1477,
+      "sha256": "6277eb06bd8bb3939290c42e337d5dd8ab0cc2f28a1d6b49172e4dc99b2801cb"
+    },
+    {
+      "path": "comparison/dc_100m_TcpSwift.flowmonitor",
+      "bytes": 6763,
+      "sha256": "d714f704a27b52cffa3f91c78dbd1c50b6739b8f1984f1e37fcc188573e2f0fd"
+    },
+    {
+      "path": "comparison/dc_100m_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "ab5192455704e79a92a54f76524961ed3c23b9afa86295f3e8d476dad88e29df"
+    },
+    {
+      "path": "comparison/dc_100m_TcpSwift_ns3.log",
+      "bytes": 1475,
+      "sha256": "211d7db257f7e3044fb22b85f8040a577e957f8299aefe6b85cf31164cdcb29c"
+    },
+    {
+      "path": "comparison/dc_500m_TcpBbr.flowmonitor",
+      "bytes": 6823,
+      "sha256": "4cecda918205a8efc76f164b73b00d73cd161e3b7a7813289f06edb567f3f3ee"
+    },
+    {
+      "path": "comparison/dc_500m_TcpBbr_ns3.log",
+      "bytes": 1494,
+      "sha256": "b0dbaeeb06f82ffc5c5952d959d60ec84063a2f37c418b94bbdc0a50623757fa"
+    },
+    {
+      "path": "comparison/dc_500m_TcpCubic.flowmonitor",
+      "bytes": 6824,
+      "sha256": "a733512d327636cd3ec2ae362f66a3456b4b57b46b29eb3771d827f38e396aea"
+    },
+    {
+      "path": "comparison/dc_500m_TcpCubic_ns3.log",
+      "bytes": 1495,
+      "sha256": "c7d8790205335e9e8afa0cce5ee242681b8d9c8ed1aaf7a593e2ce9b3067ec77"
+    },
+    {
+      "path": "comparison/dc_500m_TcpNewReno.flowmonitor",
+      "bytes": 6830,
+      "sha256": "e9aeb60ab88448d7ed59d8d2b6176c2acf1db7c0c2ae59db1a79796017f3df22"
+    },
+    {
+      "path": "comparison/dc_500m_TcpNewReno_ns3.log",
+      "bytes": 1498,
+      "sha256": "cba10372699f201e6c82835401d36f5d059cdd33082d854daff28d36e327e455"
+    },
+    {
+      "path": "comparison/dc_500m_TcpSwift.flowmonitor",
+      "bytes": 6826,
+      "sha256": "1d19bc3b2d5de211e03b596cb67eba34e0c1b140339dbbee8f74eab4aa27bc94"
+    },
+    {
+      "path": "comparison/dc_500m_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "f4264f3ee2c93137d968a8f4cc037dddb0997eff1e56d6b05c14cffd2f7d8c36"
+    },
+    {
+      "path": "comparison/dc_500m_TcpSwift_ns3.log",
+      "bytes": 1495,
+      "sha256": "eeeb4b66def08bfc6c3e8aa3ce0fa47683199de0225165e592d36dee7c4da6a5"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpBbr.flowmonitor",
+      "bytes": 6847,
+      "sha256": "bc96a0bb3c931077fc79c12d1786b5667dcf2c82c41fb3cb87c8470e67c35851"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpBbr_ns3.log",
+      "bytes": 1492,
+      "sha256": "93bb035b205ae22537b48152c819ae6740f16ebd73661cf4bcbf772a9bfd7e22"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpCubic.flowmonitor",
+      "bytes": 6848,
+      "sha256": "c058ed381fe4525b9fe4ed0d10f3ed6f81b60e5510539b935472d303562b8636"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpCubic_ns3.log",
+      "bytes": 1495,
+      "sha256": "77afbafb68fd9289df728f9036bf2612fd40b2b4c91124bdb6bcad76f231792c"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpNewReno.flowmonitor",
+      "bytes": 6850,
+      "sha256": "dd605617ee3d69d203cb3e1fead42e2bd7134e7176bce1aecd743de4f32dcf49"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpNewReno_ns3.log",
+      "bytes": 1496,
+      "sha256": "ca1e2a8d700046f3d2a26003852c543eccf2f1fc89fcb57f4f22d34f1163d4ae"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpSwift.flowmonitor",
+      "bytes": 6850,
+      "sha256": "c8e8af53b7a02971117e4861a26f9cbceb60ebe2eaa66c0aa302340363c13aeb"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "965bf8a374badae7b27761a3f2ec0daf870526e75079d540587a2d4e2bfdd453"
+    },
+    {
+      "path": "comparison/dc_oversub_10to1_TcpSwift_ns3.log",
+      "bytes": 1493,
+      "sha256": "2a9ad0a92a998863fa46e2c2f323a5f783d7b52900b3cd5d6eb9e2fe13447b11"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpBbr.flowmonitor",
+      "bytes": 6920,
+      "sha256": "f6f1039fb347f6bb7afa9be525483c895594f872fd29e80023f4830ef6c6ae37"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpBbr_ns3.log",
+      "bytes": 1517,
+      "sha256": "b184d2d12109877fa9c0697d17b6c01ffd842117b1f5193d9f37d51577c15025"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpCubic.flowmonitor",
+      "bytes": 6923,
+      "sha256": "5c87f7d0c15c8995189a8fbf36af0f335153597bcc2d1a0105f51331280436b0"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpCubic_ns3.log",
+      "bytes": 1518,
+      "sha256": "bdef210ee55f2c3d7bb28b2e0e3703cb60c32f4497ac94555d4ead5dcd459e61"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpNewReno.flowmonitor",
+      "bytes": 6923,
+      "sha256": "c66d7a07969c93f3807fb1d3909be43a31b03513e0f3c1d1274360214b5a9665"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpNewReno_ns3.log",
+      "bytes": 1520,
+      "sha256": "6cc87fa5714057ab9c3ff1f0876384ae1d4a5fe2d720f456baabf8bd901fcbae"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpSwift.flowmonitor",
+      "bytes": 6924,
+      "sha256": "c0eaf8bd9fb773cb62f451270eafc4c09c4f8a26433205be57bf10d109bc0790"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "e382053609553effcc91ed949185cc1493c37ff7e2a46e3c3a4503903ba39857"
+    },
+    {
+      "path": "comparison/intra_rack_10g_TcpSwift_ns3.log",
+      "bytes": 1519,
+      "sha256": "d164d92086f5ca98282e591e2df7068e9c1d45a64bfce1adce710d7962afb560"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpBbr.flowmonitor",
+      "bytes": 6957,
+      "sha256": "d42c1b3be10294952f47b1b57b8ab73acf1a803ce446d069933edc6f68c73856"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpBbr_ns3.log",
+      "bytes": 1530,
+      "sha256": "e73a7182509f97018f6f83513ab8e0e370ae27ae193b4731e2dd09d2494ef4e9"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpCubic.flowmonitor",
+      "bytes": 6960,
+      "sha256": "96526adea68c1b80dc7b5b928be2f7aeb877ddee92e62b703157ace4c8a5dbf8"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpCubic_ns3.log",
+      "bytes": 1532,
+      "sha256": "65dfb6014633169bedaac399309068cb2fad36b592d19eb6950ecdedc233da55"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpNewReno.flowmonitor",
+      "bytes": 6958,
+      "sha256": "b86b5175807efa0892bfe5a0dbbe19dbb780b93a7c8d33ab1ed3d3e805f12de8"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpNewReno_ns3.log",
+      "bytes": 1533,
+      "sha256": "a9c9ea70f0c197611aad04a0df952fde06576af1cc919843dc3f1bd83bb7e941"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpSwift.flowmonitor",
+      "bytes": 6958,
+      "sha256": "b7846a0a7442f0cb8960bdac0ca081d1d5fbe963fc643c4b58f87113eb0ac5b4"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "542f9aa6ee3cdbd104b9e03f52f7481056ce9d9ebb3eff37bc7c965a709381ae"
+    },
+    {
+      "path": "comparison/intra_rack_25g_TcpSwift_ns3.log",
+      "bytes": 1532,
+      "sha256": "ca9d0b47e1345f31d2c47507e97cfe26564390f74f33248bb9fe37aae16b13b1"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpBbr.flowmonitor",
+      "bytes": 6934,
+      "sha256": "9ca2b1a745041a7481fbd6db8f56f0cc006b590ac067b4d1bc35cfffeae91587"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpBbr_ns3.log",
+      "bytes": 1518,
+      "sha256": "3c379e3e2199ee03a3d12094ae74a87b10aa9a5287e3b0ede93950476399ef7b"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpCubic.flowmonitor",
+      "bytes": 6940,
+      "sha256": "4fa55e788bb3a03bb78759493f9a4d2dfb15e3a041a8731eebc76497c878d434"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpCubic_ns3.log",
+      "bytes": 1523,
+      "sha256": "d6e08bc74d41029cb4964d71689ca347d4efffbf3b2e8a6d3766a9ebaf2c7c13"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpNewReno.flowmonitor",
+      "bytes": 6933,
+      "sha256": "48e3f3c042ab40feb66d63a7fbbacce43ec9dbda41113a1cf8d26b99eb022878"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpNewReno_ns3.log",
+      "bytes": 1522,
+      "sha256": "e29e835c40a909a13a7dacaee07c103dc5f48538d69523e5775c784f595fe3e2"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpSwift.flowmonitor",
+      "bytes": 6953,
+      "sha256": "53ed1f0d49ef1bf6967cd25a089ed883ed5cabc51c8d2a2f3184d35dbfe6cfe6"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "8bcf522bdac8a0a0504ebb502b8e74b9d3a21eb4bfd6e0dfa6343a35b734ae2e"
+    },
+    {
+      "path": "comparison/leaf_spine_20g_TcpSwift_ns3.log",
+      "bytes": 1529,
+      "sha256": "66ffd90173e4a6cd633618067901718780d05b59e24f7271ae2e151facb405c9"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpBbr.flowmonitor",
+      "bytes": 6987,
+      "sha256": "ec51fa9f078b78eddd2edfe2e7724f0a909429c4796b2bee372a46e6591c5310"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpBbr_ns3.log",
+      "bytes": 1540,
+      "sha256": "c82e0029af8e6004056d46e10041e5ba385eb20475e50a8115c2a62baa562c25"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpCubic.flowmonitor",
+      "bytes": 6991,
+      "sha256": "4fba34c433743c19249dab46c0de1f49c11ac2dbfd0828d0e9a6d450135ea509"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpCubic_ns3.log",
+      "bytes": 1542,
+      "sha256": "8d6a2ed964953df1badd58efaa198753b8b9640c0936b0d56e7a7cf95b341145"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpNewReno.flowmonitor",
+      "bytes": 6991,
+      "sha256": "ce60ce9371f8264f59b6fedadd9d36d26a401ebec89f8d1346fe85ddf496148b"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpNewReno_ns3.log",
+      "bytes": 1543,
+      "sha256": "c9de44b2c8336622e521747350b003664e08cbd11a20100a7c082360ba685b29"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpSwift.flowmonitor",
+      "bytes": 6990,
+      "sha256": "657356ea8cf61fb5a58760a072984b61b81dbcd21a5ba1dd39716c075654aad2"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpSwift_agent.log",
+      "bytes": 25,
+      "sha256": "fe27350a75b81aa273d355d623f2634cce084e790539bb4e4fdc6d7b2a5c864c"
+    },
+    {
+      "path": "comparison/leaf_spine_50g_TcpSwift_ns3.log",
+      "bytes": 1541,
+      "sha256": "9e2327568419bbcd6c584469b34da199533296461c2cecf646f26668233e9d50"
+    },
+    {
+      "path": "comparison/lte_good_TcpBbr.flowmonitor",
+      "bytes": 6782,
+      "sha256": "f6a4e5dd5f1e2a65f4a2058f6cfce0fa7b7b6b024f6d401f84dcf03dd0e1c926"
+    },
+    {
+      "path": "comparison/lte_good_TcpBbr_ns3.log",
+      "bytes": 1475,
+      "sha256": "457d5e1d65d7ab3a40d9d20ffd2245a9d78d2db65e63f2916040244a1e96529e"
+    },
+    {
+      "path": "comparison/lte_good_TcpCubic.flowmonitor",
+      "bytes": 6791,
+      "sha256": "4a50cde49c2c00ef119eaf2036ab2e0da99b26ce894acd88c6df2b30112219b2"
+    },
+    {
+      "path": "comparison/lte_good_TcpCubic_ns3.log",
+      "bytes": 1477,
+      "sha256": "9ec8df60d02cbdb8c276c56f1c0ec7de4873bb13ccefc4ef35ef5eab1135c76d"
+    },
+    {
+      "path": "comparison/lte_good_TcpNewReno.flowmonitor",
+      "bytes": 6786,
+      "sha256": "0b8383d150a8e632ba5f14b8ec9adf105723303e66a74f0d7b5bee22021772cb"
+    },
+    {
+      "path": "comparison/lte_good_TcpNewReno_ns3.log",
+      "bytes": 1478,
+      "sha256": "04c836aee60c66dcffc71f2b8060fc63f99a5f2736f52f6306bf04d45ffa0e59"
+    },
+    {
+      "path": "comparison/lte_good_TcpSwift.flowmonitor",
+      "bytes": 6791,
+      "sha256": "74dadafa13de571d91af25c407b0c60dba62da5eb44eb8323f19c939e9fbd04d"
+    },
+    {
+      "path": "comparison/lte_good_TcpSwift_agent.log",
+      "bytes": 19,
+      "sha256": "8fd2c3d42ee2fddf55c648e3e64c8c6770b30d3b961e1e99ff3eecc878d5ff97"
+    },
+    {
+      "path": "comparison/lte_good_TcpSwift_ns3.log",
+      "bytes": 1477,
+      "sha256": "ccfbc27443a544334737d8e4941976e79531b5482265dcb0ae3156955ebddd61"
+    },
+    {
+      "path": "comparison/lte_poor_TcpBbr.flowmonitor",
+      "bytes": 6724,
+      "sha256": "c58aee7e2647c4cd01c1a9539426e93be4852fb202d77de2cb67623073beee42"
+    },
+    {
+      "path": "comparison/lte_poor_TcpBbr_ns3.log",
+      "bytes": 1453,
+      "sha256": "20f9f9f63179c8e132c4017c16a739f55ad73de4878c66650b3162f6a0b4bef7"
+    },
+    {
+      "path": "comparison/lte_poor_TcpCubic.flowmonitor",
+      "bytes": 6724,
+      "sha256": "4ef32c1a12f1f9c69b4d123367cf897362d6c3026f9511ab67079e5376cd1f56"
+    },
+    {
+      "path": "comparison/lte_poor_TcpCubic_ns3.log",
+      "bytes": 1456,
+      "sha256": "c31ed7db60bf7e1dfaf43953979bb85a944a3a788c93b492da795e309109ec34"
+    },
+    {
+      "path": "comparison/lte_poor_TcpNewReno.flowmonitor",
+      "bytes": 6730,
+      "sha256": "e1cac656f69f57a49075191e4620adfa112fd5ec4853a222095848de2d918f99"
+    },
+    {
+      "path": "comparison/lte_poor_TcpNewReno_ns3.log",
+      "bytes": 1457,
+      "sha256": "61b87eade5e66338c5dcf742926976abe6cbd31eead5648067ebc6fac18ab752"
+    },
+    {
+      "path": "comparison/lte_poor_TcpSwift.flowmonitor",
+      "bytes": 6726,
+      "sha256": "79ccf019a530b5658b0b9282da12f3e23f8282a63a25792c6e20b167c9a9061f"
+    },
+    {
+      "path": "comparison/lte_poor_TcpSwift_agent.log",
+      "bytes": 19,
+      "sha256": "ca99267008893bc82f9c729fb8d33b3be03a227b363b4b96a2d0daff11879a5c"
+    },
+    {
+      "path": "comparison/lte_poor_TcpSwift_ns3.log",
+      "bytes": 1455,
+      "sha256": "cdd2c45965b44059a782c3a6b3326201846a11f7ca5bccd00e11542ff7eb380e"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpBbr.flowmonitor",
+      "bytes": 6931,
+      "sha256": "8c92da10b2927d99ca7f550ca54a2314f2aa2112664607141f322e5ca455e948"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpBbr_ns3.log",
+      "bytes": 1520,
+      "sha256": "70850b576151db1c37eb65301c6e8f14f48df2d550bfdad84324816bf157f0f9"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpCubic.flowmonitor",
+      "bytes": 6936,
+      "sha256": "432c95a85dfc43aef9100aa60fcd1cb0725550e7de325fd1879c7cf9c1f479cf"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpCubic_ns3.log",
+      "bytes": 1521,
+      "sha256": "dfe64d6a865226c78c7928e1f6db0a815e1cba25f130902479de81630aa41dab"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpNewReno.flowmonitor",
+      "bytes": 6935,
+      "sha256": "9b265f715b719b19844d02fc6cda28e30cd986f5854ad26810db5f54dee8bfb2"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpNewReno_ns3.log",
+      "bytes": 1524,
+      "sha256": "e91edd250865a55086a57842eaa26e77807c898c0b895b8180e8378368af9846"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpSwift.flowmonitor",
+      "bytes": 6933,
+      "sha256": "02654d0c4df92d56e0b2a1fdbe810baac14041334a08d889db8c3b9ab0e3f7cc"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "40eef8768dfc9aa62aca7deac1655210232c5a3a80658c69373645c9205fd107"
+    },
+    {
+      "path": "comparison/mixed_large_flow_TcpSwift_ns3.log",
+      "bytes": 1522,
+      "sha256": "3f07a2dd1478576b9c77fd4b3a1c671bf13fdd9110e22ca79553a66e77a5a16b"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpBbr.flowmonitor",
+      "bytes": 6865,
+      "sha256": "81c5defa143cbe8999a6016b3c1a2ccf3eb85946d07cc23e9626c32a3b4ea4ce"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpBbr_ns3.log",
+      "bytes": 1495,
+      "sha256": "a5228e04b302c17bea6b3b23207706d414cf70c6f8d7b1bd99a2eee0abe79730"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpCubic.flowmonitor",
+      "bytes": 6875,
+      "sha256": "738132be857e71a87144c69dd2859b5678192fc1eaceeabf875d8f2f372764c0"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpCubic_ns3.log",
+      "bytes": 1500,
+      "sha256": "46ec8e41794c92bc314ffe61cc18b4d95f55588ea1002c1313664c3dd8a8398b"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpNewReno.flowmonitor",
+      "bytes": 6868,
+      "sha256": "96bb1391570ca492372f14cf24dc97d2ce7e7142e27cb461ce99cfdaf13549da"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpNewReno_ns3.log",
+      "bytes": 1500,
+      "sha256": "bfad8e8f864cb4d6bfea77db1520972e6bf33a53332f47733c03425c352a07ae"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpSwift.flowmonitor",
+      "bytes": 6891,
+      "sha256": "808dd68852b741c40867c1d123c4563db112315b9ffb0f80d1d7c86a4692cf91"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "2fbeecc6ff3e91143a387ff4fb078cb6aa87598cf24a7ce5e888f4937f833015"
+    },
+    {
+      "path": "comparison/mixed_small_flow_TcpSwift_ns3.log",
+      "bytes": 1507,
+      "sha256": "a0759acc2ede58d3159622187e6af8cddfc49a8907ed4eb6bafaf8b52b3f1ab7"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpBbr.flowmonitor",
+      "bytes": 6798,
+      "sha256": "f97f465902e33750bde6e331c78e9591e99cdccfa4fcf9a61179cfefc3fab9f4"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpBbr_ns3.log",
+      "bytes": 1476,
+      "sha256": "738002b27bda4293ce0c858c126723756dd9803f93cbf53b667e51e80232ce52"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpCubic.flowmonitor",
+      "bytes": 6800,
+      "sha256": "8547e842f13f82e710f7bc97dc87e559ed1c81f6a349b017d9b7f88eb5c396df"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpCubic_ns3.log",
+      "bytes": 1478,
+      "sha256": "a1f698af1bea19b447471dd0637aa9c76ee0aadae04191b745ccd90f8e2e4b5c"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpNewReno.flowmonitor",
+      "bytes": 6805,
+      "sha256": "944701235616a867143406c44fd65e940859f198b02c69c079c5ce4191ff70b5"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpNewReno_ns3.log",
+      "bytes": 1480,
+      "sha256": "8fa9b35ce604637876a29bc3be5316cb718786075e89a3a6c0460400774ffaf0"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpSwift.flowmonitor",
+      "bytes": 6802,
+      "sha256": "a74c4b743bdd990e5cc5bf3d7907255e9d5355a189b54086bdeec5e4765b425c"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpSwift_agent.log",
+      "bytes": 21,
+      "sha256": "035d59f3b46fd730af726c0b2af80fa89596915b62069b28292ac497a993199c"
+    },
+    {
+      "path": "comparison/nr_5g_edge_TcpSwift_ns3.log",
+      "bytes": 1477,
+      "sha256": "dd80d651a052c12377d04bf04ed53c091e564585cc1754f575d227eb8e7e8d38"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpBbr.flowmonitor",
+      "bytes": 6859,
+      "sha256": "2ea62735a94eaa14a2afbc6ee9b80aca506c3a64731608d281487fc2537a4d6b"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpBbr_ns3.log",
+      "bytes": 1494,
+      "sha256": "7ae97f75d2cc01281e0321e18fcfa0f3edb2c23cd3d47c2d2af3c957fe9df0f2"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpCubic.flowmonitor",
+      "bytes": 6861,
+      "sha256": "69ec3664ecf3fe8c1fcb151bb76f27d90daea0327be2a08f166981d7ce677bb9"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpCubic_ns3.log",
+      "bytes": 1496,
+      "sha256": "64dc3e374b38791c9bb988db2cf593d4ad333991d11b5d794c5d61ae69982d78"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpNewReno.flowmonitor",
+      "bytes": 6863,
+      "sha256": "c1c80222d37a012a64a3b48c1cf066ac306c1ebb2bcdc196647d74c74c0e5a96"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpNewReno_ns3.log",
+      "bytes": 1495,
+      "sha256": "7bf893a3a1fc8ea19657fd10b68cc78e7af2d1a4f229b4eeea4077fd4724a514"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpSwift.flowmonitor",
+      "bytes": 6861,
+      "sha256": "6862661e04d3c2f5e45b6152e933e65d80c53070d03cdbd13658fcddfea0310e"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpSwift_agent.log",
+      "bytes": 21,
+      "sha256": "9aa54a4c93694c900e4d4c7b5b3c163c22a83dcc81b07407af474f22c1a7eedb"
+    },
+    {
+      "path": "comparison/nr_5g_embb_TcpSwift_ns3.log",
+      "bytes": 1496,
+      "sha256": "5dbcf22d5577e71e7e3bac6efbe0fa6b41422b8704995611933b704acbb3cf5c"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpBbr.flowmonitor",
+      "bytes": 6931,
+      "sha256": "ca137cdee14365c23cb06cca662a8de8f78f02b08954470c631fd3f2a4e1f761"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpBbr_ns3.log",
+      "bytes": 1520,
+      "sha256": "7a531f9bca06c3e8406b0b1bb45903bc46033af55c66ada8051380a823a9ce8e"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpCubic.flowmonitor",
+      "bytes": 6933,
+      "sha256": "49b900e04d54d54974901d0a3b6bc1072bb6cdee12e92cf869babd720fc8f601"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpCubic_ns3.log",
+      "bytes": 1522,
+      "sha256": "fc51ed0ede8a119f3e63b3873e71bb7410344611463eaa9d791f6e26186dfef7"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpNewReno.flowmonitor",
+      "bytes": 6928,
+      "sha256": "8f62ef03ffe8cf850450a9f496141baf4ca29c51959785a9360cec15ace74c55"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpNewReno_ns3.log",
+      "bytes": 1524,
+      "sha256": "7c7a22199b161cc45cffe1064573ce42b04bc2add31d2d868b112ab27058d33b"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpSwift.flowmonitor",
+      "bytes": 6930,
+      "sha256": "2d17929a98adb89d044da120ca53812ff9dac51ac4f538afdfffb8883d305e1e"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "0e6eaba8e9236db19b696e211fd1609a0bbd69c51aa014220f72f475940c7d0b"
+    },
+    {
+      "path": "comparison/oversub_2to1_25g_TcpSwift_ns3.log",
+      "bytes": 1522,
+      "sha256": "f31cdf5714d2a2117087262a053c6a6b2c68e6684e5f1a16dfe310470733f7aa"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpBbr.flowmonitor",
+      "bytes": 6960,
+      "sha256": "28c95bd1323809e84f39c171a77a2a59b8f2c26de87f060a67d5f4dbf1fabe94"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpBbr_ns3.log",
+      "bytes": 1530,
+      "sha256": "59a00b7c420916eff15cadf6f3fe8f8c94eea6f73b84d6922f62b8f4505f3d01"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpCubic.flowmonitor",
+      "bytes": 6965,
+      "sha256": "fbb7b04f36bca33440f06c31f4e0fef6d4ead4dd4e86cc9e25c0196c18168101"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpCubic_ns3.log",
+      "bytes": 1532,
+      "sha256": "cfc3c876908424fe29bfe9cc37d5d6042cb4d8b3419cb8cc73aaa0820286a310"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpNewReno.flowmonitor",
+      "bytes": 6964,
+      "sha256": "ea7a9a0e298a1a99c17f67f250df1856f7ea0c8ca698b42cebcc69a5d2134358"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpNewReno_ns3.log",
+      "bytes": 1534,
+      "sha256": "85018aa0df4f17a1d09f75d2c7d87e00406ac36326b12354f4bea7b74df7ea9e"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpSwift.flowmonitor",
+      "bytes": 6962,
+      "sha256": "e49820eb26030349f4556f7133b0557274a8ad34f09798ec150d84960687171e"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "9945cb0be2f6372c2f9e7d3a73f60ed7362d01ac92e2e1e2e1b194aae123d751"
+    },
+    {
+      "path": "comparison/oversub_2to1_50g_TcpSwift_ns3.log",
+      "bytes": 1531,
+      "sha256": "b39feba97b225fed02512cf6d42cb5b77b9b0d6f411b4bb2967c029550f0f210"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpBbr.flowmonitor",
+      "bytes": 6883,
+      "sha256": "564c573c1fb0ec69153adb4f70c5d5ea959ab8a8b5394469af04c449151bae39"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpBbr_ns3.log",
+      "bytes": 1508,
+      "sha256": "6858eb0435b8ddf219a9a829fc7e2a1831e40c0f77ba6e491f269007b7474acd"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpCubic.flowmonitor",
+      "bytes": 6886,
+      "sha256": "d72217e5026a79f3a13da484d405513c5f2bc8036d5574b83291af29a9374e89"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpCubic_ns3.log",
+      "bytes": 1510,
+      "sha256": "a925b1dc5b54ba35e7b286b42a5cef4c14bcdf8e45fd3b5b100958cee8a9de9c"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpNewReno.flowmonitor",
+      "bytes": 6883,
+      "sha256": "580f557d231743816782fc052799f675efbcd7458a203403dfc83571ce543494"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpNewReno_ns3.log",
+      "bytes": 1512,
+      "sha256": "a1b774170ae62ecd3a7d6516a2c77bbe47f6858427e42bf6bf3e99695f916e32"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpSwift.flowmonitor",
+      "bytes": 6883,
+      "sha256": "459f2dc28c0c8fda66b307052d837a254b7e543027c8fcd81a8edf74d70ded09"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "44853ff3aa968d6ab64f7e44904593c87009a51d82c6dd872ef879344ee17447"
+    },
+    {
+      "path": "comparison/oversub_4to1_10g_TcpSwift_ns3.log",
+      "bytes": 1510,
+      "sha256": "9351de1304c75cacb33124f81ef5126a81c54c92ea50d8dafcdfa92d6bb98635"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpBbr.flowmonitor",
+      "bytes": 6922,
+      "sha256": "f18c10a53d36a4d1536d4bc432026ff995266a94e19681e205c24f42258e64f6"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpBbr_ns3.log",
+      "bytes": 1516,
+      "sha256": "82e5a810d1da544322c20a9eeaf0c2c4c7d88f80f39e0e1a0833296cb818011a"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpCubic.flowmonitor",
+      "bytes": 6921,
+      "sha256": "a1b9d195f9247b613dd8e1e67e3fe8d49ad8228bc0653351e9d31072741deb3d"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpCubic_ns3.log",
+      "bytes": 1519,
+      "sha256": "632f548d346b5b53ad7356e9dbda25e5d1c4a1c25b0ccfcfee4cab8315ff822e"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpNewReno.flowmonitor",
+      "bytes": 6925,
+      "sha256": "904785760d62573a6989c26b654d6b7fe5b4c702fbf4bc2d83636946a495a5b3"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpNewReno_ns3.log",
+      "bytes": 1521,
+      "sha256": "195bfc42019ced3bc02f3540df0c5010bf4c071400f97709013c0153ff2012f3"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpSwift.flowmonitor",
+      "bytes": 6922,
+      "sha256": "1e96fee5e2b5a11818d0a5657a2d0d8c4464e04f78616b27bbac83a2f10bf1a7"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpSwift_agent.log",
+      "bytes": 27,
+      "sha256": "18e498ba7a9e87148bec7092d3e7e014558580655527e2f42c5e6d9ce0d9ef32"
+    },
+    {
+      "path": "comparison/oversub_4to1_40g_TcpSwift_ns3.log",
+      "bytes": 1518,
+      "sha256": "b32f72efb234b357824fe833e42afe79ff4542755a940c65870d1080f5ed3bcf"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpBbr.flowmonitor",
+      "bytes": 6955,
+      "sha256": "69d8b7216f5557ef7414ff9f30b0cc59036c6dc40ae86f7433a36ad097510eae"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpBbr_ns3.log",
+      "bytes": 1530,
+      "sha256": "b3796be524c564a0febc911933af22279cc821273e75a5bcfcdd822a55cf4091"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpCubic.flowmonitor",
+      "bytes": 6960,
+      "sha256": "980654030542ff44ebea7901e4318ca24357d0d7ba172175f14df0a66f5ac921"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpCubic_ns3.log",
+      "bytes": 1532,
+      "sha256": "e6c4aa2306a5013cda3aa7af3cbe1cfa27a75a26fba34c8c8ad84c9391c42479"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpNewReno.flowmonitor",
+      "bytes": 6961,
+      "sha256": "fe654965176119213232fbfa7261cee032a0f6dde7a3a10b139e0e6dd2c2725d"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpNewReno_ns3.log",
+      "bytes": 1533,
+      "sha256": "ffa6b525578b07998292cf9a92485fc49aeea7e30fa45a3c55bc8bcfe57b226c"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpSwift.flowmonitor",
+      "bytes": 6959,
+      "sha256": "4f931decbeae0b586a20687a32729a687c154ef71f3d371014a3f62e2a2e7239"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "ed24f60ea2b41ce6106454ec3fbf2ef792d28e1fc2e71c2acada2fb6e8d445e0"
+    },
+    {
+      "path": "comparison/rdma_like_25g_TcpSwift_ns3.log",
+      "bytes": 1532,
+      "sha256": "5e4be0c5b79bdb82bdc15c09095654c92db18e188561b06e5654237cc8c2231a"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpBbr.flowmonitor",
+      "bytes": 6973,
+      "sha256": "2859d50e71fed88985e34c23018b80845f9096f44214d237f6310383db568c7a"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpBbr_ns3.log",
+      "bytes": 1540,
+      "sha256": "fd58086a1eebcfbb33169204af8d43b47fced39892757358b36b82c9f3b14a14"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpCubic.flowmonitor",
+      "bytes": 6974,
+      "sha256": "19a68c34d19f0e3a977b9728117bacff609d3da4b9ff4e33b750db59686490ad"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpCubic_ns3.log",
+      "bytes": 1542,
+      "sha256": "f49eea6a84a651979f8257cb8505dfd378eee00f9bf075fd566821c11137c016"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpNewReno.flowmonitor",
+      "bytes": 6982,
+      "sha256": "bb41581fd04d4d5beaba36a27a227b3e69cdaf12aabece75c58c7c9c6a05e17e"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpNewReno_ns3.log",
+      "bytes": 1544,
+      "sha256": "7ac674b161beedfbada911b13893842bff0e2d8825db054fb777c651f5527ea2"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpSwift.flowmonitor",
+      "bytes": 6978,
+      "sha256": "10f29dae83d1be2cc94af0bb05d3d3182b185803ff50589452144cbfea0c3eca"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "edf566a3311812dd2ecdc2ac268124173d50462cc73f667317b6be5d675d41ad"
+    },
+    {
+      "path": "comparison/rdma_like_50g_TcpSwift_ns3.log",
+      "bytes": 1541,
+      "sha256": "ef61a5e12ccf6749f1198d85ad6bd2d775bced23b80131a03c8d36ed1766ae6e"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpBbr.flowmonitor",
+      "bytes": 6741,
+      "sha256": "fc5e742cc74d1eb8b23a017cf7a20f9b861a9987693eb165d3bce03f2938b726"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpBbr_ns3.log",
+      "bytes": 1453,
+      "sha256": "624a0bc0d5a1706e4d90ccef6eab9c02ffff76c22c038d2966c89746108f7fd5"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpCubic.flowmonitor",
+      "bytes": 6744,
+      "sha256": "3ca0bfc4decd4ae3ab305bf9ae48e54de6207c6856dc075a94e194d602c9a44e"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpCubic_ns3.log",
+      "bytes": 1456,
+      "sha256": "fff1345b806ec191fff365318db85d52b5e071c79856d83b77a79fb1b5a29704"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpNewReno.flowmonitor",
+      "bytes": 6745,
+      "sha256": "708118ecf43a73e70df6e878e5a3ab75589c71b77113cd1f5f492716798d1c35"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpNewReno_ns3.log",
+      "bytes": 1458,
+      "sha256": "1df75743b5b12a2bc16c5784f9426d08a71f3a6ce2fb1bd1e6ecab3a6129e069"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpSwift.flowmonitor",
+      "bytes": 6745,
+      "sha256": "ee0b9663cc6bfa2336cd03e11d3121d31efa494838092d6edb8d4dfc5388f0e9"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "81c3ac0ad9303af199a9e1a06a731228ae5568dfa79fc4052cc21db6204144f7"
+    },
+    {
+      "path": "comparison/satellite_geo_TcpSwift_ns3.log",
+      "bytes": 1455,
+      "sha256": "ea5a56be25d43c695bbfd5ae6191de8c968727ba7b32bec05c103e5bfe85c9d8"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpBbr.flowmonitor",
+      "bytes": 6840,
+      "sha256": "f112a71d7ab98c59d219451f9f53ecdc4595231dcdcfd3afb09cbd7bc1324917"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpBbr_ns3.log",
+      "bytes": 1477,
+      "sha256": "77a421bad18074a29bad67309abf9221146b8db93b9dcbbfd0be07296582e227"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpCubic.flowmonitor",
+      "bytes": 6833,
+      "sha256": "46f6e50e626a095b43b702e03faa66425662cf5713f85a015400184283038a7b"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpCubic_ns3.log",
+      "bytes": 1479,
+      "sha256": "d82e0e56e25f196b022846f7f5c095f06d691563f6de0340af7bf72fd4d9d089"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpNewReno.flowmonitor",
+      "bytes": 6839,
+      "sha256": "fa9bf8f18f09aebca51428d5a50bc745b28b0f9d44633e128b44ee5a936a25d0"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpNewReno_ns3.log",
+      "bytes": 1481,
+      "sha256": "fad6f835083545b3dab3fb965a60b2667020fa1431c5e9a3bb3b56b5f6e416cb"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpSwift.flowmonitor",
+      "bytes": 6842,
+      "sha256": "ee675acde498dc80c6a9c66d852f490ce6fa7441a45c770a63050a28c5a63dd2"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "9b851e3aef7c9d46c726bb0c9f0269162bc96c819d97d48a00b706ae9203e017"
+    },
+    {
+      "path": "comparison/satellite_leo_TcpSwift_ns3.log",
+      "bytes": 1479,
+      "sha256": "faa17c1590055d3f557ec724d6dcb5ea1d14cfb5d04ec74cce6a687c88016daa"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpBbr.flowmonitor",
+      "bytes": 6847,
+      "sha256": "f8f9cb14bcdcc17cb9b0e5b16643d20c4a924c93a4d69377f73b6e0a28884ba9"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpBbr_ns3.log",
+      "bytes": 1492,
+      "sha256": "57c2116da55afe82cff22280e46f0c6c92482325b8ce4e64026a9dfd189ca87a"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpCubic.flowmonitor",
+      "bytes": 6848,
+      "sha256": "4bfd07f98a17e631be80f7eaa9fa9526312a2ca5e9246f773c18d17d223ea86e"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpCubic_ns3.log",
+      "bytes": 1494,
+      "sha256": "663b72214164e31cedc5564c0b0b798c7c4c695af1918b5fe1e117e6331da951"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpNewReno.flowmonitor",
+      "bytes": 6845,
+      "sha256": "842c14b32559472080f0f1df0a85819d2ab542a7b168dfb7463fc95958a2987b"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpNewReno_ns3.log",
+      "bytes": 1496,
+      "sha256": "fe6da0dc6e3c1b45124ee4ded7e26827bd82c57bab0733cfa293c5a8ffd4f5bb"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpSwift.flowmonitor",
+      "bytes": 6845,
+      "sha256": "142d23a266a1401101801821a39bd9a60f413af22e092b7b41db35b847e7c69b"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpSwift_agent.log",
+      "bytes": 24,
+      "sha256": "72819bb78c6b9c40090cd55cd8ce4010a1b0b8cc60648fa8525562ae4d0434c2"
+    },
+    {
+      "path": "comparison/symmetric_low_TcpSwift_ns3.log",
+      "bytes": 1494,
+      "sha256": "7e9cfdaed447ecd0d77b354bad35c180c0799562325e4486fe9788dffb8fff86"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpBbr.flowmonitor",
+      "bytes": 6902,
+      "sha256": "32e7987eb1d1a75503c00da96298c219e215f1d8b43c750426c2cbc90a5848c2"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpBbr_ns3.log",
+      "bytes": 1493,
+      "sha256": "9deb5792c39d7d2b22b405d3d87a6c970f9bb97e478378a56edea8549089463f"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpCubic.flowmonitor",
+      "bytes": 6904,
+      "sha256": "6d3a79f28a733128bf17c4233d506e617dbe57d0a04e9845d79eb375be923e1d"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpCubic_ns3.log",
+      "bytes": 1493,
+      "sha256": "67847ca55727ee3a3d9dde014a89b70bf02822b4e86b5d8f44f6edb188d8e333"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpNewReno.flowmonitor",
+      "bytes": 6903,
+      "sha256": "df5e60cc9a4adac09c2fab191e33c7e7d0a390389412a7bdf2ee058ab45ac9c4"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpNewReno_ns3.log",
+      "bytes": 1497,
+      "sha256": "0bee1f0f9380add1694d7ecffe12b9100628cb9aef7cafb1c164f681aafa042e"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpSwift.flowmonitor",
+      "bytes": 6902,
+      "sha256": "2cc9b29754db486b30be3d1decdc444c84bd74da194b9f42729adb1d80de6773"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpSwift_agent.log",
+      "bytes": 23,
+      "sha256": "681edfc442187996d104847407c9f414709f2a803cd4ef63da510aa9025e7b8b"
+    },
+    {
+      "path": "comparison/wan_longhaul_TcpSwift_ns3.log",
+      "bytes": 1495,
+      "sha256": "fd03331269959c93a756516ed6f4cc22dbffad859e78166dfd8fc8434b9f797c"
+    },
+    {
+      "path": "comparison/wan_metro_TcpBbr.flowmonitor",
+      "bytes": 6879,
+      "sha256": "649398c186bf5cfbdb0e49439331f139e18b53ed5a69deaa3998cd4882ba5815"
+    },
+    {
+      "path": "comparison/wan_metro_TcpBbr_ns3.log",
+      "bytes": 1493,
+      "sha256": "4051623d7491f02637c5808970f0a9529b37bb0bf217a6202fbb7de7e5a4236b"
+    },
+    {
+      "path": "comparison/wan_metro_TcpCubic.flowmonitor",
+      "bytes": 6880,
+      "sha256": "a5042943868ed031eff388a59433ce49b06ae89861d5fbabde734c9d0a7fea8d"
+    },
+    {
+      "path": "comparison/wan_metro_TcpCubic_ns3.log",
+      "bytes": 1495,
+      "sha256": "870eca68357a9b658c9d0924b17d0f48addff105b34caa7498e0dcdf369e1a5a"
+    },
+    {
+      "path": "comparison/wan_metro_TcpNewReno.flowmonitor",
+      "bytes": 6877,
+      "sha256": "a633108db97b44660b96aa25e1fd3d398b99376ba5d7c1b581c18dd8b57b3d63"
+    },
+    {
+      "path": "comparison/wan_metro_TcpNewReno_ns3.log",
+      "bytes": 1497,
+      "sha256": "cfe333172fff8f89041e246806a013dbcef4c8679ccbce456e33e61267d8613f"
+    },
+    {
+      "path": "comparison/wan_metro_TcpSwift.flowmonitor",
+      "bytes": 6883,
+      "sha256": "ccec46132cfb61e5af9681a1d41144d0a8477eda4b554d79fc97560c6adb875c"
+    },
+    {
+      "path": "comparison/wan_metro_TcpSwift_agent.log",
+      "bytes": 20,
+      "sha256": "5c801bd5ac83f1ed4b9376e448db2e213ad1821ab434ea8ff2f1d32522ddd31b"
+    },
+    {
+      "path": "comparison/wan_metro_TcpSwift_ns3.log",
+      "bytes": 1495,
+      "sha256": "28087f99f06ca80a43d583442fd9c22ee0aaceea864df801928d734175e3f10f"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpBbr.flowmonitor",
+      "bytes": 6837,
+      "sha256": "abc9f982356fea1f047416ce79d744fa6f5bb1a998b68644f552fc41f94e5fd4"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpBbr_ns3.log",
+      "bytes": 1486,
+      "sha256": "1365c070645c64785cf18bd2f3eb2ea9ccd489b7c6bd451d518cc246e5a63642"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpCubic.flowmonitor",
+      "bytes": 6837,
+      "sha256": "9bbb3b20b56bd3b82e5d6bc301d538c65baf83da6345fef06226c22c7b251a9d"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpCubic_ns3.log",
+      "bytes": 1489,
+      "sha256": "61c8b6c95b71cc71f0d7fbf5c607cbfc6db1f4cfe135700901bae3c8d6277bff"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpNewReno.flowmonitor",
+      "bytes": 6840,
+      "sha256": "9ddcd602b5cae5f172e92f88b893e5d246092e98843a94ce4c0a8057460c89ce"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpNewReno_ns3.log",
+      "bytes": 1491,
+      "sha256": "caa5ab2f4efbe96be491025595fa16bb1c538e7bd943f604a44792999885dee9"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpSwift.flowmonitor",
+      "bytes": 6846,
+      "sha256": "48e62fdeb07eefa91b663ae5e76ebf69755d1647346f2bf064128fb6c7302f63"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "863cb8dfd34f72ddaf6fecfffe17aa60f898b3b8d1eb500e6b1ef2fe08f5c2c1"
+    },
+    {
+      "path": "comparison/wifi_ac_TcpSwift_ns3.log",
+      "bytes": 1489,
+      "sha256": "26c5594b3f5c50851255209b258ba1dfbc7e317aef3fe254e25030185353f1f8"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpBbr.flowmonitor",
+      "bytes": 6863,
+      "sha256": "24e2980fe1daef75a88a9b659e4930ddf35de28597fa74a7c3524e0162328931"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpBbr_ns3.log",
+      "bytes": 1494,
+      "sha256": "6ab2095e05b8cfc01874ef39812ed0965e8eb4155e42d0311cb37a99b67c9a58"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpCubic.flowmonitor",
+      "bytes": 6864,
+      "sha256": "e700fc6f0581a0e7df73ba3f0935fde545460018a1aec6d62a60308d3bf25395"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpCubic_ns3.log",
+      "bytes": 1496,
+      "sha256": "81e398941d6601b8682a93aed5246f2a330e379cc378544828613a4bdd46032e"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpNewReno.flowmonitor",
+      "bytes": 6866,
+      "sha256": "62e66487b7c143071832bd270ece28574bc8a5a2e560cba7fd2ecec51df35c87"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpNewReno_ns3.log",
+      "bytes": 1497,
+      "sha256": "9fbe9e0d8e09629d828918235b6b4da93369fe3a64ee0fc4bce6e2a113a79356"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpSwift.flowmonitor",
+      "bytes": 6861,
+      "sha256": "c908a6c64bfb2677eba5f60ac65fc4ebca77e75c193bf2e2006822d81ab4c7a0"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpSwift_agent.log",
+      "bytes": 18,
+      "sha256": "24078f3150af6b574cae1701e0c04eb3c6fccb2ac4250c914400899de7c51388"
+    },
+    {
+      "path": "comparison/wifi_ax_TcpSwift_ns3.log",
+      "bytes": 1496,
+      "sha256": "f17aaa04974218ecda39a84e27c7d7155fd9b32fcf013044347891ef05ab23f4"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpBbr.flowmonitor",
+      "bytes": 6722,
+      "sha256": "a97504e24adfbf25c0efd380f5274db4c2393b0276528c85305dd6abbe45ff25"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpBbr_ns3.log",
+      "bytes": 1455,
+      "sha256": "eca30e9f82306ec2c506906b7ae0a70b671cbef9b565fe43f77c9ad2682932e9"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpCubic.flowmonitor",
+      "bytes": 6721,
+      "sha256": "6708b6401f6622a1bb99d3dc362c53aee6ae3e78ca7ced40784233292653e98a"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpCubic_ns3.log",
+      "bytes": 1457,
+      "sha256": "f674c5fbe43ad05639bd08bc214871198ec5063e17122335b8eb8481c604d9f4"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpNewReno.flowmonitor",
+      "bytes": 6722,
+      "sha256": "f6daf47526c3807ab6ba6f1f14efd61e39140a7adde029bea37559caf376ad33"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpNewReno_ns3.log",
+      "bytes": 1459,
+      "sha256": "3c5cca675f184a625845f4b990dafba81a0db2e03016282ee96d5d628c29ac4a"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpSwift.flowmonitor",
+      "bytes": 6721,
+      "sha256": "6761a9a17ddbc7d0e623ce019de03d07eebe1dd41fbbba74b42dd997950def9f"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpSwift_agent.log",
+      "bytes": 22,
+      "sha256": "e5f907066c9036ae0dafd1423c6b3442509087961a93645eb2e29455a1051d5c"
+    },
+    {
+      "path": "comparison/wifi_legacy_TcpSwift_ns3.log",
+      "bytes": 1456,
+      "sha256": "0d863f0f8185e19a07b860d3974c53961bdeede9c5f49e3998756f67613d7000"
+    },
+    {
+      "path": "comparison/wifi_n_TcpBbr.flowmonitor",
+      "bytes": 6779,
+      "sha256": "74b112353659ca754a1cb0ff71151070a8bbb34f15135307e0db4403d3047b92"
+    },
+    {
+      "path": "comparison/wifi_n_TcpBbr_ns3.log",
+      "bytes": 1472,
+      "sha256": "697b21293f085760a50df62f8f4e99f4c294182dd9997d890822d893843775c2"
+    },
+    {
+      "path": "comparison/wifi_n_TcpCubic.flowmonitor",
+      "bytes": 6783,
+      "sha256": "0f72e988eb97670db5b44148b399f482d7a4a1b196541ee75470bbad4c376060"
+    },
+    {
+      "path": "comparison/wifi_n_TcpCubic_ns3.log",
+      "bytes": 1477,
+      "sha256": "99ed607e1780c03914aa455d072ebde50660f365c4fc3740bfcd6ed0bca7f85b"
+    },
+    {
+      "path": "comparison/wifi_n_TcpNewReno.flowmonitor",
+      "bytes": 6784,
+      "sha256": "8f6835f6c39792de23d95a66da652c03b2dd6f5d601749777734237c682f4f38"
+    },
+    {
+      "path": "comparison/wifi_n_TcpNewReno_ns3.log",
+      "bytes": 1478,
+      "sha256": "9a7819c12d17586fe66ec3d06b7dffc5ada20f6039f5be3ae00ede8dd242c9f1"
+    },
+    {
+      "path": "comparison/wifi_n_TcpSwift.flowmonitor",
+      "bytes": 6783,
+      "sha256": "76e1ef0a8127b51dc597271c6000f718edfc6cafca4ebed931bac6d686a27d11"
+    },
+    {
+      "path": "comparison/wifi_n_TcpSwift_agent.log",
+      "bytes": 17,
+      "sha256": "eeb8456e0cde70ed40355f765794e90782d76349e5b9374daa034c782f9a7b9e"
+    },
+    {
+      "path": "comparison/wifi_n_TcpSwift_ns3.log",
+      "bytes": 1477,
+      "sha256": "897a118bbbfb5026fe6a18ed020cbb0cfdf5fa31d436b73e96edc7f22a194ecb"
+    },
+    {
+      "path": "plots-udp/summary.csv",
+      "bytes": 8855,
+      "sha256": "5da2ebde0226c3b88203e18f8db3335395f0f1bfa1129cfba72a893ca9249107"
+    },
+    {
+      "path": "plots/summary.csv",
+      "bytes": 8867,
+      "sha256": "660040478a7f4acd202f309161cc7e29008ec686a06b5b383e57278a3b5d30d6"
+    },
+    {
+      "path": "summary/kpi_forward.csv",
+      "bytes": 48479,
+      "sha256": "d16ff19b3446b6f9d1e0150f0150d6bef895cfdd0acc6c2846f6ea85794b7139"
+    }
+  ]
+}

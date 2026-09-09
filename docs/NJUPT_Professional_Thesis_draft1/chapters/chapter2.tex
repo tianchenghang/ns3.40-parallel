@@ -1,0 +1,472 @@
+\chapter{相关工作}\label{Chap:chap2}
+
+网络拥塞控制是计算机网络领域的核心研究课题之一，自互联网诞生以来一直是学术界和工业界关注的焦点。本章从传统拥塞控制算法、显式拥塞通知机制、基于机器学习的拥塞控制方法三个方面综述相关研究工作，并分析各方法的优缺点及其对Swift算法设计的启示。
+
+图\ref{fig:cc_taxonomy}展示了拥塞控制算法的分类体系及其演进关系。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    level 1/.style={sibling distance=4.5cm, level distance=1.8cm},
+    level 2/.style={sibling distance=2.2cm, level distance=1.6cm},
+    every node/.style={rectangle, draw, rounded corners=2pt, font=\footnotesize, align=center, minimum width=1.8cm, minimum height=0.6cm},
+    edge from parent/.style={draw, ->, >=stealth, thick},
+    root/.style={fill=red!12, minimum width=3.5cm},
+    cat/.style={fill=blue!10},
+    leaf/.style={fill=green!8, font=\scriptsize},
+]
+\node[root] {TCP拥塞控制算法}
+    child { node[cat] {基于丢包}
+        child { node[leaf] {NewReno} }
+        child { node[leaf] {CUBIC} }
+    }
+    child { node[cat] {基于延迟}
+        child { node[leaf] {Vegas} }
+        child { node[leaf] {BBR} }
+    }
+    child { node[cat] {ECN辅助}
+        child { node[leaf] {DCTCP} }
+        child { node[leaf] {HPCC} }
+    }
+    child { node[cat] {ML驱动}
+        child { node[leaf] {Aurora} }
+        child { node[leaf, fill=orange!15] {\textbf{Swift}} }
+    };
+\end{tikzpicture}
+\caption{拥塞控制算法分类体系}
+\label{fig:cc_taxonomy}
+\end{figure}
+
+\section{传统拥塞控制算法}
+
+传统的TCP拥塞控制算法根据其使用的拥塞信号类型，可以分为基于丢包的算法、基于延迟的算法和混合算法三大类。
+
+\subsection{基于丢包的拥塞控制算法}
+
+基于丢包的拥塞控制算法将数据包丢失作为网络拥塞的主要判断信号。这类算法的核心思想是：当发送端检测到数据包丢失（通过超时或重复确认判断）时，认为网络发生了拥塞，需要降低发送速率以缓解拥塞。
+
+\textbf{TCP Tahoe和TCP Reno}是最早的拥塞控制算法，由Van Jacobson于1988年提出\upcite{jacobson1988}。TCP Tahoe引入了慢启动（Slow Start）、拥塞避免（Congestion Avoidance）和快速重传（Fast Retransmit）三个核心机制。慢启动机制在连接建立初期指数级增加拥塞窗口，快速探测可用带宽；拥塞避免机制在窗口达到阈值后线性增加窗口，谨慎探测额外带宽；快速重传机制在收到三个重复确认时立即重传丢失的数据包，而无需等待超时。TCP Reno在Tahoe的基础上增加了快速恢复（Fast Recovery）机制，在快速重传后将窗口减半而非重置为1，提高了丢包后的恢复效率。
+
+\textbf{TCP NewReno}\upcite{newreno}是对TCP Reno的改进，主要解决了Reno在多个数据包丢失时性能下降的问题。NewReno修改了快速恢复机制的行为：在快速恢复期间，如果收到部分确认（Partial ACK，确认了部分但非全部已发送数据），则继续保持在快速恢复状态，直到所有丢失的数据包都被成功重传。这种改进使得NewReno能够更高效地处理突发丢包情况，成为RFC 6582中定义的标准TCP拥塞控制算法之一。
+
+\textbf{TCP CUBIC}\upcite{cubic}是目前Linux操作系统的默认拥塞控制算法，自Linux 2.6.19版本开始采用。CUBIC的核心创新是采用三次函数（Cubic Function）模型调整拥塞窗口大小：
+
+\begin{equation}
+W(t) = C \cdot (t - K)^3 + W_{max}
+\end{equation}
+
+其中，$W(t)$是时刻$t$的窗口大小，$C$是缩放因子，$K = \sqrt[3]{\frac{W_{max} \cdot \beta}{C}}$是从上次拥塞事件恢复到$W_{max}$所需的时间，$W_{max}$是上次拥塞事件前的窗口大小，$\beta$是窗口缩减因子。
+
+CUBIC的三次函数模型具有以下特点：（1）在远离$W_{max}$时快速增长，在接近$W_{max}$时缓慢增长，实现了对可用带宽的稳定探测；（2）窗口增长速度与RTT无关，避免了传统AIMD算法在高RTT链路上收敛缓慢的问题；（3）在$W_{max}$附近有一个"平台期"，减少了在最优工作点附近的窗口振荡。
+
+\textbf{TCP BIC}\upcite{bic}是CUBIC的前身，采用二分搜索（Binary Search）算法调整拥塞窗口。BIC的基本思想是：上次拥塞发生时的窗口$W_{max}$是带宽上限的估计，当前窗口是带宽下限的估计，通过二分搜索在两者之间寻找最优窗口。BIC算法的窗口增长函数如下：
+
+\begin{equation}
+W_{new} = W_{current} + \frac{W_{max} - W_{current}}{2}
+\end{equation}
+
+当窗口接近$W_{max}$时，BIC采用加性增加策略以避免过冲。BIC算法在高带宽延迟积网络中表现良好，但其窗口增长行为对RTT不敏感，在与其他TCP变体共存时可能产生公平性问题。
+
+基于丢包的算法存在以下共同缺陷：
+
+（1）\textbf{拥塞信号滞后}：丢包是网络拥塞的滞后指示器。网络设备的缓冲区在溢出丢包前已经积累了大量排队数据，导致排队延迟显著增加。在深缓冲区（Deep Buffer）网络环境中，这种延迟可能达到数十甚至数百毫秒级别，严重影响延迟敏感型应用的性能。
+
+（2）\textbf{缓冲区膨胀}：基于丢包算法的典型行为是持续增加发送速率直到发生丢包，这会导致网络缓冲区长期处于高占用状态，产生"Bufferbloat"（缓冲区膨胀）问题\upcite{bufferbloat}。缓冲区膨胀不仅增加了网络延迟，还降低了网络的整体吞吐量，因为大量带宽被用于传输最终会被丢弃的数据包。
+
+（3）\textbf{无法区分拥塞程度}：基于丢包算法只能检测"有丢包"或"无丢包"两种状态，无法区分轻度拥塞和严重拥塞。因此，无论拥塞程度如何，算法都采用统一的窗口缩减策略，在轻度拥塞时可能响应过度，在严重拥塞时又可能响应不足。
+
+（4）\textbf{高BDP网络收敛缓慢}：在高带宽延迟积网络中，基于丢包算法的收敛速度极为缓慢。以10Gbps带宽、100微秒RTT的链路为例，BDP约为125KB，需要约86个MSS的窗口才能充分利用带宽。从初始窗口增长到86个MSS需要较长时间，丢包后的恢复更是如此。
+
+\subsection{基于延迟的拥塞控制算法}
+
+基于延迟的拥塞控制算法通过监测往返时延（RTT）的变化来推断网络拥塞状态，试图在丢包发生前就感知到拥塞并采取措施。这类算法的核心假设是：网络拥塞会导致队列积累，进而导致RTT增加。
+
+\textbf{TCP Vegas}\upcite{vegas}是最早的基于延迟拥塞控制算法之一，由Lawrence Brakmo和Larry Peterson于1994年提出。Vegas通过比较期望吞吐量和实际吞吐量来估计网络中的排队数据量。期望吞吐量定义为：
+
+\begin{equation}
+Expected = \frac{cwnd}{BaseRTT}
+\end{equation}
+
+实际吞吐量定义为：
+
+\begin{equation}
+Actual = \frac{cwnd}{RTT}
+\end{equation}
+
+其中，$BaseRTT$是测量到的最小RTT，被认为是无排队情况下的传播延迟。差值$\Delta = Expected - Actual$表示网络中排队的数据量。Vegas根据$\Delta$的大小调整拥塞窗口：
+
+\begin{equation}
+cwnd = \begin{cases}
+cwnd + 1 & \text{如果 } \Delta < \alpha \\
+cwnd - 1 & \text{如果 } \Delta > \beta \\
+cwnd & \text{否则}
+\end{cases}
+\end{equation}
+
+其中，$\alpha$和$\beta$是预设的阈值参数，通常设置为$\alpha = 1$、$\beta = 3$。
+
+\textbf{TCP BBR}\upcite{bbr}（Bottleneck Bandwidth and Round-trip propagation time）是Google于2016年提出的基于延迟算法，是近年来最具影响力的拥塞控制算法之一。BBR的核心思想是通过显式估计瓶颈带宽（Bottleneck Bandwidth，BtlBw）和最小RTT（$RTT_{prop}$），以带宽延迟积为目标调整发送速率。
+
+BBR通过维护一个滑动窗口来跟踪最大投递率（作为BtlBw的估计）和最小RTT（作为$RTT_{prop}$的估计）。发送速率和拥塞窗口按以下方式计算：
+
+\begin{equation}
+pacing\_rate = pacing\_gain \times BtlBw
+\end{equation}
+
+\begin{equation}
+cwnd = cwnd\_gain \times BDP = cwnd\_gain \times BtlBw \times RTT_{prop}
+\end{equation}
+
+BBR采用周期性的增益调整策略，在不同阶段采用不同的$pacing\_gain$和$cwnd\_gain$值，以实现带宽探测和RTT测量。
+
+\textbf{TCP Copa}\upcite{copa}是MIT于2018年提出的基于延迟算法，采用了与Vegas类似但更精细的RTT监测机制。Copa将目标排队延迟设定为$RTT_{standing} - RTT_{min}$的函数，其中$RTT_{standing}$是最近一个RTT窗口内的最小RTT。Copa采用以下窗口调整规则：
+
+\begin{equation}
+cwnd = cwnd + \frac{1}{cwnd \cdot \delta} \quad \text{或} \quad cwnd = cwnd - \frac{1}{cwnd \cdot \delta}
+\end{equation}
+
+其中，$\delta$是目标延迟参数，默认值为0.5。Copa还引入了"竞争模式"检测机制，当检测到与基于丢包算法的流竞争时，会切换到更激进的发送策略。
+
+基于延迟的算法存在以下共同问题：
+
+（1）\textbf{RTT测量不稳定}：RTT测量受多种因素影响，包括操作系统调度延迟、网络路径抖动、网络拓扑变化、对端主机处理延迟等。在高速网络中，这些干扰因素可能与实际排队延迟处于同一数量级，导致基于RTT的拥塞推断不可靠。
+
+（2）\textbf{公平性问题}：基于延迟算法在与基于丢包算法共存时存在严重的公平性问题。由于基于延迟算法对拥塞信号更敏感，会在RTT增加时提前降低发送速率，而基于丢包算法继续增加窗口直到丢包。研究表明，在与CUBIC流共存时，BBR流的吞吐量可能下降30\%以上\upcite{bbrfairness}。
+
+（3）\textbf{参数敏感性}：基于延迟算法的性能对参数设置较为敏感。例如，Vegas的$\alpha$和$\beta$参数、Copa的$\delta$参数都需要根据具体网络环境进行调优，而静态参数难以适应动态变化的网络条件。
+
+\subsection{混合拥塞控制算法}
+
+混合拥塞控制算法综合利用丢包和延迟两种信号进行拥塞控制，试图结合两类算法的优点。
+
+\textbf{Compound TCP}\upcite{compound}是Microsoft开发的混合算法，在Windows Vista及后续版本中使用。Compound TCP在传统的基于丢包的窗口增长之上叠加了一个基于延迟的"快速"窗口分量，在网络空闲时快速增长，在队列积累时减速增长。
+
+\textbf{TCP Illinois}\upcite{illinois}根据RTT变化调整AIMD参数，在低延迟时采用更激进的增加策略，在高延迟时采用更保守的增加策略和更激进的减少策略。
+
+\textbf{TCP Westwood}\upcite{westwood}通过测量ACK到达率来估计可用带宽，在丢包时根据估计的带宽而非固定比例调整慢启动阈值。
+
+混合算法在一定程度上缓解了单一信号类型的局限性，但也增加了算法复杂性，且参数调优更加困难。
+
+\section{显式拥塞通知机制}
+
+显式拥塞通知（Explicit Congestion Notification，ECN）是由IETF在RFC 3168\upcite{rfc3168}中定义的一种网络层辅助拥塞控制机制。ECN通过修改IP报头中的服务类型字段（Type of Service，ToS）来传递拥塞信息，实现了比隐式丢包信号更早、更精确的拥塞通知。
+
+\subsection{ECN工作原理}
+
+ECN在IP报头中使用两个比特（ECN字段），定义了四种码点：
+
+\begin{itemize}
+    \item 00：Non-ECT（非ECN能力传输），表示端点不支持ECN
+    \item 01：ECT(1)（ECN能力传输1），表示端点支持ECN
+    \item 10：ECT(0)（ECN能力传输0），表示端点支持ECN
+    \item 11：CE（Congestion Experienced，拥塞经历），由路由器标记，表示经历了拥塞
+\end{itemize}
+
+ECN的工作流程如下：发送端在发送数据包时将ECN字段设置为ECT(0)或ECT(1)，表明该数据包支持ECN。当网络设备（如路由器）检测到队列长度超过预设阈值时，将ECN字段从ECT(0/1)修改为CE，而不是丢弃数据包。接收端收到CE标记的数据包后，在TCP报头中设置ECE（ECN-Echo）标志，将拥塞信息反馈给发送端。发送端收到ECE标志后，采取拥塞响应措施（如降低发送速率），并在随后的数据包中设置CWR（Congestion Window Reduced）标志，通知接收端已经响应了拥塞通知。图\ref{fig:ecn_workflow}展示了ECN信号传递的完整工作流程。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.3cm,
+    entity/.style={rectangle, draw, fill=blue!8, minimum width=2cm, minimum height=0.8cm, font=\small, rounded corners=2pt},
+    msg/.style={->, >=stealth, thick},
+    label/.style={font=\scriptsize, fill=white, inner sep=1pt},
+]
+% 实体
+\node[entity] (sender) {发送端};
+\node[entity, right=5cm of sender] (router) {路由器};
+\node[entity, right=5cm of router] (receiver) {接收端};
+
+% 时间线
+\draw[thick, gray!50] (sender.south) -- ++(0,-7);
+\draw[thick, gray!50] (router.south) -- ++(0,-7);
+\draw[thick, gray!50] (receiver.south) -- ++(0,-7);
+
+% 消息流
+\draw[msg, blue!70] ([yshift=-1.0cm]sender.south) -- node[label, above, sloped] {数据包 (ECT=1)} ([yshift=-1.5cm]router.south);
+\draw[msg, red!70] ([yshift=-1.5cm]router.south) -- node[label, above, sloped] {数据包 (CE标记)} ([yshift=-2.0cm]receiver.south);
+\node[font=\scriptsize, red!70, right] at ([yshift=-1.5cm, xshift=0.3cm]router.south) {队列>阈值};
+\draw[msg, orange!70] ([yshift=-2.8cm]receiver.south) -- node[label, above, sloped] {ACK (ECE=1)} ([yshift=-3.8cm]router.south);
+\draw[msg, orange!70] ([yshift=-3.8cm]router.south) -- node[label, above, sloped] {ACK (ECE=1)} ([yshift=-4.3cm]sender.south);
+\draw[msg, green!60!black] ([yshift=-5.0cm]sender.south) -- node[label, above, sloped] {数据包 (CWR=1)} ([yshift=-5.5cm]router.south);
+\node[font=\scriptsize, green!60!black, left] at ([yshift=-5.0cm, xshift=-0.3cm]sender.south) {降低cwnd};
+\draw[msg, green!60!black] ([yshift=-5.5cm]router.south) -- node[label, above, sloped] {数据包 (CWR=1)} ([yshift=-6.0cm]receiver.south);
+\end{tikzpicture}
+\caption{ECN信号传递工作流程}
+\label{fig:ecn_workflow}
+\end{figure}
+
+\subsection{ECN相关拥塞控制算法}
+
+\textbf{DCTCP}\upcite{dctcp}（Data Center TCP）是Microsoft和Stanford于2010年提出的面向数据中心环境的拥塞控制算法，是ECN应用的典范。DCTCP的核心创新是利用ECN标记的\textbf{比例}（而非仅仅是有无）来进行细粒度的窗口调整。DCTCP维护一个指数加权移动平均（EWMA）的ECN标记比例$\alpha$：
+
+\begin{equation}
+\alpha = (1 - g) \cdot \alpha + g \cdot F
+\end{equation}
+
+其中，$g$是平滑因子（通常为1/16），$F$是最近一个RTT内被标记的数据包比例。拥塞窗口根据$\alpha$进行调整：
+
+\begin{equation}
+cwnd = cwnd \times (1 - \frac{\alpha}{2})
+\end{equation}
+
+这种设计使得DCTCP能够根据拥塞程度进行比例响应：轻度拥塞时（$\alpha$较小）轻微降低窗口，严重拥塞时（$\alpha$较大）大幅降低窗口。
+
+DCTCP要求网络交换机配置适当的ECN标记阈值，通常使用RED（Random Early Detection）或其变体。推荐的配置是将标记阈值设置为较低的值（如20个数据包或BDP的10\%），以实现早期拥塞通知。
+
+\textbf{ECN++}\upcite{ecnpp}是对DCTCP的改进，引入了更精细的ECN标记策略和响应机制。ECN++在接收端累积ECN标记计数，而非仅使用二元ECE标志，从而传递更丰富的拥塞信息。
+
+\textbf{HPCC}\upcite{hpcc}（High Precision Congestion Control）是阿里巴巴于2019年提出的高精度拥塞控制算法，利用网络设备提供的精确拥塞信息（如队列长度、带宽利用率）进行拥塞控制。HPCC要求网络设备支持INT（In-band Network Telemetry）功能。
+
+ECN机制的主要优势在于：（1）能够在丢包发生前提供明确的拥塞信号；（2）避免了因丢包导致的重传开销；（3）信号来自网络设备的显式标记，比推测性的RTT测量更可靠。然而，ECN的有效使用需要网络设备的支持和正确配置，且现有算法对ECN信号的利用还不够充分。
+
+\section{基于机器学习的拥塞控制方法}
+
+近年来，机器学习技术在网络拥塞控制领域的应用受到了广泛关注。根据所采用的学习范式，可以分为监督学习方法、强化学习方法和其他方法。
+
+\subsection{监督学习方法}
+
+监督学习方法通过从标记数据中学习拥塞控制策略。
+
+\textbf{Remy}\upcite{remy}是MIT于2013年提出的开创性工作，采用离线优化方法生成拥塞控制规则。Remy将拥塞控制问题形式化为一个优化问题，在给定网络模型的情况下，搜索最优的窗口调整规则。Remy的规则形式为：在特定状态下（由RTT测量、ACK间隔等特征定义），执行特定的窗口增量和发送间隔调整。
+
+Remy的优点是能够针对特定网络环境生成最优规则，在目标场景下表现优异。其局限性在于：（1）需要准确的网络模型，对模型误差敏感；（2）离线生成的规则难以适应动态变化的网络环境；（3）状态空间划分的粒度影响算法性能和复杂度。
+
+\subsection{强化学习方法}
+
+强化学习方法通过与网络环境的交互来学习最优的拥塞控制策略，能够适应动态变化的网络条件。
+
+\textbf{Aurora}\upcite{aurora}是CMU于2019年提出的基于深度强化学习的拥塞控制算法。Aurora采用PPO（Proximal Policy Optimization）算法训练神经网络策略，输入网络状态特征（延迟梯度、延迟比率、发送比率等），输出发送速率调整因子。Aurora的状态空间包含10个特征，涵盖延迟、吞吐量和丢包率的历史统计信息。
+
+Aurora的奖励函数设计为吞吐量和延迟的加权组合：
+
+\begin{equation}
+reward = throughput - \delta \cdot delay - \lambda \cdot loss
+\end{equation}
+
+其中，$\delta$和$\lambda$是权重参数，控制延迟和丢包的惩罚程度。
+
+\textbf{Orca}\upcite{orca}是UC Berkeley于2020年提出的强化学习拥塞控制算法，采用经典的AIMD框架，但使用强化学习来动态调整AIMD参数。Orca的核心思想是：AI参数（增加因子$\alpha$和减少因子$\beta$）不应是固定值，而应根据网络状态动态调整。
+
+\textbf{PCC}\upcite{pcc}（Performance-oriented Congestion Control）是UIUC提出的基于在线学习的拥塞控制算法。PCC采用实用函数（Utility Function）指导发送速率调整，通过在线实验探索最优速率。
+
+\begin{equation}
+U(x) = T \cdot x^{\alpha} - \delta \cdot L \cdot x - \beta \cdot D \cdot x
+\end{equation}
+
+其中，$x$是发送速率，$T$是吞吐量，$L$是丢包率，$D$是延迟，$\alpha$、$\delta$、$\beta$是参数。PCC通过梯度上升方法最大化实用函数。
+
+现有基于强化学习的方法存在以下共同问题：
+
+（1）\textbf{状态空间设计不完善}：现有方案通常只使用4-6维的简化状态参数，未能充分利用TCP协议栈提供的丰富状态信息，特别是ECN相关状态和拥塞控制事件信息。
+
+（2）\textbf{奖励函数设计困难}：吞吐量、延迟、公平性、丢包率等多个优化目标之间存在权衡关系，设计能够平衡多目标的奖励函数是一个挑战。
+
+（3）\textbf{训练效率低下}：网络仿真的计算开销较大，限制了强化学习算法的训练效率。
+
+（4）\textbf{泛化能力有限}：在特定网络环境下训练的策略可能难以泛化到其他环境。
+
+\section{远距离与异构终端网络特性分析}
+
+为了更好地理解Swift算法的设计动机，本节分析远距离传输、多接入链路与异构终端并存环境中的网络特性。此类环境通常同时包含手机、笔记本电脑、台式机、边缘节点和云端服务等端系统，端到端路径可能跨越无线接入、城域网、广域网和卫星链路，网络条件随终端能力、接入方式和路径拥塞状态动态变化。
+
+\subsection{路径与接入特性}
+
+远距离与异构终端传输场景具有以下特点：
+
+\textbf{（1）往返时延跨度大}：不同路径的RTT可能从毫秒级扩展到数百毫秒级。较大的带宽时延积使发送端需要更准确地估计可容纳的在途数据量，否则容易出现带宽利用不足或队列持续驻留。
+
+\textbf{（2）接入链路异构}：终端可能通过有线以太网、Wi-Fi、蜂窝网络或卫星链路接入网络。不同接入链路在带宽、误码、调度粒度和队列管理方式上差异显著，使固定参数的拥塞控制难以同时适配多类路径。
+
+\textbf{（3）终端能力差异明显}：手机、笔记本电脑、桌面终端和边缘设备在处理能力、网卡能力、缓冲区规模和操作系统协议栈配置方面存在差异，这会影响ACK反馈节奏、突发发送行为和拥塞窗口恢复速度。
+
+\textbf{（4）路径状态动态变化}：无线信道波动、移动性、跨流量突发和路由变化会导致RTT、吞吐量和丢包风险快速变化。拥塞控制算法需要利用多维状态信号进行及时感知，而不能仅依赖单一丢包反馈。
+
+\subsection{流量特性分析}
+
+远距离与多终端网络中的流量负载具有明显的多样性：
+
+\textbf{（1）业务类型多样}：文件同步、视频会议、网页访问、远程桌面、云游戏、在线备份和模型数据传输等业务可能同时存在，对吞吐量、时延和稳定性的要求不同。
+
+\textbf{（2）突发跨流量普遍}：非响应式UDP流、周期性上报、后台同步和多媒体码流可能在短时间内占用瓶颈队列，放大RTT抖动并干扰TCP长流的窗口控制。
+
+\textbf{（3）长短流混合}：短流关注完成时间，长流关注持续吞吐量和稳定性。若拥塞控制响应过慢，短流可能受到排队延迟影响；若响应过激，长流又可能出现带宽利用不足。
+
+\textbf{（4）反馈信号不完全一致}：丢包、ECN、RTT膨胀和协议栈状态分别反映不同层面的网络变化。多信号融合能够降低单一信号误判带来的风险。
+
+\subsection{应用延迟需求分析}
+
+不同应用对网络延迟和吞吐量的需求并不相同：
+
+\textbf{（1）实时交互业务}：视频会议、云游戏和远程协作要求持续低延迟，拥塞控制需要避免队列长期驻留。
+
+\textbf{（2）大文件与数据同步业务}：云盘同步、备份和数据分发更关注带宽利用率，需要在不引发持续拥塞的前提下充分填充高BDP路径。
+
+\textbf{（3）移动终端业务}：移动设备受无线链路波动和终端能耗约束影响，更需要平滑、稳定且可自适应的窗口调节策略。
+
+\textbf{（4）边缘与云服务访问}：边缘计算、远程推理和跨区域服务调用同时关注时延、吞吐量和鲁棒性，需要算法在多目标之间动态权衡。
+
+Swift算法的“高吞吐、低排队、强鲁棒”设计目标正是为了适应上述复杂场景：在路径条件良好时保持较高带宽利用率，在拥塞或突发跨流量出现时及时降低排队和丢包风险。
+
+\subsection{网络设备与反馈机制特性}
+
+网络设备和协议栈反馈机制对拥塞控制算法有重要影响：
+
+\textbf{（1）缓冲区规模差异}：不同接入设备和中间节点的缓冲区规模差异较大，浅缓冲链路更容易丢包，深缓冲链路更容易产生排队时延。
+
+\textbf{（2）ECN支持程度不一}：部分网络设备支持ECN标记，可以在队列溢出前提供早期拥塞信号。算法需要在可获得ECN信号时充分利用该信号，同时在无ECN场景下仍保持基于丢包和RTT的稳健响应。
+
+\textbf{（3）终端协议栈可观测性增强}：现代协议栈能够暴露拥塞状态、拥塞事件、RTT样本和在途字节等信息，为强化学习辅助的多维状态建模提供基础。
+
+\textbf{（4）部署形态多样}：拥塞控制逻辑既可以在内核TCP栈中实现，也可以在用户态传输协议或仿真环境中验证。统一的状态感知和窗口控制框架有助于后续迁移与工程化。
+
+\section{拥塞控制的理论基础}
+
+本节介绍网络拥塞控制的理论基础，包括流量模型、排队论分析和控制论视角，为理解Swift算法的设计决策提供理论支撑。
+
+\subsection{网络流量模型}
+
+网络流量建模是拥塞控制研究的基础。常用的流量模型包括：
+
+\textbf{（1）泊松模型}：传统上假设数据包到达服从泊松过程，即到达间隔服从指数分布。泊松模型的数学性质简单，便于分析，但实际网络流量通常表现出更强的突发性。
+
+\textbf{（2）自相似模型}：研究表明，网络流量具有自相似（Self-Similar）特性，即在不同时间尺度上呈现相似的统计特性。自相似流量可以用分数布朗运动（Fractional Brownian Motion）或Pareto分布建模。设流量过程为$X(t)$，其自相似性定义为：
+\begin{equation}
+X(t) \stackrel{d}{=} m^{-H} X(mt), \quad \forall m > 0
+\end{equation}
+其中$H$是Hurst参数（$0.5 < H < 1$），$\stackrel{d}{=}$表示同分布。
+
+\textbf{（3）ON-OFF模型}：TCP流量可以用ON-OFF模型描述，其中ON状态对应数据传输，OFF状态对应等待。如果ON和OFF的持续时间服从重尾分布，聚合流量将表现出自相似特性。
+
+\textbf{（4）流体模型}：在分析大规模网络时，可以将离散的数据包流近似为连续的流体流。设发送速率为$x(t)$，队列长度为$q(t)$，链路容量为$C$，则流体模型为：
+\begin{equation}
+\dot{q}(t) = x(t) - C, \quad \text{当 } q(t) > 0 \text{ 或 } x(t) > C
+\end{equation}
+
+Swift算法的设计考虑了流量的突发性特征。当前实现优先使用显式丢包回调和ECN状态作为拥塞判定信号，并将RTT膨胀用于$\alpha$参数自适应调节，从而在突发跨流量和路径RTT波动下避免仅依赖单一信号作出窗口决策。
+
+\subsection{排队论分析}
+
+排队论为分析网络缓冲区行为提供了理论工具。考虑单个瓶颈链路，可以建模为M/M/1队列（泊松到达、指数服务时间、单服务器）或更一般的G/G/1队列。
+
+\textbf{M/M/1队列}的稳态性质：设到达率为$\lambda$，服务率为$\mu$，负载为$\rho = \lambda/\mu$（$\rho < 1$时队列稳定），则：
+
+平均队列长度：
+\begin{equation}
+\bar{Q} = \frac{\rho}{1-\rho}
+\end{equation}
+
+平均等待时间（Little公式）：
+\begin{equation}
+\bar{W} = \frac{\bar{Q}}{\lambda} = \frac{1}{\mu - \lambda}
+\end{equation}
+
+队列长度分布：
+\begin{equation}
+P(Q = k) = (1-\rho)\rho^k, \quad k = 0, 1, 2, ...
+\end{equation}
+
+从排队论角度，Swift的低延迟特性源于其维持较低的平均负载$\rho$。通过对ECN信号的敏感响应，Swift在$\rho$接近1之前就降低发送速率，从而保持$\bar{Q}$和$\bar{W}$在较低水平。
+
+\textbf{ECN标记概率}：设队列长度为$Q$，ECN标记阈值为$K$，则在RED（Random Early Detection）策略下：
+\begin{equation}
+P(\text{标记}|Q) = \begin{cases}
+0 & Q < min\_th \\
+\frac{Q - min\_th}{max\_th - min\_th} & min\_th \leq Q < max\_th \\
+1 & Q \geq max\_th
+\end{cases}
+\end{equation}
+
+Swift对ECN的利用采用直接状态检测机制：当ecnState为ECN\_CE\_RCVD或ECN\_ECE\_RCVD时，判定存在ECN拥塞信号，触发保留因子为0.75的早期预警窗口缩减。这种直接检测方式避免了基于事件率的间接测量，具有更低的响应延迟。
+
+\subsection{控制论视角}
+
+从控制论角度，TCP拥塞控制可以建模为反馈控制系统。系统框图包括：
+\begin{itemize}
+    \item 被控对象：网络（包括链路、路由器、队列）
+    \item 控制器：拥塞控制算法
+    \item 反馈信号：ACK、RTT、ECN标记、丢包
+    \item 控制输入：发送窗口或发送速率
+    \item 干扰：跨流量、背景噪声
+\end{itemize}
+
+\textbf{线性化分析}：在稳态点附近，TCP系统可以线性化。设稳态发送速率为$x^*$，稳态队列长度为$q^*$，令$\delta x = x - x^*$，$\delta q = q - q^*$，则线性化系统为：
+\begin{equation}
+\dot{\delta q} = \delta x
+\end{equation}
+\begin{equation}
+\delta x(t) = -K \cdot \delta q(t - \tau)
+\end{equation}
+其中$K$是控制增益，$\tau$是反馈延迟（约等于RTT）。
+
+系统的特征方程为：
+\begin{equation}
+s + K e^{-s\tau} = 0
+\end{equation}
+
+稳定性条件（小增益定理）：
+\begin{equation}
+K \tau < \frac{\pi}{2}
+\end{equation}
+
+这意味着在高延迟网络中，控制增益$K$必须足够小以保证稳定性，但过小的$K$会导致收敛缓慢。Swift的自适应参数调优机制可以理解为根据$\tau$（通过RTT测量）动态调整$K$（通过$\alpha$参数）。
+
+\textbf{时滞系统分析}：网络的反馈延迟（RTT）使得拥塞控制成为时滞系统。时滞系统的稳定性分析比常微分方程系统更复杂。Swift通过综合使用多种拥塞信号，减少了对单一信号（如RTT）的依赖，提高了系统的鲁棒性。
+
+\section{强化学习在网络中的应用综述}
+
+强化学习技术在网络领域的应用日益广泛。本节综述强化学习在路由优化、资源分配、安全防护等方面的研究进展，为Swift算法的强化学习设计提供参考。
+
+\subsection{路由优化}
+
+强化学习可以用于学习最优路由策略。Q-routing算法将每个路由器建模为智能体，学习到各目的地的最优下一跳。Deep Q-Network（DQN）被应用于软件定义网络（SDN）中的流量工程，学习全局最优的路由配置。
+
+与路由优化相比，拥塞控制的特点是：（1）时间尺度更细（毫秒级vs.秒级）；（2）状态空间更大（每个流独立状态）；（3）实时性要求更高。这些特点决定了Swift采用基于规则的决策机制，而非深度神经网络。
+
+\subsection{资源分配}
+
+在云计算和边缘计算中，强化学习被用于动态资源分配。例如，使用深度强化学习进行虚拟机放置、容器调度、带宽分配等。这些应用的决策周期通常在秒级到分钟级，对实时性要求较低。
+
+Swift算法借鉴了资源分配中的多目标优化思想，通过差异化响应机制平衡吞吐量和延迟两个目标。
+
+\subsection{安全防护}
+
+强化学习在网络安全领域也有应用，如入侵检测、DDoS防护等。与安全应用不同，拥塞控制需要处理合法流量，不能简单地丢弃可疑流量，需要更精细的控制策略。
+
+\subsection{与Swift的关系}
+
+Swift算法继承了强化学习的核心思想——通过与环境交互学习最优策略，但在具体实现上做了以下调整：
+\begin{itemize}
+    \item 采用基于规则的策略而非神经网络策略，保证实时性和可解释性
+    \item 将观测空间扩展到11维，充分利用TCP协议栈信息
+    \item 实现每流独立状态管理，支持大规模并发场景
+    \item 通过自适应参数调优实现策略的在线优化
+\end{itemize}
+
+表\ref{tab:cc_comparison_summary}从多个维度对比了上述代表性拥塞控制算法与Swift的技术特性。
+
+\begin{table}[htbp]
+\centering
+\caption{代表性拥塞控制算法综合对比}
+\label{tab:cc_comparison_summary}
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+\textbf{特性} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} & \textbf{DCTCP} & \textbf{Swift} \\
+\hline
+拥塞信号类型 & 丢包 & 丢包 & RTT & ECN比例 & 多信号融合 \\
+ECN利用 & 否 & 否 & 否 & 是 & 是 \\
+差异化响应 & 否 & 否 & 否 & 部分 & 是 \\
+参数自适应 & 否 & 否 & 否 & 否 & 是 \\
+BDP估计 & 否 & 否 & 是 & 否 & 是 \\
+每流状态管理 & 是 & 是 & 是 & 是 & 是 \\
+可解释性 & 高 & 高 & 中 & 高 & 高 \\
+学习能力 & 无 & 无 & 无 & 无 & 在线自适应 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{本章小结}
+
+本章综述了网络拥塞控制领域的相关研究工作。传统的基于丢包算法（如NewReno、CUBIC）虽然成熟稳定，但存在拥塞信号滞后、缓冲区膨胀等问题；基于延迟算法（如Vegas、BBR）能够提前感知拥塞，但RTT测量不稳定且公平性较差；ECN机制提供了更精确的拥塞信号，但现有算法的利用还不够充分；基于机器学习的方法展现出自适应学习的潜力，但仍存在状态空间设计、奖励函数设计、训练效率等方面的问题。
+
+Swift算法在现有工作的基础上，通过设计完整的11维观测空间、提出多信号融合拥塞检测方法、实现差异化拥塞响应机制和自适应参数调优，试图解决上述问题，实现高吞吐量和低延迟的拥塞控制目标。

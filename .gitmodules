@@ -1,0 +1,3 @@
+[submodule "markdownlint"]
+	path = markdownlint
+	url = git@github.com:markdownlint/markdownlint.git

@@ -1,0 +1,66 @@
+\chapter*{专用术语注释表}
+\addcontentsline{toc}{chapter}{专用术语注释表}
+
+\section*{符号说明}
+\begin{supertabular}{p{3cm}p{10cm}}
+$cwnd$ & 拥塞窗口（Congestion Window），TCP发送端在未收到确认的情况下最多可以发送的数据量（字节） \\
+$ssthresh$ & 慢启动阈值（Slow Start Threshold），区分慢启动和拥塞避免阶段的临界值（字节） \\
+$\alpha$ & 乘性增加因子（Multiplicative Increase Factor），控制拥塞避免阶段窗口增长速度，取值范围$[0.85, 1.30]$，基准值1.10 \\
+$\gamma$ & 加性增加因子（Additive Increase Factor），控制窗口的加性增量，默认值为1.0 \\
+$\rho$ & 窗口保留因子（Window Retention Factor），拥塞响应后新窗口与原窗口的比值 \\
+$\rho_{\text{loss}}$ & 丢包保留因子，默认值0.70 \\
+$\rho_{\text{ecn}}$ & ECN保留因子，默认值0.75 \\
+$\rho_{\text{timeout}}$ & 超时保留因子，默认值0.50 \\
+$\eta$ & 奖励信号指数移动平均（EMA）衰减系数，默认值0.1 \\
+$BDP$ & 带宽延迟积（Bandwidth-Delay Product），网络链路能够容纳的最大在途数据量（字节） \\
+$MSS$ & 最大报文段长度（Maximum Segment Size），本文取1440字节 \\
+$RTT$ & 往返时延（Round-Trip Time），数据包从发送端到接收端再返回的总时间 \\
+$W(t)$ & 时刻$t$的拥塞窗口大小 \\
+$W_{max}$ & 上次拥塞事件前的最大窗口大小 \\
+$K$ & CUBIC算法中恢复到$W_{max}$所需的时间 \\
+$C$ & 链路容量或CUBIC缩放因子 \\
+$\beta$ & 窗口缩减因子 \\
+$\delta$ & 延迟惩罚权重参数 \\
+$\lambda$ & 丢包惩罚权重参数 \\
+$H$ & Hurst参数，描述流量自相似性 \\
+$\bar{Q}$ & 平均队列长度 \\
+$\bar{W}$ & 平均等待时间 \\
+$\tau$ & 反馈延迟（约等于RTT） \\
+\end{supertabular}
+
+\section*{缩略词}
+\begin{supertabular}{p{3cm}p{10cm}}
+TCP & 传输控制协议（Transmission Control Protocol） \\
+ECN & 显式拥塞通知（Explicit Congestion Notification） \\
+RTT & 往返时延（Round-Trip Time） \\
+BDP & 带宽延迟积（Bandwidth-Delay Product） \\
+MDP & 马尔可夫决策过程（Markov Decision Process） \\
+RL & 强化学习（Reinforcement Learning） \\
+AIMD & 加性增乘性减（Additive Increase Multiplicative Decrease） \\
+MSS & 最大报文段长度（Maximum Segment Size） \\
+DCTCP & 数据中心TCP（Data Center TCP） \\
+BBR & 瓶颈带宽和往返传播时间（Bottleneck Bandwidth and Round-trip propagation time） \\
+CUBIC & 三次函数拥塞控制算法 \\
+ACK & 确认（Acknowledgment） \\
+SACK & 选择性确认（Selective Acknowledgment） \\
+CE & 拥塞经历（Congestion Experienced） \\
+ECE & ECN回显（ECN-Echo） \\
+CWR & 拥塞窗口缩减（Congestion Window Reduced） \\
+RED & 随机早期检测（Random Early Detection） \\
+CA & 拥塞算法（Congestion Algorithm） \\
+PPO & 近端策略优化（Proximal Policy Optimization） \\
+DQN & 深度Q网络（Deep Q-Network） \\
+PCC & 面向性能的拥塞控制（Performance-oriented Congestion Control） \\
+ZMQ & ZeroMQ消息队列 \\
+SDN & 软件定义网络（Software Defined Networking） \\
+QoS & 服务质量（Quality of Service） \\
+QUIC & 快速UDP互联网连接（Quick UDP Internet Connections） \\
+RDMA & 远程直接内存访问（Remote Direct Memory Access） \\
+PFC & 优先级流量控制（Priority Flow Control） \\
+INT & 带内网络遥测（In-band Network Telemetry） \\
+HPCC & 高精度拥塞控制（High Precision Congestion Control） \\
+WAN & 广域网（Wide Area Network） \\
+Pod & 交换机组（Point of Delivery） \\
+EMA & 指数移动平均（Exponential Moving Average） \\
+IPC & 进程间通信（Inter-Process Communication） \\
+\end{supertabular}

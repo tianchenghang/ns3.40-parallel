@@ -1,0 +1,25 @@
+\begin{ProgramList}
+
+第\ref{Chap:chap3}章 Swift拥塞控制算法Python实现（swift-tcp文件夹）
+
+tcp\_swift.py：Swift强化学习智能体核心实现（约380行），包含TcpSwift类，实现多信号融合拥塞检测、差异化拥塞响应、自适应参数调优（$\alpha$动态调整）、融合控制策略（BDP估计与窗口调整）、每流独立状态管理等全部核心算法逻辑
+
+tcp\_base.py：TCP观测空间基类（约140行），实现TcpEventBased（11维事件驱动）和TcpTimeBased（16维时间驱动）两种观测空间解析模式，负责将ns-3传递的原始观测向量解析为语义化的状态参数
+
+test\_swift.py：Swift算法测试与运行脚本（约120行），基于ns3-gym框架的强化学习训练/评估入口，创建OpenGym环境实例，为每个TCP套接字（socketUuid）创建独立的Swift智能体实例，实现多流并发控制
+\\
+
+第\ref{Chap:chap3}章 ns-3网络仿真C++模块（swift-tcp文件夹）
+
+tcp-swift.cc / tcp-swift.h：TcpSwift拥塞控制类实现，继承自TcpRlBase基类，负责在ns-3 TCP协议栈中注册Swift算法并创建TcpSwiftEnv环境实例
+
+tcp-swift-env.cc / tcp-swift-env.h：Swift专用OpenGym环境类（约230行），继承自TcpGymEnv，实现11维观测空间的数据采集与传递、ECN增强的奖励计算（ECN惩罚因子）、延迟拥塞窗口应用机制（Deferred Cwnd）
+\\
+
+第\ref{Chap:chap4}章 网络仿真实验配置（swift-tcp文件夹）
+
+sim.cc：ns-3网络仿真主程序（约400行），构建哑铃型（Dumbbell）网络拓扑、配置TCP协议参数、设置FlowMonitor流量监控、配置OpenGym强化学习接口，支持通过命令行参数灵活配置9种实验场景
+
+Makefile：自动化编译与实验运行脚本，支持多场景批量实验、对比测试和日志收集
+
+\end{ProgramList}

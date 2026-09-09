@@ -1,0 +1,116 @@
+{
+  "source": "logs/{comparison,comparison-udp}/*.flowmonitor (288 artifacts)",
+  "kpi_csv": "logs/summary/kpi_forward.csv",
+  "kpi_csv_status": "kpi_forward.csv regenerated: 288 rows CHANGED vs previous version",
+  "metric_definition": "forward TCP data flows only (proto 6, 10.1.x -> 10.2.x)",
+  "selected_groups": {
+    "tcp_only": [
+      "S1=intra_rack_10g",
+      "S2=intra_rack_25g",
+      "S3=leaf_spine_20g",
+      "S4=asymmetric_high",
+      "S5=congested_heavy",
+      "S6=symmetric_low",
+      "S7=dc_500m",
+      "S8=dc_100m",
+      "S9=cross_dc_wan",
+      "S10=wan_metro",
+      "S11=wifi_ac",
+      "S12=wifi_ax",
+      "S13=wifi_n",
+      "S14=wifi_legacy",
+      "S15=nr_5g_embb",
+      "S16=nr_5g_edge",
+      "S17=lte_good",
+      "S18=lte_poor",
+      "S19=satellite_geo"
+    ],
+    "udp_burst": [
+      "S1",
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7",
+      "S8",
+      "S10",
+      "S13",
+      "S14",
+      "S16",
+      "S17",
+      "S18",
+      "S19"
+    ]
+  },
+  "stale_outputs_removed": [
+    "fig01_goodput_clean.pdf",
+    "fig01_goodput_clean.png",
+    "fig01_goodput_clean.svg",
+    "fig02_delay_clean.pdf",
+    "fig02_delay_clean.png",
+    "fig02_delay_clean.svg",
+    "fig03_tradeoff_clean.pdf",
+    "fig03_tradeoff_clean.png",
+    "fig03_tradeoff_clean.svg",
+    "fig04_udp_burst_clean.pdf",
+    "fig04_udp_burst_clean.png",
+    "fig04_udp_burst_clean.svg",
+    "fig06_architecture_zh.pdf",
+    "fig06_architecture_zh.png",
+    "fig06_architecture_zh.svg",
+    "fig07_workflow_zh.pdf",
+    "fig07_workflow_zh.png",
+    "fig07_workflow_zh.svg"
+  ],
+  "figures": [
+    {
+      "stem": "fig01_goodput_clean",
+      "files": [
+        "fig01_goodput_clean.png",
+        "fig01_goodput_clean.pdf",
+        "fig01_goodput_clean.svg"
+      ]
+    },
+    {
+      "stem": "fig02_delay_clean",
+      "files": [
+        "fig02_delay_clean.png",
+        "fig02_delay_clean.pdf",
+        "fig02_delay_clean.svg"
+      ]
+    },
+    {
+      "stem": "fig03_tradeoff_clean",
+      "files": [
+        "fig03_tradeoff_clean.png",
+        "fig03_tradeoff_clean.pdf",
+        "fig03_tradeoff_clean.svg"
+      ]
+    },
+    {
+      "stem": "fig04_udp_burst_clean",
+      "files": [
+        "fig04_udp_burst_clean.png",
+        "fig04_udp_burst_clean.pdf",
+        "fig04_udp_burst_clean.svg"
+      ]
+    },
+    {
+      "stem": "fig06_architecture_zh",
+      "files": [
+        "fig06_architecture_zh.png",
+        "fig06_architecture_zh.pdf",
+        "fig06_architecture_zh.svg"
+      ]
+    },
+    {
+      "stem": "fig07_workflow_zh",
+      "files": [
+        "fig07_workflow_zh.png",
+        "fig07_workflow_zh.pdf",
+        "fig07_workflow_zh.svg"
+      ]
+    }
+  ]
+}

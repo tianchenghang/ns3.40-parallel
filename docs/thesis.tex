@@ -1,0 +1,981 @@
+% sudo apt update && sudo apt install -y texlive-full
+% 使用 XeLaTeX 编译: xelatex thesis.min.tex
+% CCF 中国计算机学会 A 类会议论文格式
+% Swift: 基于强化学习的多信号融合自适应网络拥塞控制算法
+
+\documentclass[10pt,twocolumn]{article}
+
+% 中文支持
+\usepackage[UTF8]{ctex}
+\usepackage{fontspec}
+
+% 数学公式
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% 图表
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+
+% 算法
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% 引用和链接
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{url}
+
+% 颜色
+\usepackage{xcolor}
+
+% 页面设置
+\usepackage{geometry}
+\geometry{a4paper,left=1.9cm,right=1.9cm,top=2.2cm,bottom=2.2cm,columnsep=0.55cm}
+
+% 行距
+\usepackage{setspace}
+\setstretch{1.08}
+
+% 标题间距
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{10pt}{5pt}
+\titlespacing*{\subsection}{0pt}{7pt}{3pt}
+\titlespacing*{\subsubsection}{0pt}{5pt}{2pt}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\small\bfseries}{\thesubsubsection}{0.5em}{}
+
+% 紧凑列表
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.2em}
+
+% caption
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+
+% 浮动体间距
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{2pt}
+
+% 段落间距
+\setlength{\parskip}{1.5pt plus 0.5pt minus 0.5pt}
+
+% 算法环境字体
+\usepackage{etoolbox}
+\AtBeginEnvironment{algorithmic}{\small}
+
+%% 英文字体默认使用 Times New Roman
+\RequirePackage{xltxtra} % \XeTeX Logo
+\setmainfont{Times New Roman}   % 衬线字体
+\setsansfont{Arial}             % 无衬线字体
+\setmonofont{Courier New}       % 等宽字体，一般是打印字体
+%% 中文字体默认使用宋体
+%\setCJKmainfont{songti}
+\IfFontExistsTF{STXingkai}{
+  \setCJKfamilyfont{hwxk}{STXingkai} % Windows
+}{
+  \setCJKfamilyfont{hwxk}{Sarasa Gothic SC} % Other
+}
+\newcommand{\stxk}{\CJKfamily{hwxk}}
+\IfFontExistsTF{SimSun}{
+  \setCJKfamilyfont{zhsong}[AutoFakeBold = {2.17}]{SimSun} % Windows
+}{
+  \setCJKfamilyfont{zhsong}[AutoFakeBold = {2.17}]{Sarasa Gothic SC} % Other
+}
+%\renewcommand{\songti}{\CJKfamily{zhsong}}
+
+\begin{document}
+
+%========================================
+% 标题
+%========================================
+
+\title{\Large\textbf{Swift: 基于强化学习的多信号融合自适应网络拥塞控制算法}}
+
+\author{
+\normalsize 杭天铖 \\
+\small 南京邮电大学 \\
+\small 1224045520@njupt.edu.cn
+}
+
+\date{}
+
+\maketitle
+
+%========================================
+% 摘要
+%========================================
+
+\begin{abstract}
+\small
+端到端网络传输的服务对象正在从固定终端和近端高质量链路，扩展到跨地域远距离传输、蜂窝/无线/卫星等多接入路径，以及手机、笔记本、台式机和边缘设备等异构终端并存的复杂场景。传统基于丢包的算法存在拥塞信号滞后与缓冲区膨胀问题，基于延迟的算法面临RTT测量噪声与共存公平性不足等缺陷；当长RTT、链路抖动与终端能力差异同时出现时，固定参数、单一信号驱动的拥塞控制更难兼顾吞吐、延迟与稳定性。本文提出Swift——一种面向远距离传输与异构终端的强化学习辅助多信号融合自适应拥塞控制方法，其核心创新收敛为三点：（1）\textbf{多信号拥塞状态感知}，将ECN协商与标记状态、拥塞避免状态机状态、拥塞事件语义、RTT与最小RTT、在途字节等协议栈内部信息组织为11维有效观测子空间（嵌入15元素OpenGym传输容器，另含套接字标识、环境类型、仿真时间、节点标识四项跨进程路由元数据），并以两级优先级判定区分超时、ECN触发的窗口收缩与普通丢包；（2）\textbf{强化学习辅助的自适应融合控制}，由最小RTT感知的RTT膨胀比、环境奖励相对其自身慢速基线的偏移量以及连续增长趋势共同调节每流乘性增加因子$\alpha\in[0.85,1.30]$，并以有界步长逼近$\alpha\times BDP$目标窗口，其中BDP由滑动时间窗口投递速率的窗口最大值滤波给出；（3）\textbf{面向不确定拥塞信号的稳定性与安全机制}，包括差异化窗口保留因子（丢包$\rho=0.70$、ECN $\rho=0.75$、超时$\rho=0.50$）、连续递减下限$D_{\max}=3$、降窗后4个ACK事件冻结、不奖励队列驻留的慢启动阈值更新以及窗口安全钳位。
+
+在ns-3.40离散事件仿真平台上，本文以哑铃拓扑、3条并发长流以及800 Mbps UDP突发流对照设置评估Swift。为消除既有汇总表将反向ACK流计入指标的缺陷（该缺陷使数据面延迟被折半、吞吐量被抬高约1.7\%），本文仅按前向数据流重新导出全部KPI（\texttt{logs/summary/kpi\_forward.csv}）：经四条排除规则审计后，纯TCP设置保留19个场景、UDP突发设置保留15个场景。结果表明，在微秒级RTT高速链路上Swift与NewReno/CUBIC的吞吐量在三位小数上完全一致（差异$+0.000\%$），而平均单向延迟降低82.1\%$\sim$93.6\%；在5G eMBB、802.11ax/ac与城域WAN等中速接入场景延迟降低10.2\%$\sim$41.0\%；在GEO卫星链路上相对NewReno/CUBIC均值提升吞吐量29.8\%，UDP突发下该优势扩大至87.8\%；Swift在19/19（纯TCP）与15/15（UDP突发）个场景中丢包率均为0.00\%，Jain公平性指数均值1.000，UDP突发下吞吐量保持率80.54\%，优于NewReno（75.86\%）、CUBIC（78.78\%）与BBR（39.07\%）。本文同时如实报告混合与负向结果：跨域广域网场景（\texttt{cross\_dc\_wan}）吞吐量较CUBIC低约29\%，其机理为修复前的逐ACK投递速率估计系统性低估带宽，v3.0.0已替换为时间窗口估计；在低速与长RTT接入链路上，Swift以队列驻留换取零丢包，平均单向延迟相对更优的丢包类基线抬升7\%$\sim$129\%。全部定量结果均来自v3.0.0修复前的实验产物，全矩阵重跑尚未完成，故上述数值构成本文的证据边界。
+
+\vspace{0.3em}
+\noindent\textbf{关键词：}拥塞控制；强化学习；多信号融合；显式拥塞通知；自适应参数调优；远距离传输；异构终端
+\end{abstract}
+
+%========================================
+% 1. 引言
+%========================================
+
+\section{引言}
+
+随着云计算、大数据、人工智能、移动互联网和物联网技术的蓬勃发展，端到端网络传输的服务对象正在从固定主机扩展到手机、笔记本、台式机、边缘节点和传感设备等异构终端，传输路径也从近端局域链路延伸到跨城、跨域、蜂窝接入、无线局域网和卫星通信等远距离复杂网络。TCP作为互联网传输层的核心协议，其拥塞控制机制的性能直接影响网络资源利用效率、应用响应延迟和用户体验。
+
+在这类端到端传输场景中，网络路径和终端侧条件呈现出更强的异构性。一方面，城域/广域网、蜂窝网络、WiFi与卫星链路具有不同的RTT量级、丢包背景、可用带宽和链路抖动；另一方面，手机、电脑、边缘设备等终端在处理能力、无线接入方式、移动性和业务负载上差异显著。同一拥塞控制策略需要在短RTT近端高速链路与长RTT远距离链路之间切换，并在突发跨流量、无线误码和终端负载波动下保持稳定。上述复杂性使传统依赖固定参数或单一拥塞信号的算法难以同时满足高吞吐、低延迟和低丢包目标。
+
+传统基于丢包的拥塞控制算法（如NewReno\cite{newreno}、CUBIC\cite{cubic}）将丢包作为拥塞信号，但丢包是拥塞的滞后指示器，通常意味着网络缓冲区已经溢出，排队延迟已累积到较高水平，产生"Bufferbloat"问题\cite{bufferbloat}。基于延迟的算法（如Vegas\cite{vegas}、BBR\cite{bbr}）尝试通过RTT变化提前感知拥塞，但RTT测量易受操作系统调度、路径抖动等因素干扰，且与基于丢包算法共存时存在严重的公平性问题\cite{bbrfairness}。
+
+ECN机制\cite{rfc3168}允许网络设备在队列超过阈值时标记数据包而非丢弃，实现更早、更精确的拥塞通知。DCTCP\cite{dctcp}利用ECN标记比例进行细粒度调整，取得了良好效果。然而，现有算法对ECN信号的利用仍不够充分，大多采用静态参数配置，缺乏自适应能力。
+
+近年来，强化学习在网络拥塞控制中的应用受到关注\cite{rlcc}。Aurora\cite{aurora}采用PPO算法训练深度神经网络策略，Orca\cite{orca}使用强化学习动态调整AIMD参数。然而，现有方案存在状态空间设计不完善（通常仅4-6维）、未利用ECN和拥塞控制状态机信息、奖励函数难以平衡多目标、训练效率低等问题。
+
+与单一网络域相比，跨地域和多接入传输的拥塞信号更难解释。丢包可能来自真实队列溢出，也可能来自无线误码或链路切换；RTT升高既可能表示排队，也可能来自路径变化、终端调度延迟或接入链路抖动；突发UDP/RPC/视频/备份流量还会造成短时间带宽挤占。因此，Swift的设计目标不是某一类专用网络，而是端到端路径条件高度可变的通用传输场景。相应地，本文将微秒级RTT的近端高速链路、无线局域网、蜂窝接入、城域/跨域广域网与GEO卫星链路组织为一组覆盖不同RTT量级、带宽量级和接入条件的评估集合；其中短RTT高速率链路（如机架内与叶脊互联）仅作为该集合中RTT最小、排队延迟占比最高的一类\emph{被评估的网络条件}出现，并不构成算法的设计动机或部署前提。
+
+针对上述挑战，本文提出Swift算法——一种基于强化学习辅助的多信号融合自适应网络拥塞控制方法，其决策策略以每个ACK事件为粒度在协议栈之外求解，经ns3-gym\cite{opengym}接口与ns-3.40协议栈交互。本文的核心创新收敛为如下三点：
+
+\textbf{（1）面向远距离与异构终端的多信号拥塞状态感知}：将ECN协商与标记状态、拥塞避免状态机状态、拥塞事件语义、RTT与最小RTT、在途字节等协议栈内部信息组织为11维有效观测子空间，并据此以两级优先级判定区分超时、ECN触发的窗口收缩与普通丢包，为异构终端与多接入路径提供比"仅丢包"或"仅RTT"更完整的拥塞语义。
+
+\textbf{（2）强化学习辅助的自适应融合控制}：由最小RTT感知的RTT膨胀比、环境奖励相对其自身慢速基线的偏移量以及连续增长趋势三路信号共同调节每流乘性增加因子$\alpha \in [0.85, 1.30]$，并以有界步长逼近$\alpha \times BDP$目标窗口；BDP由滑动时间窗口投递速率的窗口最大值滤波给出，配合最小RTT自适应的HyStart风格慢启动退出与管道利用率感知加性递增，在吞吐、延迟与稳定性之间取得在线折中。
+
+\textbf{（3）面向不确定拥塞信号的稳定性与安全机制}：依据信号严重程度施加差异化窗口保留因子（丢包0.70、ECN 0.75、超时0.50），并以连续递减下限$D_{\max}=3$、降窗后4个ACK事件冻结、不奖励队列驻留的慢启动阈值更新、窗口安全钳位以及超时时丢弃陈旧动作等机制，抑制误判信号与陈旧带宽估计导致的窗口过度收缩和振荡。
+
+%========================================
+% 2. 相关工作
+%========================================
+
+\section{相关工作}
+
+\subsection{传统拥塞控制算法}
+
+\subsubsection{基于丢包的算法}
+
+TCP Tahoe和Reno是最早的拥塞控制算法\cite{jacobson1988}，引入了慢启动、拥塞避免和快速重传/恢复机制。TCP NewReno\cite{newreno}改进了快速恢复机制，能够处理突发丢包情况，是RFC 6582定义的标准算法。
+
+TCP CUBIC\cite{cubic}是Linux自2.6.19版本以来的默认算法，采用三次函数模型调整窗口：
+\begin{equation}
+W(t) = C \cdot (t - K)^3 + W_{max}
+\end{equation}
+其中$K = \sqrt[3]{W_{max} \cdot \beta / C}$。CUBIC的窗口增长与RTT无关，在高BDP网络中具有更快的收敛速度。
+
+基于丢包算法的共同缺陷包括：（1）拥塞信号滞后，缓冲区溢出前已积累大量排队延迟；（2）缓冲区膨胀，持续增加发送速率直至丢包；（3）无法区分拥塞程度，对所有拥塞采用统一的窗口减半策略。
+
+\subsubsection{基于延迟的算法}
+
+TCP Vegas\cite{vegas}通过比较期望吞吐量$cwnd/BaseRTT$与实际吞吐量$cwnd/RTT$的差值$\Delta$调整窗口，当$\Delta < \alpha$时增窗，$\Delta > \beta$时降窗。
+
+BBR\cite{bbr}通过估计瓶颈带宽$BtlBw$和最小RTT $RTT_{prop}$，以BDP为目标调整发送速率：$pacing\_rate = pacing\_gain \times BtlBw$。BBR采用周期性增益调整实现带宽探测。
+
+Copa\cite{copa}将目标排队延迟设为$RTT_{standing} - RTT_{min}$的函数，并引入竞争模式检测机制。
+
+这类算法面临RTT测量不稳定（受调度延迟、路径抖动影响）、与丢包算法共存公平性差（研究表明BBR与CUBIC共存时吞吐量可下降30\%以上\cite{bbrfairness}）、参数敏感等问题。
+
+\subsubsection{混合算法}
+
+Compound TCP\cite{compound}叠加基于延迟的窗口分量，Illinois\cite{illinois}根据RTT调整AIMD参数，Westwood\cite{westwood}通过ACK到达率估计带宽。混合算法在一定程度上缓解了单一信号的局限性，但增加了复杂性。
+
+\subsection{ECN机制与相关算法}
+
+ECN\cite{rfc3168}通过IP报头中的2比特字段传递拥塞信息，定义四种码点（Non-ECT、ECT(0)、ECT(1)、CE）。发送端设置ECT标记表明支持ECN；网络设备在队列超阈值时将ECT改为CE；接收端回传ECE标志；发送端响应后设置CWR标志。
+
+DCTCP\cite{dctcp}利用ECN标记比例$\alpha$进行细粒度调整：
+\begin{equation}
+\alpha = (1-g) \cdot \alpha + g \cdot F, \quad cwnd = cwnd \times (1 - \alpha/2)
+\end{equation}
+其中$g=1/16$是平滑因子，$F$是最近一个RTT内被标记的数据包比例。DCTCP能根据拥塞程度进行比例响应，但参数静态预设。HPCC\cite{hpcc}利用网络设备提供的INT精确拥塞信息进行控制，但需要特殊硬件支持。
+
+ECN的优势在于：（1）在丢包前提供明确拥塞信号；（2）避免重传开销；（3）信号来自网络设备显式标记，比RTT推测更可靠。然而，现有算法对ECN的利用仍不充分。
+
+\subsection{基于强化学习的拥塞控制}
+
+Aurora\cite{aurora}采用PPO算法训练神经网络策略，使用10维状态空间（延迟梯度、延迟比率、发送比率等），奖励函数为$r = throughput - \delta \cdot delay - \lambda \cdot loss$。Orca\cite{orca}在AIMD框架下用强化学习动态调整增加因子$\alpha$和减少因子$\beta$。PCC\cite{pcc}定义实用函数$U(x) = T \cdot x^\alpha - \delta \cdot L \cdot x - \beta \cdot D \cdot x$，通过梯度上升最大化。Remy\cite{remy}采用离线优化生成规则。
+
+现有方法的共同问题是：（1）状态空间较窄，通常为4$\sim$6维，未利用ECN和CA状态等协议栈内部信息；（2）奖励函数设计困难，多目标权衡复杂；（3）训练与再训练成本高；（4）在训练分布之外的路径条件上泛化能力有限。Swift在状态表示上引入协议栈内部信号，并以确定性规则代替神经网络推理，从而避免训练依赖；但本文不主张Swift在表示能力上优于深度策略，二者的取舍差异见第\ref{sec:discussion}节。
+
+\subsection{参数化白盒控制与带外参数优化}
+\label{subsec:gemini}
+
+与"用学习模型替换控制逻辑"不同，另一类工作把学习限制在\emph{参数}层面。Gemini\cite{gemini}采用分而治之框架：其参数化拥塞控制类Fusion以Linux内核模块形式实现固定的白盒控制逻辑（融合窗口式与速率式增长，以丢包率阈值$l$和RTT膨胀阈值$\delta$作为拥塞信号，并以$\alpha \cdot R^{\max}T^{\min}$为窗口目标），其在线优化引擎Booster则运行在用户态集群中，按分钟级时间窗口聚合流级统计量，并用贝叶斯优化在隐变量（区域、ISP、时段）分组内搜索控制参数$\theta=\{\omega,\alpha,\gamma,\lambda,l,\delta,n\}$。该设计的优势是数据面开销与传统算法相当，且已在生产网络完成大规模部署验证。
+
+Swift与之处于不同的设计点。第一，\textbf{决策位置与时间尺度}：Gemini的控制逻辑固定在内核数据面内，学习只在带外、以分钟级和流组粒度更新参数；Swift把整个决策策略置于协议栈之外，并在每个ACK事件（GetSsThresh/IncreaseWindow回调）上被同步调用，因此其自适应发生在单流、单事件粒度上。第二，\textbf{可用信号}：带外优化器只能观察流级统计量，而Swift的观测向量直接来自协议栈内部，可读取ECN状态机与拥塞避免状态机，从而区分ECE/CWR触发的收缩与真实丢包。第三，\textbf{部署代价}：这一选择的代价是每事件一次跨进程往返，本文实现依赖ZeroMQ同步通信，在当前形态下适用于仿真与研究平台，而非生产数据面；Gemini的内核态Fusion在这一维度上明显更易部署。第四，\textbf{证据强度}：Gemini给出了生产网络A/B测试结果，本文的证据仅来自ns-3.40仿真。因此，本文将Swift定位为"协议栈外每事件决策 + 协议栈内信号"这一设计点的可行性与代价评估，而非对Gemini式部署路线的替代。
+
+%========================================
+% 3. Swift算法设计
+%========================================
+
+\section{Swift算法设计}
+
+\subsection{系统架构}
+
+Swift的系统架构由四个核心模块组成，整体控制回路如图\ref{fig:architecture}所示。\textbf{网络仿真模块}基于ns-3\cite{ns3}构建，实现完整TCP/IP协议栈和多种网络拓扑（近端高速链路、哑铃型、无线/移动、广域网与卫星链路等）。\textbf{拥塞控制环境模块}基于OpenGym\cite{opengym}框架实现，在TCP协议栈的五个关键回调点（GetSsThresh、IncreaseWindow、PktsAcked、CongestionStateSet、CwndEvent）采集11维状态参数，并将智能体决策应用于TCP连接。\textbf{智能决策模块}采用Python实现，执行多信号融合拥塞检测、差异化拥塞响应、自适应参数调优和融合控制策略计算，维护每个TCP连接的独立状态。\textbf{进程间通信模块}采用ZeroMQ消息队列和Protocol Buffers序列化，实现仿真进程与决策进程间的同步交互；由于OpenGym路径依赖ZMQ同步通信，当前TcpSwift实验未启用MTP并行仿真。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{plots/fig06_architecture_zh.pdf}
+\caption{Swift控制回路总体架构：协议栈回调采集的观测经OpenGym容器与ZeroMQ同步信道送入智能体，智能体内部依次执行拥塞三分类判定、两级BDP估计与基线相对奖励自适应，动作对经应答写回协议栈}
+\label{fig:architecture}
+\end{figure*}
+
+Swift将拥塞控制建模为马尔可夫决策过程$\langle S, A, P, R, \gamma \rangle$。状态空间$S$为11维有效RL观测子空间（嵌入于15元素OpenGym传输容器，另含4项元数据通道），动作空间$A$直接输出新的ssthresh和cwnd值（连续动作空间），采用基于规则的确定性策略而非神经网络，以提高可解释性并避免神经网络推理依赖。
+
+状态空间设计满足以下理论要求：（1）\textbf{马尔可夫性}——当前状态包含做出最优决策所需的全部信息，即$P(s_{t+1}, r_{t+1} | s_t, a_t, s_{t-1}, ...) = P(s_{t+1}, r_{t+1} | s_t, a_t)$，通过包含ECN状态、CA状态等协议栈内部状态近似满足；（2）\textbf{信息充分性}——11维空间涵盖TCP协议栈所有关键信息，避免因信息不足导致的次优决策；（3）\textbf{可观测性}——所有参数均可从ns-3标准回调接口直接获取；（4）\textbf{维度可控性}——11维处理时间复杂度$O(1)$，基于规则的决策避免了维度灾难问题。
+
+\subsection{11维观测空间设计}
+
+Swift的观测空间采用"11维有效RL子空间 + 4项元数据通道"的15元素OpenGym传输布局，如表\ref{tab:observation}所示。参数涵盖六大类别：连接标识（socketUuid、nodeId）用于多流识别和状态隔离；时间信息（envType、simTime）用于时序分析和投递速率计算；窗口状态（ssthresh、cwnd）是拥塞控制的核心变量；传输性能（segSize、segmentsAcked、bytesInFlight）用于吞吐量估算和管道利用率计算；延迟测量（lastRtt、minRtt）用于BDP估算和拥塞程度判断；回调类型与拥塞控制状态（calledFunc、caState、caEvent、ecnState）提供协议栈完整状态。其中前4项（socketUuid、envType、simTime、nodeId）为跨进程路由用的元数据，不参与窗口决策；后11项构成参与AIMD/ECN响应/$\alpha$自适应的有效RL状态，故本文后续统称"11维观测"指该有效子空间。
+
+\begin{table}[htbp]
+\centering
+\caption{Swift 11维有效观测子空间（对应15元素容器索引4$\sim$14）}
+\label{tab:observation}
+\small
+\begin{tabular}{clp{3.2cm}}
+\toprule
+\textbf{索引} & \textbf{参数} & \textbf{说明} \\
+\midrule
+4  & ssThresh & 慢启动阈值(B) \\
+5  & cwnd & 拥塞窗口(B) \\
+6  & segSize & 段大小(B) \\
+7  & segmentsAcked & 确认段数 \\
+8  & bytesInFlight & 在途字节数 \\
+9  & lastRtt & 最近RTT($\mu$s) \\
+10 & minRtt & 最小RTT($\mu$s) \\
+11 & calledFunc & 回调类型(0/1) \\
+12 & caState & CA状态(0-4) \\
+13 & caEvent & CA事件(0-5) \\
+14 & ecnState & ECN状态(0-5) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Swift的核心创新在于引入三个协议栈内部状态参数。\textbf{caState}反映TCP拥塞控制状态机的当前状态：CA\_OPEN（0，正常传输）、CA\_DISORDER（1，收到重复确认）、CA\_CWR（2，响应ECN缩减窗口）、CA\_RECOVERY（3，快速恢复中）、CA\_LOSS（4，超时丢包）。\textbf{caEvent}表示最近的拥塞事件：包括CA\_EVENT\_TX\_START（0）、CWND\_RESTART（1）、COMPLETE\_CWR（2）、LOSS（3）、ECN\_NO\_CE（4）、ECN\_IS\_CE（5）六种。\textbf{ecnState}反映ECN协商和标记状态：ECN\_DISABLED（0）、ECN\_IDLE（1）、ECN\_CE\_RCVD（2）、ECN\_SENDING\_ECE（3）、ECN\_ECE\_RCVD（4）、ECN\_CWR\_SENT（5）。
+
+这三个参数的引入使智能体能够感知TCP协议栈的完整状态信息，近似满足马尔可夫性要求。所有15个参数均可从ns-3 TCP模块的标准回调接口直接获取，满足可观测性要求。11维有效状态的处理时间复杂度为$O(1)$，避免了神经网络策略的高维推理依赖。
+
+\subsection{多信号融合拥塞检测}
+
+Swift将拥塞信号分为三类，采用两级优先级层次结构进行综合判断，并引入连续递减保护机制防止窗口过度收缩。
+
+\textbf{第一优先级——窗口收缩回调检测}：当$calledFunc = 0$时（GetSsThresh回调），表明协议栈正在执行窗口收缩。此时进一步区分收缩原因：若$caState = \text{CA\_LOSS}$，判定为超时丢包（通常意味着连续多个数据包丢失或网络路径中断）；若$ecnState \in \{\text{ECN\_CE\_RCVD}, \text{ECN\_ECE\_RCVD}\}$或$caState = \text{CA\_CWR}$，说明本次收缩由ECN回显（ECE）触发，判定为ECN标记并施加ECN保留因子；否则判定为普通丢包（快速重传触发）。丢包和超时是最可靠的拥塞信号（似然比$LR \approx 100$），一旦检测到即触发响应。
+
+\textbf{第二优先级——ECN状态直接检测}：当$ecnState \in \{\text{ECN\_CE\_RCVD}, \text{ECN\_ECE\_RCVD}\}$时，判定存在ECN拥塞标记。与基于事件率统计的方法不同，Swift直接检查协议栈的ECN状态字段，避免了维护时间戳队列的额外开销和事件率阈值的参数敏感性问题。需要强调的是，该分支成立的前提是瓶颈队列管理器确实执行CE标记：若瓶颈使用不标记CE的先进先出队列，则$ecnState$不会进入CE/ECE状态，ECN分支恒不触发。第\ref{subsec:setup}节据此将瓶颈默认配置为启用ECN标记的RED队列，并对全部对比协议对称开启ECN，同时说明本文所引用的归档实验产物尚未包含该配置。
+
+\textbf{连续递减保护机制}：为防止在突发拥塞期间窗口被过度收缩，Swift维护一个连续递减计数器$d$。每次触发拥塞响应时$d$自增；仅当窗口真正发生增长时$d$才被重置为零——在降窗后的冻结期内窗口保持不变，因此$d$不被清零，从而使保护逻辑对连续到达的拥塞信号保持记忆。当$d$超过最大连续递减次数$D_{max} = 3$时，拥塞响应被抑制——保持当前窗口不变，避免因连续乘性递减导致窗口收缩至过小值。连续3次丢包响应后窗口仅剩$0.70^3 \approx 34.3\%$，已强于传统算法单次窗口减半的效果，进一步缩减的边际收益递减。
+
+完整的多信号融合拥塞检测算法如算法\ref{alg:detect}所示。
+
+\begin{algorithm}[htbp]
+\caption{Multi-Signal Fusion Congestion Detection}
+\label{alg:detect}
+\small
+\begin{algorithmic}[1]
+\REQUIRE Observation $obs$, consecutive decrease counter $d$
+\ENSURE $(is\_congested, \; type)$
+\STATE \textbf{// Level-1: window-reduction callback (GetSsThresh)}
+\IF{$obs.calledFunc = 0$}
+    \IF{$obs.caState = \text{CA\_LOSS}$}
+        \RETURN $(True, \; \text{TIMEOUT})$
+    \ELSIF{$obs.ecnState \in \{\text{CE\_RCVD}, \text{ECE\_RCVD}\}$ \textbf{or} $obs.caState = \text{CA\_CWR}$}
+        \RETURN $(True, \; \text{ECN})$
+    \ELSE
+        \RETURN $(True, \; \text{LOSS})$
+    \ENDIF
+\ENDIF
+\STATE \textbf{// Level-2: ECN state inspection}
+\IF{$obs.ecnState \in \{\text{CE\_RCVD}, \text{ECE\_RCVD}\}$}
+    \RETURN $(True, \; \text{ECN})$
+\ENDIF
+\RETURN $(False, \; \text{NONE})$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{差异化拥塞响应机制}
+
+传统算法（如NewReno、CUBIC）对所有拥塞信号采用统一的窗口减半策略（保留因子$\rho=0.5$），这种"一刀切"的方法无法区分轻度和严重拥塞，在轻度拥塞时响应过度（不必要地降低吞吐量），在严重拥塞时响应不足。Swift根据拥塞类型设计差异化的窗口保留因子：
+
+\begin{equation}
+\begin{aligned}
+new\_cwnd &= \rho \cdot cwnd, \\
+\rho &= \begin{cases}
+0.70 & \text{丢包(LOSS)} \\
+0.75 & \text{ECN标记} \\
+0.50 & \text{超时(TIMEOUT)}
+\end{cases}
+\end{aligned}
+\end{equation}
+
+设计依据如下。（1）\textbf{拥塞信号的时序特性}：ECN标记是最早的信号（队列超低阈值时触发），丢包较晚（队列溢出），超时最晚（连续丢包或路径问题）。早期信号应采用相对温和但足以排空队列的响应，晚期信号采用更激进的响应。（2）\textbf{信号可靠性}：丢包几乎不会误报（$LR \approx 100$），ECN的可靠性取决于设备配置，因此对丢包响应更坚决。（3）\textbf{吞吐量-延迟权衡}：丢包保留因子0.70高于传统的0.5，配合ECN的提前预警机制实现更平滑的响应；当前实现将ECN保留因子设为0.75，使早期拥塞预警能够触发25\%的窗口收缩，以降低持续排队驻留风险；超时保留因子0.50与传统窗口减半一致，反映超时信号所指示的严重拥塞或路径故障。
+
+慢启动阈值更新为$new\_ssthresh = \max(\rho \cdot \min(cwnd, BDP), \; new\_cwnd)$：以$\min(cwnd, BDP)$为基准可避免将阈值抬升至BDP以上而变相奖励队列驻留，同时以$new\_cwnd$为下界保证拥塞避免阶段仍可缓慢上探。窗口下限约束为$4 \times MSS$。
+
+此外，当前实现在拥塞响应路径上还包含三项与信号不确定性直接相关的安全约束。（1）\textbf{降窗后冻结}：每次进入拥塞响应即将冻结计数器置为4个ACK事件，且该赋值先于连续递减下限判定执行，因此即使响应被$D_{max}$抑制，队列仍获得排空窗口。（2）\textbf{超时重入慢启动}：当拥塞类型为超时时，除施加$\rho=0.50$外还重置慢启动标志与慢启动阶段最小RTT采样，使控制律回到指数上探而非在错误的BDP估计附近继续微调。（3）\textbf{陈旧动作丢弃}：由于GetSsThresh回调接收的是常量协议栈状态，Python侧返回的$cwnd$需缓存至下一次IncreaseWindow才能生效；若在此期间协议栈进入CA\_LOSS（重传超时已重置窗口），环境侧将直接丢弃该缓存动作，避免陈旧决策覆盖协议栈的丢包恢复过程。差异化响应算法如算法\ref{alg:response}所示。
+
+\begin{algorithm}[htbp]
+\caption{Differentiated Congestion Response}
+\label{alg:response}
+\small
+\begin{algorithmic}[1]
+\REQUIRE Current $cwnd$, congestion type $type$, consecutive decrease counter $d$, BDP estimate $bdp$
+\ENSURE New window $new\_cwnd$, new threshold $new\_ssthresh$
+\STATE $d \leftarrow d + 1$; \; consecutive increases $\leftarrow 0$
+\STATE $freeze \leftarrow 4$ \COMMENT{Post-decrease freeze, armed before the floor test}
+\IF{$d > D_{max}$}
+    \STATE $new\_cwnd \leftarrow \max(cwnd, \; 4 \times MSS)$ \COMMENT{Freeze window}
+    \STATE $new\_ssthresh \leftarrow new\_cwnd$
+    \RETURN $(new\_cwnd, \; new\_ssthresh)$
+\ENDIF
+\IF{$type = \text{LOSS}$}
+    \STATE $\rho \leftarrow 0.70$
+\ELSIF{$type = \text{ECN}$}
+    \STATE $\rho \leftarrow 0.75$
+\ELSIF{$type = \text{TIMEOUT}$}
+    \STATE $\rho \leftarrow 0.50$; \; re-enter slow start
+\ENDIF
+\STATE $new\_cwnd \leftarrow \max(\rho \times cwnd, \; 4 \times MSS)$
+\STATE $new\_ssthresh \leftarrow \max(\rho \times \min(cwnd, \; bdp), \; new\_cwnd)$
+\RETURN $(new\_cwnd, \; new\_ssthresh)$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{强化学习驱动的自适应参数调优}
+
+Swift根据多种网络状态因素动态调整乘性增加因子$\alpha \in [0.85, 1.30]$（初始值1.10），控制拥塞避免阶段窗口增长速度。当前实现的调优逻辑基于RTT膨胀、奖励信号EMA和连续增长趋势三个维度。与固定阈值不同，RTT膨胀阈值会随最小RTT增大而放宽，使长RTT路径不会因为正常的BDP填充过程过早触发收缩。
+
+\textbf{基于最小RTT感知阈值的调整}：设$r = lastRtt/minRtt$。Swift首先根据$minRtt$计算松弛量$slack = 0.3 + 0.15\sqrt{\max(0,minRtt_{ms}-1)}$，并构造$low=1+slack$、$mid=1+2slack$、$high=1+4slack$三个动态阈值。当$r < low$时，说明队列驻留较低，$\alpha$按0.02或0.03小步增加；当$low \leq r < mid$时，$\alpha$仅增加0.01以维持温和探测；当$r > high$时，说明排队膨胀明显，$\alpha$按0.02或0.03收缩并重置连续增长计数器。
+
+\textbf{基于奖励基线相对比较的调整}：为捕获较长期性能趋势，同时维护奖励信号的快速指数移动平均$\bar{r}_t = (1 - \eta) \cdot \bar{r}_{t-1} + \eta \cdot r_t$（$\eta=0.15$）与慢速基线$b_t = (1 - \eta_b) \cdot b_{t-1} + \eta_b \cdot r_t$（$\eta_b=0.02$）。由于逐ACK奖励几乎恒为正（每个确认段贡献$+0.5$的吞吐收益），固定绝对阈值不携带调节信息；因此仅当$\bar{r} > b + m$时$\alpha \mathrel{+}=0.01$，当$\bar{r} < b - 4m$时$\alpha \mathrel{-}=0.01$，其中动态裕量$m = \max(0.25, 0.1|b|)$，非对称下界使丢包/超时的惩罚尖峰仍能迅速收缩$\alpha$。C++环境侧的奖励在ACK事件上定义为$r = \min(0.5\,segmentsAcked, 5) - p_{rtt}$，其中仅当$lastRtt/RTT_{min}>1.5$时$p_{rtt}=\min(0.3(lastRtt/RTT_{min}-1.5), 3)$，否则为零；在窗口收缩回调上则给出固定惩罚：ECN为$-3$、超时（CA\_LOSS）为$-20$、其他丢包为$-10$。由此奖励同时携带传输进度与排队/丢包代价信息，而其绝对量级不影响$\alpha$调节——只有相对基线的变化量被使用。
+
+\textbf{基于连续增长趋势的调整}：窗口连续增长超过8次时，说明当前路径仍具备可探测空间，$\alpha \mathrel{+}=0.01$。所有调整均限制在$[0.85,1.30]$内，以避免无线、蜂窝和广域网场景中的持续队列堆积。完整的$\alpha$自适应过程如算法\ref{alg:adapt}所示。
+
+\begin{algorithm}[htbp]
+\caption{RTT- and Reward-Aware Adaptive Parameter Tuning}
+\label{alg:adapt}
+\small
+\begin{algorithmic}[1]
+\REQUIRE Current $\alpha$, observation $obs$, consecutive increase count $g$, reward EMA $\bar{r}$, reward baseline $b$
+\ENSURE Updated $\alpha$
+\STATE $r \leftarrow obs.lastRtt \;/\; obs.minRtt$
+\STATE $slack \leftarrow 0.3 + 0.15\sqrt{\max(0, obs.minRtt_{ms}-1)}$
+\STATE $low \leftarrow 1+slack$; $mid \leftarrow 1+2slack$; $high \leftarrow 1+4slack$
+\IF{$r < low$}
+    \STATE $\alpha \leftarrow \alpha + (obs.minRtt_{ms}>5 ? 0.02 : 0.03)$; $g \leftarrow g+1$
+\ELSIF{$r < mid$}
+    \STATE $\alpha \leftarrow \alpha + 0.01$
+\ELSIF{$r > high$}
+    \STATE $\alpha \leftarrow \alpha - (obs.minRtt_{ms}>5 ? 0.03 : 0.02)$; $g \leftarrow 0$
+\ENDIF
+\STATE $m \leftarrow \max(0.25, \; 0.1\,|b|)$
+\IF{$\bar{r} > b + m$}
+    \STATE $\alpha \leftarrow \alpha + 0.01$
+\ELSIF{$\bar{r} < b - 4m$}
+    \STATE $\alpha \leftarrow \alpha - 0.01$
+\ENDIF
+\IF{$g > 8$}
+    \STATE $\alpha \leftarrow \alpha + 0.01$
+\ENDIF
+\STATE $\alpha \leftarrow \text{clamp}(\alpha, \; 0.85, \; 1.30)$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{融合控制策略}
+
+Swift将BDP估计、目标窗口渐进逼近和安全边界约束相结合。BDP估计采用窗口最大值滤波器（Windowed Max-Filter）：投递速率由滑动时间窗口内的累计确认字节数计算，$DR = \Delta bytes_{acked} / \Delta t$，时间窗口跨度取$\min(\max(2 \times RTT_{min}, 5\,\text{ms}), 1\,\text{s})$，使速率反映ACK时钟（即瓶颈排空速率）而非单个ACK的载荷（后者会按每RTT的ACK数量成倍低估带宽）；速率样本存入容量为$W_{bw}=40$的滑动窗口队列，取窗口内最大值$BW_{max}$作为瓶颈带宽估计；RTT采样窗口容量为$W_{rtt}=40$，并持续跟踪全局最小RTT。BDP计算为$BDP = BW_{max} \times RTT_{min}$；当BDP估计无效时回退至当前窗口值。BDP估计算法如算法\ref{alg:bdp}所示。
+
+\begin{algorithm}[htbp]
+\caption{Windowed Max-Filter BDP Estimation}
+\label{alg:bdp}
+\small
+\begin{algorithmic}[1]
+\REQUIRE Flow state $state$, observation $obs$
+\ENSURE BDP estimate
+\STATE $state.bytes_{acked} \leftarrow state.bytes_{acked} + obs.segAcked \times obs.segSize$
+\STATE $W \leftarrow \min(\max(2 \times RTT_{min}, \; 5\,\text{ms}), \; 1\,\text{s})$ \COMMENT{Rate window span}
+\STATE $dr \leftarrow \Delta bytes_{acked} \;/\; \Delta t$ over the last $W$ \COMMENT{Delivery rate}
+\STATE $state.bw\_samples$.append($dr$) \COMMENT{Sliding window, capacity $W_{bw}=40$}
+\STATE $BW_{max} \leftarrow \max(state.bw\_samples)$
+\STATE $RTT_{min} \leftarrow \min(state.min\_rtt, \; obs.minRtt)$
+\STATE $bdp \leftarrow BW_{max} \times RTT_{min}$
+\IF{$bdp \leq 0$}
+    \STATE $bdp \leftarrow \max(obs.cwnd, \; 1)$ \COMMENT{Fallback}
+\ENDIF
+\RETURN $bdp$
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{慢启动阶段}（$cwnd < ssthresh$）：目标窗口$target = 2 \times BDP$（下限$10 \times MSS$）。Swift采用HyStart风格慢启动退出：当当前RTT超过慢启动阶段最小RTT的动态阈值时，提前退出慢启动以避免首轮BDP填充后的突发排队；该阈值随最小RTT从1.25放宽到1.40，使广域网和卫星链路不因正常长RTT特性过早退出。标准增量为$segmentsAcked \times MSS$；仅当当前窗口明显低于BDP且RTT尚未膨胀时，增量才提升为$2 \times segmentsAcked \times MSS$。
+
+\textbf{拥塞避免阶段}（$cwnd \geq ssthresh$）：当前实现先计算目标速率窗口$target=\alpha \times BDP$（BDP无效时回退到当前窗口），再以有界步长向目标靠拢，而不是直接把窗口跳变到目标值。当$target>cwnd$时，窗口按$\max(\gamma\times MSS, MSS, (target-cwnd)/16)$上探，并以$target+\gamma\times MSS$为本次上限，从而在约16个ACK事件内完成BDP填充而不产生超调；当$target<cwnd$时，每个ACK事件按$\max((cwnd-target)/2, MSS)$回落且不低于$target$，以主动排空队列；当二者相等时，按$\gamma\times MSS$进行Reno式加性增长。当前实现取$\gamma=1.0$。此外，若降窗冻结计数器非零，本次事件直接返回当前窗口并将计数器减一，冻结期内不做任何增长。
+
+\textbf{管道利用率感知加速与安全边界}：管道利用率$u = bytesInFlight/cwnd$用于识别未充分填充的链路。该增量仅在RTT未明显膨胀（$lastRtt < 1.3\,RTT_{min}$）时生效：当$u<0.4$时，短RTT路径追加$2\times MSS$，最小RTT超过5 ms的长RTT路径仅追加$1\times MSS$；当$0.4 \leq u<0.5$时，只有短RTT路径再追加$1\times MSS$。这一分级设计避免了在无线、蜂窝和广域网场景中因盲目加速而累积队列。最终窗口被约束在$[4\times MSS, \max(4\times BDP, 200\times MSS)]$内，避免BDP估计陈旧时窗口失控。融合控制策略的完整算法如算法\ref{alg:fusion}所示。
+
+\begin{algorithm}[htbp]
+\caption{Hybrid Rate-Window Fusion Control}
+\label{alg:fusion}
+\small
+\begin{algorithmic}[1]
+\REQUIRE Observation $obs$, parameter $\alpha$, BDP estimate $bdp$, freeze counter $f$
+\ENSURE New window $new\_cwnd$
+\IF{$f > 0$}
+    \STATE $f \leftarrow f - 1$; \; \RETURN $obs.cwnd$ \COMMENT{Post-decrease freeze}
+\ENDIF
+\STATE $d \leftarrow 0$ \COMMENT{Reset the consecutive-decrease counter only on growth}
+\IF{$obs.cwnd < obs.ssthresh$ and flow is in slow start}
+    \STATE Apply HyStart-style RTT-inflation exit ($1.25/1.30/1.40$ by $RTT_{min}$)
+    \STATE $target \leftarrow \max(2 \times bdp, \; 10 \times MSS)$
+    \STATE $\Delta \leftarrow obs.segmentsAcked \times MSS$
+    \IF{$obs.cwnd < 0.3 \times bdp$ and $obs.lastRtt < 1.2\,RTT_{min}$}
+        \STATE $\Delta \leftarrow 2 \times obs.segmentsAcked \times MSS$
+    \ENDIF
+    \STATE $new\_cwnd \leftarrow \min(obs.cwnd + \Delta, \; target)$
+\ELSE
+    \STATE $target \leftarrow \alpha \times bdp$
+    \IF{$target > obs.cwnd$}
+        \STATE $step \leftarrow \max(\gamma \times MSS, \; MSS, \; (target-obs.cwnd)/16)$
+        \STATE $new\_cwnd \leftarrow \min(obs.cwnd + step, \; target + \gamma \times MSS)$
+    \ELSIF{$target < obs.cwnd$}
+        \STATE $new\_cwnd \leftarrow \max(obs.cwnd - \max(\tfrac{obs.cwnd-target}{2}, MSS), \; target)$
+    \ELSE
+        \STATE $new\_cwnd \leftarrow obs.cwnd + \gamma \times MSS$
+    \ENDIF
+\ENDIF
+\IF{$obs.lastRtt < 1.3\,RTT_{min}$}
+    \STATE $u \leftarrow obs.bytesInFlight / obs.cwnd$
+    \IF{$u < 0.4$}
+        \STATE $new\_cwnd \leftarrow new\_cwnd + (RTT_{min} > 5\,\text{ms} \; ? \; MSS : 2 \times MSS)$
+    \ELSIF{$u < 0.5$ \textbf{and} $RTT_{min} \leq 5\,\text{ms}$}
+        \STATE $new\_cwnd \leftarrow new\_cwnd + MSS$
+    \ENDIF
+\ENDIF
+\STATE $new\_cwnd \leftarrow \text{clamp}(new\_cwnd, \; 4 \times MSS, \; \max(4 \times bdp, \; 200 \times MSS))$
+\RETURN $new\_cwnd$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{每流独立状态管理}
+
+Swift为每个TCP连接维护独立状态，通过socketUuid为键的哈希表实现$O(1)$查找。每流状态包括四个子模块：（1）\textbf{带宽与RTT估计模块}——容量$W_{bw}=40$的投递速率滑动窗口队列和容量$W_{rtt}=40$的RTT采样队列，支持窗口最大值带宽估计、全局最小RTT追踪和慢启动阶段最小RTT采样；（2）\textbf{拥塞控制计数器}——连续递减计数器$d$、连续增长计数器$g$、累计丢包和ECN事件计数，以及降窗后的ACK冻结计数；（3）\textbf{性能指标聚合}——吞吐量指数移动平均、当前BDP估计、上一步窗口和时间戳；（4）\textbf{自适应参数}——$\alpha$（初始1.10）、$\gamma$（默认1.0）和慢启动标志位。
+
+状态管理遵循延迟初始化（首次访问时创建）和增量更新（仅更新变化字段）两个原则。每流独立管理避免了多流并发场景下的流间干扰，支持差异化控制。奖励EMA（平滑因子$\eta=0.15$）与慢速基线（$\eta_b=0.02$）由每个智能体实例独立维护——每个TCP连接对应一个智能体实例，避免流间奖励串扰。
+
+%========================================
+% 4. 实验评估
+%========================================
+
+\section{实验评估}
+
+\subsection{仿真配置与实验矩阵}
+\label{subsec:setup}
+
+\textbf{软硬件环境}：ns-3.40\cite{ns3}与ns3-gym\cite{opengym}，Python 3.8，Intel i7-10700K（8核）处理器、32 GB内存、Ubuntu 20.04。
+
+\textbf{拓扑与负载}：使用\texttt{PointToPointDumbbellHelper}构造哑铃拓扑，左右各3个叶子节点（$nLeaf=3$）经接入链路汇聚到一条共享瓶颈链路；每对叶子节点上运行一条\texttt{BulkSendHelper}长流，3条流分别在0、100与200 ms错峰启动，仿真时长20 s。MTU取1500 B，扣除IP/TCP头部与预留后应用数据单元（MSS）为1440 B，初始窗口10个MSS（RFC 6928），启用SACK。瓶颈队列长度按$\max(BDP \cdot nLeaf / MTU, \; 100)$个报文配置，其中$BDP$由瓶颈速率与基础RTT算出，从而使缓冲深度随场景带宽和时延同步伸缩。
+
+\textbf{队列管理与ECN}：v3.0.0参考配置将瓶颈队列设为RED，标记下限$MinTh = 0.3Q$、上限$MaxTh = 0.9Q$、\texttt{UseEcn=true}，并对四种协议一律设置\texttt{TcpSocketBase::UseEcn=On}，使ECN信号在对照组之间对称可得。需要明确指出的是，本节引用的归档实验产物由该修正之前的版本生成：当时瓶颈使用不执行CE标记的\texttt{PfifoFast}队列，且ECN仅对TcpSwift开启。因此在这些产物中Swift的ECN分支实际从未触发，下文报告的增益只能归因于$\alpha \times BDP$目标窗口的有界逼近、差异化丢包/超时响应以及连续递减与冻结保护；ECN路径的实际贡献须待全矩阵重跑后单独评估（见第\ref{subsec:limitations}节）。
+
+\textbf{A/B对照设置}：两组实验共享完全相同的场景参数、拓扑与随机种子，仅\texttt{enable\_udp\_burst}取值不同：
+\begin{itemize}
+\item \textbf{纯TCP设置}：瓶颈上仅承载3条TCP长流；
+\item \textbf{UDP突发设置}：在同一瓶颈上叠加一路800 Mbps、50\%占空比（On 0.5 s / Off 0.5 s）、报文长1024 B的OnOff UDP源，用以模拟视频、RPC、后台同步与备份等非响应式跨流量。
+\end{itemize}
+
+\textbf{对比算法与评测指标}：NewReno\cite{newreno}、CUBIC\cite{cubic}与BBR\cite{bbr}。指标包括3条前向流的聚合有效吞吐量（Goodput，Mbps）、逐包平均单向端到端延迟（ms）、丢包率（\%）以及流间Jain公平性指数\cite{fairness}。实验运行器支持\texttt{--num-seeds}多随机种子重复，产物按\texttt{<场景>\_<协议>\_s<种子>}命名。
+
+\subsection{测量方法修正与数据筛选}
+\label{subsec:data-audit}
+
+\textbf{反向流污染修正}：既有汇总表\texttt{logs/plots/summary.csv}与\texttt{logs/plots-udp/summary.csv}在聚合时把反向ACK流（10.2.x$\rightarrow$10.1.x）与前向数据流一并计入，由此产生两类系统性偏差：其一，延迟被计算为数据流与ACK流的均值，约等于$(D_{data} + D_{prop})/2$，使数据面延迟被折半；其二，吞吐量被ACK流额外抬高约1.7\%。为消除该缺陷，本文从原始FlowMonitor产物重新导出\emph{仅含前向数据流}的KPI，结果提交于\texttt{logs/summary/kpi\_forward.csv}（288条记录，字段包含设置、场景、协议、瓶颈速率、基础单向时延、流数、汇聚端口、吞吐量、利用率、延迟、抖动、丢包率、Jain指数与产物路径）。本节所有数值以该文件为唯一数据来源，其中吞吐量为3条前向长流之和，延迟为这些流的逐包平均单向时延，Jain指数在3条流之间计算。
+
+\textbf{排除规则}：对完整归档矩阵（36个场景 $\times$ 4个协议 $\times$ 2种设置）执行数据质量审计，得到四条排除规则，全部记录于\texttt{logs/error.txt}的"AUDIT PASS 2026-08-20"条目中：
+\begin{itemize}
+\item \textbf{规则A（指标定义缺陷）}：两份绘图汇总表的吞吐量与延迟列由\texttt{kpi\_forward.csv}取代。
+\item \textbf{规则B（仿真器版本混用）}：27个（设置，场景）组合内部不同协议的汇聚端口分别为5000与50000，表明产物来自两个\texttt{sim.cc}版本，跨协议对比不成立，相关场景整体排除；另有7个组合虽然端口内部一致，但整组产自已被取代的旧修订（端口5000），与保留集合不可比，同样排除。
+\item \textbf{规则C（重复与错标配置）}：\texttt{dc\_oversub\_10to1}与\texttt{congested\_heavy}、\texttt{satellite\_leo}与\texttt{lte\_good}的配置完全相同且产物逐字节一致，保留后者。其中\texttt{satellite\_leo}实际被配置为100/50 Mbps、5/20 ms链路，并不具备LEO卫星链路特征，属标签错误；因此\textbf{本文不基于该数据集给出任何LEO卫星结论}，GEO卫星场景（\texttt{satellite\_geo}）不受影响。
+\item \textbf{规则D（基线退化）}：在微秒级RTT高速率路径上BBR吞吐量不足瓶颈容量的1\%（约2 Mbps），其成因是ns-3.40中BBR的pacing与RTT分辨率失配，而非拥塞控制策略的结果；据此在\texttt{intra\_rack\_10g}与\texttt{intra\_rack\_25g}中排除BBR，这两个场景退化为三协议对比。
+\end{itemize}
+
+经上述规则筛选后，纯TCP设置保留19个场景，UDP突发设置保留15个场景（后者为前者的真子集），合计132条可用于跨协议对比的记录。图\ref{fig:audit-funnel}给出该筛选过程的漏斗视图，其中每一级排除均与\texttt{logs/error.txt}中的记录一一对应；本文全部图表由绘图管线\texttt{docs/plots/main.py}从原始FlowMonitor产物重新推导生成，该管线在每次运行时自动重算此漏斗并断言保留集合不变。场景配置如表\ref{tab:scenarios}所示。为便于组织讨论，按路径特征将19个场景归为四组：\textbf{G1}为微秒级RTT高速链路，\textbf{G2}为千兆级近端与城域/跨域链路，\textbf{G3}为无线与蜂窝接入链路，\textbf{G4}为GEO卫星链路。
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{plots/fig05_audit_funnel.pdf}
+\caption{数据审计漏斗：72个(设置, 场景)组合经规则B（修订混用与整组旧修订）、规则C（重复配置）过滤后保留34个组合；规则A重写全部保留组合的指标定义，规则D另行排除4个退化BBR数据点}
+\label{fig:audit-funnel}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{审计后保留的19个纯TCP场景配置}
+\label{tab:scenarios}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}ccllr@{}}
+\toprule
+\textbf{编号} & \textbf{组} & \textbf{场景} & \textbf{瓶颈(Mbps)} & \textbf{基础单向时延(ms)} \\
+\midrule
+S1 & G1 & intra\_rack\_10g$^{\ddagger}$ & 10000 & 0.004 \\
+S2 & G1 & intra\_rack\_25g$^{\ddagger}$ & 25000 & 0.004 \\
+S3 & G1 & leaf\_spine\_20g & 20000 & 0.009 \\
+\midrule
+S4 & G2 & asymmetric\_high & 1000 & 0.012 \\
+S5 & G2 & congested\_heavy & 1000 & 0.009 \\
+S6 & G2 & symmetric\_low & 1000 & 0.030 \\
+S8 & G2 & dc\_100m & 100 & 0.009 \\
+S7 & G2 & dc\_500m & 500 & 0.009 \\
+S10 & G2 & wan\_metro & 1000 & 2.20 \\
+S9 & G2 & cross\_dc\_wan$^{\dagger}$ & 1000 & 5.02 \\
+\midrule
+S11 & G3 & wifi\_ac$^{\dagger}$ & 400 & 7.00 \\
+S12 & G3 & wifi\_ax$^{\dagger}$ & 600 & 5.00 \\
+S13 & G3 & wifi\_n & 50 & 14.0 \\
+S14 & G3 & wifi\_legacy & 10 & 30.0 \\
+S17 & G3 & lte\_good & 50 & 30.0 \\
+S18 & G3 & lte\_poor & 10 & 70.0 \\
+S16 & G3 & nr\_5g\_edge & 100 & 14.0 \\
+S15 & G3 & nr\_5g\_embb$^{\dagger}$ & 500 & 7.00 \\
+\midrule
+S19 & G4 & satellite\_geo & 10 & 320.0 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+
+\raggedright
+\scriptsize $\dagger$ 该场景不在UDP突发设置的15个洁净场景之列；$\ddagger$ 该场景按规则D排除BBR基线。编号S1--S19为全文统一的场景标识，图\ref{fig:goodput-overview}--图\ref{fig:udp-burst}的横轴使用该编号。
+\end{table}
+
+\subsection{纯TCP设置下的稳态性能}
+\label{subsec:main-results}
+
+表\ref{tab:throughput}、表\ref{tab:latency}与表\ref{tab:loss}分别给出19个洁净场景的聚合吞吐量、平均单向延迟与丢包率。图\ref{fig:goodput-overview}与图\ref{fig:delay-overview}以对数坐标给出前两项指标的全景视图（横轴为表\ref{tab:scenarios}中的场景编号）：吞吐量柱组逐场景几乎重合，而延迟图中各场景的基线传播时延以黑色短划线标出，柱顶与短划线之间的距离即排队分量，Swift在S1--S3的柱体几乎落在短划线上。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.92\textwidth]{plots/fig01_goodput_clean.pdf}
+\caption{19个审计后场景的聚合前向吞吐量（对数坐标）。S1、S2的BBR数据点按规则D排除}
+\label{fig:goodput-overview}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.92\textwidth]{plots/fig02_delay_clean.pdf}
+\caption{19个场景的平均单向前向延迟（对数坐标）。黑色短划线为各场景的基线单向传播时延，柱顶与短划线的距离即排队分量}
+\label{fig:delay-overview}
+\end{figure*}
+
+\begin{table}[htbp]
+\centering
+\caption{纯TCP设置：聚合有效吞吐量（Mbps）}
+\label{tab:throughput}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{场景} & \textbf{Swift} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} \\
+\midrule
+intra\_rack\_10g & 10038.0 & 10038.0 & 10038.0 & --- \\
+intra\_rack\_25g & 25095.0 & 25095.0 & 25095.0 & --- \\
+leaf\_spine\_20g & 20059.2 & 20059.2 & 20059.1 & 7414.7 \\
+\midrule
+asymmetric\_high & 1003.6 & 1003.6 & 1003.6 & 510.16 \\
+congested\_heavy & 1003.6 & 1003.6 & 1003.6 & 507.86 \\
+symmetric\_low & 1003.6 & 1003.6 & 1003.6 & 482.83 \\
+dc\_100m & 100.36 & 100.36 & 100.36 & 51.53 \\
+dc\_500m & 501.81 & 501.81 & 501.81 & 257.07 \\
+wan\_metro & 1000.3 & 1001.7 & 1002.3 & 1005.0 \\
+cross\_dc\_wan & 709.72 & 998.38 & 1000.0 & 1001.5 \\
+\midrule
+wifi\_ac & 398.66 & 398.91 & 399.69 & 398.91 \\
+wifi\_ax & 598.37 & 599.38 & 600.26 & 600.92 \\
+wifi\_n & 49.88 & 49.80 & 49.88 & 48.92 \\
+wifi\_legacy & 9.95 & 9.95 & 9.95 & 9.85 \\
+lte\_good & 49.46 & 49.24 & 49.39 & 46.33 \\
+lte\_poor & 9.81 & 9.77 & 9.81 & 9.28 \\
+nr\_5g\_edge & 99.63 & 99.35 & 99.63 & 98.84 \\
+nr\_5g\_embb & 497.66 & 498.50 & 499.52 & 499.93 \\
+\midrule
+satellite\_geo & \textbf{8.57} & 5.61 & 7.59 & 2.81 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{纯TCP设置：前向流平均单向延迟（ms）}
+\label{tab:latency}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{场景} & \textbf{Swift} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} \\
+\midrule
+intra\_rack\_10g & \textbf{0.71} & 3.94 & 4.51 & --- \\
+intra\_rack\_25g & \textbf{0.28} & 3.79 & 4.39 & --- \\
+leaf\_spine\_20g & 0.35 & 3.81 & 4.44 & 0.01 \\
+\midrule
+asymmetric\_high & 6.97 & 5.87 & 5.49 & 0.13 \\
+congested\_heavy & 6.97 & 5.87 & 5.49 & 0.13 \\
+symmetric\_low & 6.95 & 5.94 & 5.52 & 0.07 \\
+dc\_100m & 35.42 & 16.25 & 15.48 & 1.37 \\
+dc\_500m & 10.72 & 6.98 & 6.67 & 0.16 \\
+wan\_metro & \textbf{4.93} & 7.02 & 7.18 & 5.26 \\
+cross\_dc\_wan & \textbf{5.04} & 8.88 & 9.56 & 10.73 \\
+\midrule
+wifi\_ac & \textbf{10.86} & 12.10 & 13.02 & 16.12 \\
+wifi\_ax & \textbf{6.93} & 9.56 & 10.17 & 12.28 \\
+wifi\_n & 78.16 & 38.22 & 39.76 & 73.95 \\
+wifi\_legacy & 242.23 & 135.63 & 164.09 & 111.73 \\
+lte\_good & 80.61 & 50.51 & 70.10 & 66.80 \\
+lte\_poor & 310.79 & 174.19 & 188.00 & 172.22 \\
+nr\_5g\_edge & 44.69 & 26.63 & 29.22 & 64.42 \\
+nr\_5g\_embb & \textbf{7.33} & 11.48 & 12.43 & 17.38 \\
+\midrule
+satellite\_geo & 391.42 & 365.15 & 420.22 & 612.08 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{纯TCP设置：丢包率（\%）}
+\label{tab:loss}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{场景} & \textbf{Swift} & \textbf{NewReno} & \textbf{CUBIC} & \textbf{BBR} \\
+\midrule
+intra\_rack\_10g & 0.00 & 0.01 & 0.00 & --- \\
+intra\_rack\_25g & 0.00 & 0.00 & 0.01 & --- \\
+leaf\_spine\_20g & 0.00 & 0.00 & 0.01 & 0.00 \\
+asymmetric\_high & 0.00 & 0.00 & 0.00 & 0.00 \\
+congested\_heavy & 0.00 & 0.00 & 0.00 & 0.00 \\
+symmetric\_low & 0.00 & 0.00 & 0.00 & 0.00 \\
+dc\_100m & 0.00 & 0.07 & 0.02 & 0.00 \\
+dc\_500m & 0.00 & 0.01 & 0.00 & 0.00 \\
+wan\_metro & 0.00 & 0.00 & 0.00 & 0.00 \\
+cross\_dc\_wan & 0.00 & 0.00 & 0.00 & 0.00 \\
+wifi\_ac & 0.00 & 0.00 & 0.00 & 0.03 \\
+wifi\_ax & 0.00 & 0.00 & 0.00 & 0.01 \\
+wifi\_n & 0.00 & 0.04 & 0.05 & 0.14 \\
+wifi\_legacy & 0.00 & 0.13 & 2.11 & 0.07 \\
+lte\_good & 0.00 & 0.03 & 1.05 & 0.77 \\
+lte\_poor & 0.00 & 0.17 & 1.80 & 1.79 \\
+nr\_5g\_edge & 0.00 & 0.01 & 0.02 & 0.08 \\
+nr\_5g\_embb & 0.00 & 0.00 & 0.00 & 0.02 \\
+satellite\_geo & \textbf{0.00} & 0.59 & 1.26 & 9.83 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+
+\raggedright
+\scriptsize 数值按两位小数四舍五入。严格为零的场景数：Swift 19/19；NewReno与CUBIC均为0；BBR为6，但其6个零丢包场景的链路利用率仅0.37$\sim$0.52。
+\end{table}
+
+\textbf{吞吐量}：在饱和链路上Swift与两种基于丢包的基线完全等价。G1的3个场景以及\texttt{asymmetric\_high}、\texttt{congested\_heavy}、\texttt{symmetric\_low}、\texttt{dc\_100m}、\texttt{dc\_500m}中，Swift与NewReno/CUBIC的吞吐量在三位小数上一致（相对差$+0.000\%$）。G3的8个无线与蜂窝场景差异均在$\pm0.5\%$以内（最大偏离为\texttt{lte\_good}的$+0.45\%$与\texttt{wifi\_ax}的$-0.31\%$）。GEO卫星场景（G4）是唯一出现显著差距的正向结果：Swift为8.57 Mbps，相对NewReno（5.61）、CUBIC（7.59）与BBR（2.81）分别提升52.8\%、12.9\%与205.0\%，相对NewReno/CUBIC均值提升29.8\%；其机理是零丢包避免了在$\approx$640 ms往返时延上以整个RTT为代价的重传恢复。反向地，\texttt{cross\_dc\_wan}是本文最主要的负向结果：Swift仅709.72 Mbps，较NewReno低28.9\%、较CUBIC低29.0\%（详见第\ref{subsec:limitations}节）。BBR在千兆级链路上系统性欠利用（利用率0.48$\sim$0.52），在\texttt{leaf\_spine\_20g}上仅取得0.37的利用率；但在\texttt{cross\_dc\_wan}、\texttt{wan\_metro}、\texttt{nr\_5g\_embb}与\texttt{wifi\_ax}上BBR的吞吐量略高于Swift（差距0.4\%$\sim$41\%不等），本文不回避这一点。
+
+\textbf{延迟}：Swift的延迟表现具有清晰的场景依赖性，且与瓶颈缓冲深度相对BDP的比例直接相关。在G1的微秒级RTT路径上，排队时延几乎构成端到端时延的全部，Swift把平均单向延迟从3.79$\sim$4.51 ms降至0.28$\sim$0.71 ms，相对NewReno/CUBIC分别降低82.1\%/84.3\%（10G）、92.6\%/93.6\%（25G）与90.9\%/92.2\%（20G叶脊），且吞吐量未有任何损失。在中速接入与城域链路上Swift同样占优：\texttt{nr\_5g\_embb}降低36.2\%/41.0\%、\texttt{wifi\_ax}降低27.5\%/31.9\%、\texttt{wan\_metro}降低29.8\%/31.3\%、\texttt{wifi\_ac}降低10.2\%/16.6\%，\texttt{cross\_dc\_wan}亦取得全场最低延迟（5.04 ms对8.88/9.56/10.73 ms）。但在低速率或长RTT且缓冲深度远大于BDP的接入链路上，Swift以队列驻留换取零丢包，延迟相对\emph{更优的}丢包类基线出现抬升：\texttt{dc\_100m}为$+128.8\%$、\texttt{wifi\_n} $+104.5\%$、\texttt{wifi\_legacy} $+78.6\%$、\texttt{lte\_poor} $+78.4\%$、\texttt{nr\_5g\_edge} $+67.8\%$、\texttt{dc\_500m} $+60.6\%$、\texttt{lte\_good} $+59.6\%$，千兆级饱和链路约$+26\%$，GEO卫星为$+7.2\%$。该现象的机理与量化边界在第\ref{subsec:limitations}节讨论。
+
+\textbf{丢包与公平性}：Swift在全部19个场景中丢包率严格为0.00\%，是四种协议中唯一做到这一点的算法；NewReno与CUBIC没有任何一个场景达到严格零丢包，BBR虽在6个场景中严格为零，但这些场景的链路利用率仅0.37$\sim$0.52，即以牺牲近半瓶颈容量换取无丢包。基线的最大丢包率分别为NewReno 0.59\%（\texttt{satellite\_geo}）、CUBIC 2.11\%（\texttt{wifi\_legacy}）与BBR 9.83\%（\texttt{satellite\_geo}）。公平性方面，Swift的Jain指数在所有场景均为1.00，NewReno均值0.988（最低0.82）、CUBIC均值0.993（最低0.91）、BBR均值0.812（最低0.38，见\texttt{wifi\_n}）。聚合统计见表\ref{tab:agg-loss-jain}。
+
+\begin{table}[htbp]
+\centering
+\caption{丢包率与公平性聚合统计（洁净场景集）}
+\label{tab:agg-loss-jain}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+\textbf{设置} & \textbf{协议} & \textbf{零丢包} & \textbf{最大} & \textbf{均值} & \textbf{Jain均} & \textbf{Jain最小} \\
+\midrule
+纯TCP & Swift    & \textbf{19/19} & \textbf{0.000} & \textbf{0.000} & \textbf{1.000} & \textbf{1.00} \\
+$n=19$ & NewReno & 0/19 & 0.591 & 0.058 & 0.988 & 0.82 \\
+      & CUBIC   & 0/19 & 2.115 & 0.334 & 0.993 & 0.91 \\
+      & BBR     & 6/17 & 9.828 & 0.750 & 0.812 & 0.38 \\
+\midrule
+UDP突发 & Swift   & \textbf{15/15} & \textbf{0.000} & \textbf{0.000} & \textbf{1.000} & \textbf{1.00} \\
+$n=15$ & NewReno & 0/15 & 0.594 & 0.107 & 0.998 & 0.98 \\
+      & CUBIC   & 0/15 & 7.714 & 1.017 & 0.997 & 0.97 \\
+      & BBR     & 6/13 & 12.338 & 1.742 & 0.844 & 0.48 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+
+\raggedright
+\scriptsize "零丢包"统计丢包率严格为0的场景数；BBR的分母为17/13，因规则D在两个微秒级RTT场景中排除该基线。丢包率单位为\%。
+\end{table}
+
+\subsection{深入分析}
+
+\subsubsection{分组讨论}
+
+\textit{G1——微秒级RTT高速链路}：瓶颈$\geq$10 Gbps，基础单向时延仅4$\sim$9 $\mu$s，因此端到端时延几乎全部来自瓶颈排队。NewReno与CUBIC按"增长至丢包"的范式运行，稳态下把队列推至接近满载，故延迟停留在3.8$\sim$4.5 ms；Swift的目标窗口被$\alpha \times BDP$（$\alpha \leq 1.30$）显式约束，并在超过目标时按超额一半的速率回落，因此在维持完全相同吞吐量的同时把队列压到极低水位。该组是Swift"等吞吐、低延迟"性质最清晰的证据。
+
+\textit{G2——千兆级近端与城域/跨域链路}：在3个千兆级饱和场景（\texttt{asymmetric\_high}、\texttt{congested\_heavy}、\texttt{symmetric\_low}）中三种算法吞吐量一致，Swift延迟高出约26\%；在带宽更低的\texttt{dc\_500m}与\texttt{dc\_100m}上该抬升分别达60.6\%与128.8\%。原因是瓶颈缓冲深度按$BDP \cdot nLeaf/MTU$配置但下限为100个报文，当BDP很小时该下限主导，$\alpha>1$的目标窗口足以在其中形成稳定驻留。随着传播时延增大（\texttt{wan\_metro} 2.2 ms、\texttt{cross\_dc\_wan} 5.02 ms），BDP上升、缓冲相对变浅，Swift转为延迟最优（分别降低29.8\%与43.2\%）；但在\texttt{cross\_dc\_wan}上这一延迟优势以近29\%的吞吐损失为代价，属于典型的带宽估计不足而非有意的延迟折中。
+
+\textit{G3——无线与蜂窝接入链路}：8个场景的吞吐量差异均在$\pm0.5\%$以内，区分度体现在丢包率与延迟上。CUBIC在\texttt{wifi\_legacy}（2.11\%）、\texttt{lte\_poor}（1.80\%）、\texttt{lte\_good}（1.05\%）上出现显著丢包，BBR在\texttt{lte\_poor}上达1.79\%且Jain指数低至0.38$\sim$0.59；Swift保持严格零丢包与理想公平性。延迟方面该组呈现两极：带宽较高的\texttt{nr\_5g\_embb}、\texttt{wifi\_ax}、\texttt{wifi\_ac}上Swift延迟最低，而带宽较低的\texttt{wifi\_n}、\texttt{wifi\_legacy}、\texttt{lte\_poor}、\texttt{nr\_5g\_edge}上Swift延迟最高，与G2中观察到的"浅BDP+深缓冲"机理一致。
+
+\textit{G4——GEO卫星链路}：单向时延320 ms、瓶颈10 Mbps，重传代价极高。Swift以8.57 Mbps取得该组最高吞吐量，并同时保持零丢包与1.00的Jain指数；NewReno受0.59\%丢包与0.82的公平性拖累仅5.61 Mbps，BBR因9.83\%丢包退化至2.81 Mbps。该场景中Swift的延迟仅比NewReno高7.2\%，却低于CUBIC 6.9\%与BBR 36.1\%，表明在长RTT路径上其吞吐优势并非以延迟为代价换取。
+
+\subsubsection{机制一致性与证据边界}
+
+\textit{差异化响应}：当前实现将拥塞信号分为丢包、ECN与超时三类并分别采用0.70、0.75与0.50的保留因子。在归档产物中瓶颈未执行CE标记，故ECN分支未被触发，观测到的零丢包只能由$\alpha \times BDP$目标窗口的主动回落、$\rho_{loss}=0.70$的温和收缩以及超时时的$\rho=0.50$加慢启动重入共同解释。ECN分支在v3.0.0配置下才具备可观测性，因此本文不把ECN响应写作已验证的定量贡献。
+
+\textit{连续递减保护与冻结}：$D_{max}=3$与降窗后4个ACK事件冻结共同限制了短时间内的重复收缩与随后的快速反弹。由于仓库未保存独立的消融重跑结果，本文只把该机制作为定性解释，不给出无来源的百分比收益。
+
+\textit{$\alpha$自适应}：$\alpha \in [0.85,1.30]$、初值1.10，由最小RTT感知阈值、奖励基线相对偏移与连续增长趋势共同调节。该机制的可解释后果在数据中有一致体现：$\alpha$上界1.30意味着稳态目标窗口最多超出BDP约30\%，这既解释了浅BDP链路上的队列驻留，也解释了在长RTT链路上窗口不会无界膨胀。由于日志中没有固定$\alpha$、固定RTT阈值或不同$\alpha$边界的完整对照结果，本文不给出参数扫描数字。
+
+\subsection{UDP突发跨流量鲁棒性评估}
+\label{subsec:udp-burst}
+
+异构终端与共享链路普遍承载突发性非响应式UDP流量（视频、RPC、后台同步、备份、游戏控制等）。本节在严格A/B对照下比较四种协议在800 Mbps、50\%占空比UDP突发干扰下的表现，数据同样取自\texttt{logs/summary/kpi\_forward.csv}的\texttt{udp\_burst}设置，洁净场景为15个。
+
+\subsubsection{聚合鲁棒性指标}
+
+以同一场景的纯TCP结果为基准，定义吞吐量保持率为$T_{udp}/T_{tcp}$、延迟膨胀为$D_{udp}/D_{tcp}-1$，在15个成对场景上聚合得到表\ref{tab:udp-burst-agg}。
+
+\begin{table}[htbp]
+\centering
+\caption{UDP突发跨流量鲁棒性聚合指标（成对场景，$n=15$）}
+\label{tab:udp-burst-agg}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrc@{}}
+\toprule
+\textbf{协议} & \textbf{保持率均值} & \textbf{保持率最小} & \textbf{延迟膨胀} & \textbf{零丢包} \\
+\midrule
+Swift    & \textbf{80.54\%} & \textbf{66.51\%} & $+$14.33\% & \textbf{15/15} \\
+NewReno & 75.86\% & 35.47\% & $+$4.32\% & 0/15 \\
+CUBIC   & 78.78\% & 53.75\% & \textbf{$+$3.22\%} & 0/15 \\
+BBR     & 39.07\% & 9.69\% & $+$50.78\% & 6/13 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+
+\raggedright
+\scriptsize BBR的分母为13，因规则D在两个微秒级RTT场景中排除该基线；三项保持率最小值均出现在\texttt{satellite\_geo}（BBR除外，其最小值出现在\texttt{wifi\_n}）。
+\end{table}
+
+三项观察如下。第一，Swift的吞吐量保持率最高（80.54\%），且最坏场景仍保持66.51\%，而NewReno与BBR的最坏场景分别跌至35.47\%与9.69\%。第二，Swift是唯一在全部15个场景中保持严格零丢包的算法；CUBIC在\texttt{lte\_poor}上从1.80\%恶化至7.71\%、在\texttt{wifi\_legacy}上从2.11\%恶化至4.00\%，BBR在\texttt{satellite\_geo}上从9.83\%恶化至12.34\%。第三，Swift的延迟膨胀（$+14.33\%$）高于NewReno（$+4.32\%$）与CUBIC（$+3.22\%$），这与稳态结论一致：$\alpha \times BDP$目标窗口在跨流量抬高RTT噪声时倾向于保留更多在途字节；但BBR的$+50.78\%$说明这一代价在四者中并非最高。
+
+\subsubsection{场景级对照}
+
+表\ref{tab:udp-burst-headline}给出15个洁净场景的吞吐量与延迟，图\ref{fig:udp-burst}以逐场景柱状图并列呈现吞吐量变化与新增丢包：Swift的回落集中于$-2\%$至$-34\%$的窄带内且下半幅不存在Swift柱体（新增丢包严格为零），而BBR在千兆级链路上出现$-89\%$至$-90\%$的深坑。Swift在其中14个场景取得最高吞吐量，唯一例外是\texttt{wan\_metro}（801.06 Mbps对CUBIC 802.95与NewReno 801.87，相对最优基线低0.24\%）。优势最显著的是GEO卫星场景：Swift 5.70 Mbps对NewReno 1.99、CUBIC 4.08与BBR 1.80，分别提升186.4\%、39.7\%与216.7\%，相对NewReno/CUBIC均值提升87.8\%——即纯TCP设置下的29.8\%优势在跨流量干扰下扩大约三倍。中低速蜂窝与WiFi场景亦呈现一致趋势：\texttt{lte\_good}提升12.7\%（对NewReno）与2.7\%（对CUBIC）、\texttt{nr\_5g\_edge}提升9.1\%与2.1\%、\texttt{wifi\_n}提升8.0\%与2.1\%、\texttt{lte\_poor}提升15.7\%与10.5\%。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.92\textwidth]{plots/fig04_udp_burst_clean.pdf}
+\caption{15个配对场景的跨流量鲁棒性：UDP突发引起的吞吐量变化（上）与新增丢包（下，符号对数坐标）。Swift无新增丢包，故下半幅不存在对应柱体；S1、S2的BBR按规则D排除}
+\label{fig:udp-burst}
+\end{figure*}
+
+\begin{table*}[htbp]
+\centering
+\caption{UDP突发设置下15个洁净场景的吞吐量与延迟（前向流聚合）}
+\label{tab:udp-burst-headline}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+\textbf{场景} & \multicolumn{4}{c}{\textbf{吞吐量 (Mbps)}} & \multicolumn{4}{c}{\textbf{平均单向延迟 (ms)}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+ & Swift & NewReno & CUBIC & BBR & Swift & NewReno & CUBIC & BBR \\
+\midrule
+intra\_rack\_10g & 9643.3 & 9643.3 & 9643.3 & --- & \textbf{0.74} & 3.90 & 4.45 & --- \\
+intra\_rack\_25g & 24700.6 & 24700.6 & 24700.5 & --- & \textbf{0.29} & 3.77 & 4.38 & --- \\
+leaf\_spine\_20g & 19664.4 & 19664.4 & 19664.3 & 7426.0 & 0.35 & 3.77 & 4.30 & 0.01 \\
+asymmetric\_high & \textbf{806.06} & 804.13 & 804.53 & 55.88 & 8.28 & 5.93 & 5.20 & 0.17 \\
+congested\_heavy & \textbf{806.06} & 804.21 & 804.53 & 56.29 & 8.28 & 5.93 & 5.20 & 0.17 \\
+symmetric\_low & \textbf{794.62} & 792.80 & 792.96 & 49.08 & 8.43 & 6.24 & 5.34 & 0.10 \\
+dc\_100m & 76.52 & 75.51 & 76.52 & 12.80 & 41.33 & 15.75 & 15.04 & 6.00 \\
+dc\_500m & 382.56 & 382.56 & 382.56 & 27.95 & 11.16 & 7.21 & 6.52 & 0.28 \\
+wan\_metro & 801.06 & 801.87 & \textbf{802.95} & 723.51 & 6.71 & 6.94 & 6.72 & \textbf{5.38} \\
+wifi\_n & \textbf{37.88} & 35.08 & 37.09 & 4.74 & 94.62 & 41.65 & 42.01 & 106.48 \\
+wifi\_legacy & \textbf{7.42} & 6.64 & 7.32 & 4.68 & 241.55 & 144.12 & 173.36 & 151.03 \\
+lte\_good & \textbf{37.21} & 33.03 & 36.23 & 16.69 & 97.94 & 59.47 & 88.21 & 114.43 \\
+lte\_poor & \textbf{7.35} & 6.35 & 6.65 & 6.20 & 304.53 & 185.39 & 262.62 & 210.83 \\
+nr\_5g\_edge & \textbf{75.71} & 69.40 & 74.16 & 43.21 & 51.77 & 27.87 & 28.52 & 49.51 \\
+satellite\_geo & \textbf{5.70} & 1.99 & 4.08 & 1.80 & 530.71 & 427.11 & 437.54 & 541.41 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+BBR在跨流量下出现系统性崩塌：在千兆级链路上吞吐量从482.83$\sim$510.16 Mbps跌至49.08$\sim$56.29 Mbps（降幅约89\%），\texttt{wifi\_n}从48.92 Mbps跌至4.74 Mbps（降幅90.3\%），\texttt{dc\_500m}从257.07跌至27.95 Mbps（降幅89.1\%）。这与已有关于BBR带宽探测在竞争流量下失真的实测报告一致\cite{bbrfairness}。
+
+\subsubsection{低速与无线接入链路的零丢包验证}
+\label{subsubsec:udp-burst-extra-wins}
+
+跨流量干扰把基线的丢包问题显著放大，而Swift在这些条件下仍保持严格零丢包，构成其鲁棒性的最直接证据：\texttt{lte\_poor}中CUBIC丢包率升至7.71\%、BBR升至4.14\%，Swift为0.00\%且吞吐量最高（7.35 Mbps）；\texttt{wifi\_legacy}中CUBIC升至4.00\%、BBR升至2.64\%，Swift为0.00\%（7.42 Mbps）；\texttt{lte\_good}中CUBIC升至2.96\%、BBR为0.93\%，Swift为0.00\%（37.21 Mbps，相对BBR的16.69 Mbps提升1.23倍）；\texttt{wifi\_n}中BBR升至2.27\%且吞吐量崩塌至4.74 Mbps，Swift为0.00\%（37.88 Mbps）。这四个场景的瓶颈带宽介于10$\sim$50 Mbps，基础单向时延14$\sim$70 ms，说明该性质在低速率、长时延且丢包背景本身较高的接入链路上同样成立。
+
+\subsubsection{鲁棒性机理分析}
+
+在归档配置下，Swift的跨流量鲁棒性可归因于两项机制。第一，\textbf{BDP窗口最大值滤波}对UDP突发引入的瞬时速率波动具有低通特性：容量40的速率样本窗口取最大值，使带宽估计锚定在突发间歇期的真实瓶颈能力附近，而不像BBR的周期性探测那样被竞争流量直接污染，这解释了两者保持率80.54\%与39.07\%的巨大差距。第二，\textbf{目标窗口的有界逼近与差异化收缩}使窗口在突发到来时按超额一半的速率回落、在突发退去时于约16个ACK事件内回填，既避免了乘性减半造成的吞吐塌陷，也避免了持续过冲导致的溢出丢包。需要重申的是，ECN温和响应（$\rho_{ecn}=0.75$）在这些归档产物中并未参与，其对鲁棒性的贡献须由后续在RED/ECN配置下的重跑给出。
+
+%========================================
+% 5. 讨论
+%========================================
+
+\section{讨论}
+\label{sec:discussion}
+
+\subsection{理论分析}
+
+\textbf{收敛性}：Swift的窗口动态可用Lyapunov函数$V = \frac{1}{2}(cwnd - cwnd^*)^2$进行定性分析，其中$cwnd^* \approx BDP$。在拥塞避免阶段，窗口不再直接跳变到$\alpha \times BDP$，而是以有界步长向目标窗口渐进逼近；当检测到ECN、丢包或超时时，窗口分别按0.75、0.70和0.50的保留因子收缩。连续递减保护（$D_{max}=3$）与降窗后4个ACK事件的冻结机制进一步抑制重复收缩与快速反弹。$\alpha$的边界约束$[0.85,1.30]$和小步长调整保证参数不会在单个RTT内发生突变。
+
+\textbf{复杂度与计算开销}：当前实现采用基于规则的确定性策略，单次决策仅包含固定数量的状态读取、分支判断、窗口最大值更新和哈希表查询，时间复杂度为$O(1)$；每流状态主要由带宽样本队列、RTT样本队列、拥塞计数器、窗口历史和少量自适应参数构成，空间复杂度为$O(n\cdot (W_{bw}+W_{rtt}))$，其中$n$为并发流数，$W_{bw}=40$、$W_{rtt}=40$。由于当前仓库未保存独立的推理延迟、CPU利用率和内存压测日志，本文仅给出复杂度级别分析，不声称具体硬件平台上的毫秒级延迟或大规模并发资源占用数字。
+
+\textbf{信息论视角}：多信号融合的两级优先级等价于按似然比排序。设网络拥塞状态$C \in \{0,1\}$，各信号条件独立，则联合似然比$LR(\mathbf{S}) = \prod_i P(S_i|C=1)/P(S_i|C=0)$。丢包/超时$LR \approx 100$，ECN $LR \approx 20$。优先使用高似然比信号可最小化贝叶斯误检概率$P_e$。连续递减保护机制从信息论角度可理解为对连续同类信号的置信度递减——第$k$次连续信号的增量信息量$I_k \propto 1/k$，当$k > D_{max}$时信息增益不足以证明进一步缩减的合理性。
+
+\textbf{最优控制视角}：差异化保留因子可从最优控制理论分析。严重拥塞（超时，连续丢包或路径故障）需最大窗口缩减（$\rho=0.50$）快速清空队列；中度拥塞（丢包，队列溢出）采用中等缩减（$\rho=0.70$）；轻度拥塞（ECN，队列开始积累）采用相对温和但足以抑制队列扩张的缩减（$\rho=0.75$）。Swift的三类差异化设计近似了不同拥塞程度下的最优控制输入，响应强度与拥塞严重程度正相关。
+
+\subsection{与相关工作的详细对比}
+
+\begin{table}[htbp]
+\centering
+\caption{Swift与主要相关算法的特性对比}
+\label{tab:comparison}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{特性} & \textbf{Swift} & \textbf{Gemini} & \textbf{Aurora} & \textbf{DCTCP} \\
+\midrule
+有效状态维度 & 11 & 流级统计 & 10 & N/A \\
+ECN状态利用 & 是 & 否 & 否 & 是 \\
+CA状态利用 & 是 & 否 & 否 & 否 \\
+决策机制 & 规则 & 规则 & DNN & 公式 \\
+学习作用对象 & 参数 & 参数 & 策略 & 无 \\
+自适应粒度 & 每流/每事件 & 流组/分钟级 & 每决策 & 无 \\
+决策位置 & 栈外进程 & 内核数据面 & 栈外/栈内 & 内核 \\
+训练需求 & 无 & 无（在线搜索） & 小时/天 & 无 \\
+差异化响应 & 是 & 否 & 否 & 否 \\
+生产部署证据 & 无 & 有 & 无 & 有 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{vs. Gemini\cite{gemini}}：两者都把"控制逻辑白盒化、让学习只作用于参数"作为出发点，但适配回路的位置和时间尺度不同。Gemini的Fusion固定在内核数据面，Booster在带外以分钟级、流组粒度用贝叶斯优化搜索参数，因此单条流在其生命周期内使用的是一组静态参数；Swift把整个决策过程置于协议栈之外，并在每个窗口调整回调上求解，$\alpha$与目标窗口对单条流的即时RTT与奖励变化作出反应。这一差异带来两个可比较的后果：Swift可以读取ECN与CA状态机从而区分ECE/CWR触发的收缩与真实丢包，是Gemini的流级统计量无法提供的信息；但Swift为此付出每事件一次跨进程往返的代价，其当前形态适用于研究与仿真平台，尚不具备Gemini已验证的生产部署性质。
+
+\textbf{vs. Aurora\cite{aurora}}：Swift采用11维有效状态子空间（Aurora常用10维观测），并引入ECN和CA状态参数。Swift采用基于规则的确定性决策而非深度神经网络，无需训练即可运行，决策路径可逐分支解释。Aurora的优势在于神经网络的表示能力，代价是训练数据收集、模型更新与推理开销；Swift则以可解释规则和协议栈内部信号换取工程可控性。本文不主张Swift在策略表示能力上优于Aurora。
+
+\textbf{vs. DCTCP\cite{dctcp}}：Swift直接读取ECN协议栈状态进行离散判断，而DCTCP用标记比例$\alpha$做连续调整；Swift按信号类型施加差异化保留因子（0.70/0.75/0.50）而非统一的$1-\alpha/2$；Swift同时利用丢包、ECN与CA状态三类信号，且参数在线自适应。需要注意的是，DCTCP的比例响应在标记密集时更平滑，而Swift的离散响应依赖$D_{max}$与冻结机制来避免过度收缩。
+
+\textbf{vs. BBR\cite{bbr}}：Swift综合多种显式拥塞信号，BBR仅依赖速率与RTT探测。在洁净数据集中，BBR于千兆级链路上仅取得0.48$\sim$0.52的利用率、在\texttt{leaf\_spine\_20g}上仅0.37，而Swift在同样场景下达到饱和；在UDP突发下BBR的吞吐量保持率均值39.07\%、最差场景9.69\%，Jain指数均值0.844（最低0.48），显著低于Swift。需要说明的是，在两个微秒级RTT场景中BBR的吞吐量不足瓶颈的1\%，审计判定其为ns-3.40中pacing与RTT分辨率失配导致的实现性退化，已按规则D排除，因此本文\emph{不}将该数据点用作Swift优于BBR的证据。反之，在\texttt{cross\_dc\_wan}与\texttt{wan\_metro}等长RTT链路上BBR吞吐量高于Swift，本文亦如实记录。
+
+\subsection{适用边界与未来方向}
+\label{subsec:limitations}
+
+\textit{浅BDP链路上的排队延迟代价}：Swift以队列驻留换取零丢包，这一取舍在缓冲深度远大于BDP的低速率或长RTT接入链路上表现为明显的延迟抬升。相对\emph{更优的}丢包类基线，纯TCP设置下的抬升幅度依次为：\texttt{dc\_100m} $+128.8\%$、\texttt{wifi\_n} $+104.5\%$、\texttt{wifi\_legacy} $+78.6\%$、\texttt{lte\_poor} $+78.4\%$、\texttt{nr\_5g\_edge} $+67.8\%$、\texttt{dc\_500m} $+60.6\%$、\texttt{lte\_good} $+59.6\%$，千兆级饱和链路（\texttt{asymmetric\_high}、\texttt{congested\_heavy}、\texttt{symmetric\_low}）约$+26\%$，\texttt{satellite\_geo} $+7.2\%$。其机理是$\alpha \times BDP$目标窗口在$\alpha$上界1.30处仍高于BDP，而这些场景的瓶颈队列受$\max(\cdot, 100)$报文下限约束、相对BDP过深，于是稳态下形成可持续的队列驻留。可探索的改进方向包括：（1）引入显式排队时延估计$q_{est} = RTT_{smoothed} - RTT_{min}$作为$\alpha$调节的第四路输入，实现排队延迟感知的$\alpha$调度；（2）当RTT膨胀持续超过最小RTT感知阈值时把$\alpha$强制收敛至1.0以下；（3）用多时间尺度BDP估计分离传播时延与排队时延。
+
+\textit{长RTT路径上的吞吐量不足}：\texttt{cross\_dc\_wan}（1 Gbps、单向5.02 ms）中Swift仅取得709.72 Mbps，较NewReno低28.9\%、较CUBIC低29.0\%，是本文最主要的负向结果。归档产物使用的投递速率估计为逐ACK公式$segmentsAcked \cdot segSize / lastRtt$，其结果约等于真实带宽除以每RTT的ACK数量，因此在长RTT路径上系统性低估带宽，进而使BDP与$\alpha \times BDP$目标窗口塌缩、窗口被$200 \times MSS$安全下限钉住。v3.0.0已将其替换为跨度不小于$2\,RTT_{min}$的滑动时间窗口估计（见第\ref{subsec:setup}节），预期可缓解该问题；但在完成全矩阵重跑之前，本文不宣称该修复的定量收益。此外，在UDP突发设置下\texttt{wan\_metro}是Swift未取得最高吞吐量的唯一场景（801.06 Mbps，较CUBIC低0.24\%），同属该类边界。
+
+\textit{参数预设依赖}：保留因子（0.70/0.75/0.50）、$\alpha$边界（$[0.85,1.30]$）、连续递减阈值（$D_{max}=3$）与降窗后冻结的ACK事件数（4）均为手动调优的预设值。未来可通过元学习\cite{meta_learning}或如Gemini\cite{gemini}所示的带外贝叶斯优化实现参数的在线搜索，二者可与本文的每事件决策回路组合成分层结构。
+
+\textit{深度RL增强}：当前基于规则的策略可解释性强但表示能力有限。可探索离线强化学习训练神经网络策略，再通过模型蒸馏提取为规则，兼顾表示能力和实时性。
+
+\textit{部署代价与真实环境验证}：每个窗口调整事件一次跨进程往返是当前实现的主要部署障碍。后续需将决策逻辑内联为Linux内核TCP模块或QUIC用户态拥塞控制插件，并在覆盖无线/蜂窝接入、广域网与卫星链路的真实或半实物测试床上验证。仿真与真实环境的差异（NIC offload、中断合并、NUMA效应、终端操作系统调度与无线链路波动）可能显著影响实际性能。
+
+\textit{证据边界说明}：本文全部定量结论的唯一数据来源是\texttt{logs/summary/kpi\_forward.csv}，即仅统计前向数据流的重导出KPI；两份旧绘图汇总表的吞吐量与延迟列因包含反向ACK流而被取代（规则A）。跨协议对比仅在通过规则B（排除汇聚端口不一致、混用两个\texttt{sim.cc}版本的27个组合）、规则C（排除重复配置\texttt{dc\_oversub\_10to1}与错标场景\texttt{satellite\_leo}）与规则D（在两个微秒级RTT场景中排除退化的BBR基线）筛选后的19个纯TCP场景与15个UDP突发场景上进行，全部排除记录见\texttt{logs/error.txt}的"AUDIT PASS 2026-08-20"条目。由此产生三条明确边界：其一，\textbf{本文不给出任何LEO卫星链路结论}，因唯一带该标签的场景实为100/50 Mbps、5/20 ms链路的错标副本，GEO卫星结论不受影响；其二，上述延迟抬升与\texttt{cross\_dc\_wan}吞吐回落不进入头部结论，仅用于机制分析与参数敏感性讨论；其三，按规则F，所有归档产物均生成于v3.0.0修复之前——当时瓶颈为不标记CE的\texttt{PfifoFast}队列且ECN仅对Swift开启，故ECN分支未被触发，投递速率仍使用逐ACK公式，奖励自适应仍使用固定阈值（见仓库\texttt{CHANGELOG.md}）。因此本文各表数值刻画的是修复前实现在洁净场景集上的行为；v3.0.0行为的定量评估须在完成同一实验矩阵重跑、异常筛查与结果溯源之后才能作为新结论引用。
+
+%========================================
+% 6. 结论
+%========================================
+
+\section{结论}
+
+本文提出了Swift——一种面向远距离传输与异构终端（手机、笔记本、台式机、边缘设备）的强化学习辅助多信号融合自适应拥塞控制算法。其核心技术贡献收敛为三点：（1）\textbf{多信号拥塞状态感知}，把ECN协商与标记状态、拥塞避免状态机状态、拥塞事件语义、RTT与最小RTT、在途字节组织为11维有效观测子空间，并以两级优先级判定区分超时、ECN触发的窗口收缩与普通丢包；（2）\textbf{强化学习辅助的自适应融合控制}，由最小RTT感知的RTT膨胀比、奖励相对慢速基线的偏移与连续增长趋势共同调节每流$\alpha \in [0.85,1.30]$，并以有界步长逼近由滑动时间窗口投递速率最大值滤波得到的$\alpha \times BDP$目标窗口；（3）\textbf{面向不确定拥塞信号的稳定性与安全机制}，包括差异化保留因子（0.70/0.75/0.50）、连续递减下限$D_{max}=3$、降窗后4个ACK事件冻结、不奖励队列驻留的阈值更新、窗口钳位与超时时丢弃陈旧动作。
+
+在ns-3.40平台上，本文以仅统计前向数据流的重导出KPI（\texttt{logs/summary/kpi\_forward.csv}）为唯一数据来源，并在经四条排除规则审计后保留的19个纯TCP场景与15个UDP突发场景上进行评估。结果显示：在微秒级RTT高速链路上，Swift在吞吐量与NewReno/CUBIC完全一致（相对差$+0.000\%$）的同时把平均单向延迟降低82.1\%$\sim$93.6\%；在\texttt{nr\_5g\_embb}、\texttt{wifi\_ax}、\texttt{wan\_metro}、\texttt{wifi\_ac}等中速接入与城域链路上延迟降低10.2\%$\sim$41.0\%；在GEO卫星链路上吞吐量相对NewReno/CUBIC均值提升29.8\%，UDP突发下扩大至87.8\%；Swift在两种设置的全部场景中丢包率严格为0.00\%（19/19与15/15），是四种协议中唯一做到这一点的算法，Jain公平性指数恒为1.00；UDP突发下其吞吐量保持率均值80.54\%、最差场景66.51\%，优于NewReno（75.86\%/35.47\%）、CUBIC（78.78\%/53.75\%）与BBR（39.07\%/9.69\%），并在15个场景中的14个取得最高吞吐量。
+
+本文同时如实披露混合与负向结果：\texttt{cross\_dc\_wan}中Swift吞吐量较NewReno/CUBIC低约29\%，源于修复前逐ACK投递速率估计对长RTT路径带宽的系统性低估，v3.0.0已改用时间窗口估计但尚未重跑验证；在缓冲深度远大于BDP的低速率与长RTT接入链路上，Swift以队列驻留换取零丢包，延迟相对更优的丢包类基线抬升7.2\%$\sim$128.8\%；UDP突发下\texttt{wan\_metro}的吞吐量较CUBIC低0.24\%。这些边界直接指向后续工作：排队延迟感知的$\alpha$调度、多时间尺度BDP估计，以及把每事件决策回路内联到内核或用户态协议栈以消除跨进程开销。综合而言，本文的结论是：以协议栈内部信号驱动的可解释规则策略，可在不损失吞吐量的前提下同时取得零丢包与理想流间公平性，其代价是浅BDP链路上的排队延迟；该结论的适用范围以本文列出的洁净场景集与v3.0.0修复前的实现版本为界。
+
+%========================================
+% 参考文献
+%========================================
+
+{\small
+\begin{thebibliography}{25}
+
+\bibitem{jacobson1988}
+Jacobson V. Congestion avoidance and control. ACM SIGCOMM CCR, 1988, 18(4): 314-329.
+
+\bibitem{newreno}
+Floyd S, Henderson T, Gurtov A. The NewReno modification to TCP's fast recovery algorithm. RFC 6582, 2012.
+
+\bibitem{cubic}
+Ha S, Rhee I, Xu L. CUBIC: a new TCP-friendly high-speed TCP variant. ACM SIGOPS OSR, 2008, 42(5): 64-74.
+
+\bibitem{bufferbloat}
+Gettys J, Nichols K. Bufferbloat: Dark buffers in the Internet. Commun. ACM, 2012, 55(1): 57-65.
+
+\bibitem{vegas}
+Brakmo L S, Peterson L L. TCP Vegas: End to end congestion avoidance on a global Internet. IEEE JSAC, 1995, 13(8): 1465-1480.
+
+\bibitem{bbr}
+Cardwell N, Cheng Y, et al. BBR: Congestion-based congestion control. ACM Queue, 2016, 14(5): 20-53.
+
+\bibitem{copa}
+Arun V, Balakrishnan H. Copa: Practical delay-based congestion control for the Internet. In Proc. NSDI, 2018: 329-342.
+
+\bibitem{bbrfairness}
+Hock M, Bless R, Zitterbart M. Experimental evaluation of BBR congestion control. In Proc. ICNP, 2017: 1-10.
+
+\bibitem{compound}
+Tan K, Song J, et al. A compound TCP approach for high-speed and long distance networks. In Proc. INFOCOM, 2006: 1-12.
+
+\bibitem{illinois}
+Liu S, Ba\c{s}ar T, Srikant R. TCP-Illinois: A loss-and delay-based congestion control algorithm. Perf. Eval., 2008, 65(6-7): 417-440.
+
+\bibitem{westwood}
+Mascolo S, Casetti C, et al. TCP Westwood: Bandwidth estimation for enhanced transport over wireless links. In Proc. MobiCom, 2001: 287-297.
+
+\bibitem{rfc3168}
+Ramakrishnan K, Floyd S, Black D. The addition of ECN to IP. RFC 3168, 2001.
+
+\bibitem{dctcp}
+Alizadeh M, Greenberg A, et al. Data center TCP (DCTCP). ACM SIGCOMM CCR, 2010, 40(4): 63-74.
+
+\bibitem{hpcc}
+Li Y, Miao R, et al. HPCC: High precision congestion control. In Proc. SIGCOMM, 2019: 44-58.
+
+\bibitem{rlcc}
+Jay N, Rotman N, et al. A deep reinforcement learning perspective on Internet congestion control. In Proc. ICML, 2019: 3050-3059.
+
+\bibitem{remy}
+Winstein K, Balakrishnan H. TCP ex machina: Computer-generated congestion control. ACM SIGCOMM CCR, 2013, 43(4): 123-134.
+
+\bibitem{aurora}
+Jay N, Rotman N, et al. Internet congestion control via deep reinforcement learning. In Proc. NeurIPS, 2019.
+
+\bibitem{orca}
+Abbasloo S, Yen C Y, Chao H J. Classic meets modern: A pragmatic learning-based congestion control. In Proc. SIGCOMM, 2020: 632-647.
+
+\bibitem{gemini}
+Yang W, Liu Y, Tian C, Jiang J, Guo L. Gemini: Divide-and-conquer for practical learning-based Internet congestion control. In Proc. IEEE INFOCOM, 2023.
+
+\bibitem{pcc}
+Dong M, Li Q, et al. PCC: Re-architecting congestion control for consistent high performance. In Proc. NSDI, 2015: 395-408.
+
+\bibitem{ns3}
+Riley G F, Henderson T R. The ns-3 network simulator. Springer, 2010: 15-34.
+
+\bibitem{opengym}
+Gaw\l{}owicz P, Zubow A. ns-3 meets OpenAI Gym: The playground for ML in networking research. In Proc. MSWiM, 2019: 113-120.
+
+\bibitem{fairness}
+Jain R K, Chiu D M W, Hawe W R. A quantitative measure of fairness and discrimination. DEC Research Report, 1984.
+
+\bibitem{meta_learning}
+Finn C, Abbeel P, Levine S. Model-agnostic meta-learning for fast adaptation of deep networks. In Proc. ICML, 2017: 1126-1135.
+
+\end{thebibliography}
+}
+
+\end{document}
