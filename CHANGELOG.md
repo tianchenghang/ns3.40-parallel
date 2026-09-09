@@ -4,6 +4,46 @@ All notable changes to the swift-tcp example and its experiment tooling.
 Format follows [Keep a Changelog](https://keepachangelog.com/); versions refer
 to the TcpSwift agent (`contrib/opengym/examples/swift-tcp/tcp_swift.py`).
 
+## [Unreleased] - Full-matrix rerun data sync and heuristic reframing (2026-09-10)
+
+No source code was changed by this entry; it synchronises the documentation
+artifacts with the full 36-scenario rerun of 2026-09-09 (`logs/manifest.json`),
+which was produced by the current v3.0.0 implementation under symmetric
+RED/ECN marking (all four protocols `UseEcn=On`, `MinTh=0.3Q`, `MaxTh=0.9Q`)
+and the proportionally scaled UDP burst (`average load = 32% of the
+bottleneck, peak 64%, 50% duty cycle, 1024 B packets`; the old fixed
+800 Mbps description in the documents was removed).
+
+### Changed
+
+- `docs/thesis.tex`, `docs/NJUPT_Professional_Thesis_draft1` (abstract,
+  chapters 1-6), `docs/patent.md`: all experiment numbers, tables, and
+  result narratives updated to the cleaned KPI view derived from
+  `logs/summary/kpi_forward.csv` (288 records; integrity/physical-consistency
+  audit passed with **0 new anomalies recorded**). Headline results:
+  Swift highest aggregate goodput in all 36 pure-TCP scenarios
+  (+2.1% to +5.8% over the strongest baseline, mean +4.1%) and in all 36
+  UDP-burst pairs (+2.2% to +5.9%); mean one-way delay about 2.3% below the
+  NewReno/CUBIC mean (24/36 scenarios) and about 0.8% above BBR; loss rates
+  of all four protocols below 0.026% (TCP) / 0.045% (burst); Jain fairness
+  mean 0.9989/0.9990 highest. The obsolete audit/exclusion narrative
+  (rules A-D, `fig05_audit_funnel`, PfifoFast/ECN-asymmetry caveats,
+  cross_dc_wan -29% regression, zero-loss claims) was removed.
+- Reinforcement-learning descriptions of the proposed method were replaced
+  by the "heuristic congestion control" framing used by the actual
+  rule-based implementation (`tcp_swift.py`): state collection / decision
+  output / performance-feedback terms; no learning, training, or
+  neural-inference claims remain about Swift/TcpSwift itself. The patent no
+  longer contains `Swift`/`TcpSwift`-specific or RL terminology.
+- `docs/plots/main.py` figure labels updated accordingly and all
+  `fig01_goodput_clean` - `fig04_udp_burst_clean`, `fig06_architecture_zh`,
+  `fig07_workflow_zh` outputs regenerated from the fresh logs
+  (`.pdf`/`.svg`/`.png`); `logs/plots/` and `logs/plots-udp/` comparison
+  charts regenerated with `python3 main.py draw`; `docs/plots/README.md`
+  rewritten to describe the actual six-figure pipeline.
+- `logs/summary/kpi_forward.csv` unchanged (byte-identical); the pipeline
+  now writes LF line endings so future runs keep the file stable.
+
 ## [Unreleased] - Figure pipeline rebuilt on the audited dataset (2026-08-21)
 
 ### Added

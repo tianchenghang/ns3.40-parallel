@@ -11,7 +11,7 @@ $\rho$ & 窗口保留因子（Window Retention Factor），拥塞响应后新窗
 $\rho_{\text{loss}}$ & 丢包保留因子，默认值0.70 \\
 $\rho_{\text{ecn}}$ & ECN保留因子，默认值0.75 \\
 $\rho_{\text{timeout}}$ & 超时保留因子，默认值0.50 \\
-$\eta$ & 奖励信号指数移动平均（EMA）衰减系数，默认值0.1 \\
+$\eta_f,\ \eta_b$ & 性能反馈值快线/慢线指数移动平均（EMA）平滑系数，默认值0.15/0.02 \\
 $BDP$ & 带宽延迟积（Bandwidth-Delay Product），网络链路能够容纳的最大在途数据量（字节） \\
 $MSS$ & 最大报文段长度（Maximum Segment Size），本文取1440字节 \\
 $RTT$ & 往返时延（Round-Trip Time），数据包从发送端到接收端再返回的总时间 \\
@@ -34,8 +34,6 @@ TCP & 传输控制协议（Transmission Control Protocol） \\
 ECN & 显式拥塞通知（Explicit Congestion Notification） \\
 RTT & 往返时延（Round-Trip Time） \\
 BDP & 带宽延迟积（Bandwidth-Delay Product） \\
-MDP & 马尔可夫决策过程（Markov Decision Process） \\
-RL & 强化学习（Reinforcement Learning） \\
 AIMD & 加性增乘性减（Additive Increase Multiplicative Decrease） \\
 MSS & 最大报文段长度（Maximum Segment Size） \\
 DCTCP & 数据中心TCP（Data Center TCP） \\

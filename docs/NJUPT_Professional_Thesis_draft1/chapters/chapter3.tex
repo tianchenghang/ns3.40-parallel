@@ -1,6 +1,6 @@
 \chapter{Swift算法设计与实现}\label{Chap:chap3}
 
-本章详细介绍Swift算法的设计与实现，包括系统架构概述、强化学习问题建模、11维观测空间设计、多信号融合拥塞检测算法、差异化拥塞响应机制、强化学习驱动的自适应参数调优、融合控制策略以及每流独立状态管理机制。
+本章详细介绍Swift算法的设计与实现，包括系统架构概述、决策问题建模与设计原则、11维观测空间设计、多信号融合拥塞检测算法、差异化拥塞响应机制、启发式反馈自适应的参数调优、融合控制策略以及每流独立状态管理机制。
 
 \section{系统架构概述}
 
@@ -17,7 +17,7 @@ Swift算法的系统架构如图\ref{fig:architecture}所示，由四个核心�
 ]
 
 % 网络仿真模块
-\node[module, fill=blue!12] (sim) at (0,0) {\textbf{网络仿真模块}\\(ns-3 / OpenGym)};
+\node[module, fill=blue!12] (sim) at (0,0) {\textbf{网络仿真模块}\\(ns-3 仿真器)};
 \node[submod, below=0.1cm of sim] (sim1) {TCP/IP协议栈};
 \node[submod, below=0.05cm of sim1] (sim2) {Dumbbell拓扑构建};
 \node[submod, below=0.05cm of sim2] (sim3) {队列管理 (ECN/RED)};
@@ -34,7 +34,7 @@ Swift算法的系统架构如图\ref{fig:architecture}所示，由四个核心�
 \node[submod, below=0.05cm of a3] (a4) {融合控制策略};
 
 % 环境模块（底部跨越）
-\node[module, fill=orange!12, minimum width=13cm] (env) at (5.5, -4.5) {\textbf{拥塞控制环境模块}（OpenGym / TcpSwiftEnv）——11维观测空间采集 + 动作应用 + 奖励计算};
+\node[module, fill=orange!12, minimum width=13cm] (env) at (5.5, -4.5) {\textbf{状态采集与决策应用模块}——11维状态采集 + 决策应用 + 反馈值计算};
 
 % 箭头
 \draw[arrow, blue!70] (sim3.east) -- ++(1.0,0) |- node[above, font=\scriptsize, pos=0.25] {11维观测} (zmq.west);
@@ -58,11 +58,11 @@ Swift算法的系统架构如图\ref{fig:architecture}所示，由四个核心�
 
 \textbf{主动队列管理与ECN信号通路}。仿真器\path{contrib/opengym/examples/swift-tcp/sim.cc}将瓶颈两侧网关的默认队列规则设为\texttt{ns3::RedQueueDisc}，并按队列容量的比例配置标记门限：$MinTh = 0.3 \times Q$、$MaxTh = 0.9 \times Q$，其中$Q = \max(BDP \times n_{leaf} / MTU, 100)$为按带宽延迟积自动定尺的队列长度（单位为数据包）。同时置\texttt{RedQueueDisc::UseEcn}为真，使RED在队列长度进入$[MinTh, MaxTh]$区间时对ECT数据包置CE码点而非直接丢弃。
 
-该配置对本文的算法评估具有决定性意义。ns-3默认的\texttt{PfifoFastQueueDisc}是纯FIFO丢尾队列，永不设置CE码点；若沿用该默认值，则协议栈上报的ecnState将始终停留在ECN\_IDLE，第~\ref{sec:multi-signal}节所述ECN分支及其0.75保留因子在整个仿真过程中都不会被触发，算法退化为纯丢包驱动，ECN早期预警的作用也就无从验证。第~\ref{Chap:chap4}章说明，本文归档实验正是在该默认值下生成的，因此其结论仅刻画纯丢包信号条件下的算法行为。此外，\texttt{ns3::TcpSocketBase::UseEcn}被统一置为\texttt{On}并作用于全部四种被比较协议，而不是仅对Swift开启：ECN协商能力直接影响拥塞信号的到达时刻，若仅令待评估算法具备该能力，则对照实验中观测到的延迟与丢包差异将无法区分算法设计的贡献与信号通路配置的差异。统一开启ECN是保证四协议对照公平性的必要条件。
+该配置对本文的算法评估具有决定性意义。若瓶颈使用ns-3默认的\texttt{PfifoFastQueueDisc}（纯FIFO丢尾队列，永不设置CE码点），则协议栈上报的ecnState将始终停留在ECN\_IDLE，第~\ref{sec:multi-signal}节所述ECN分支及其0.75保留因子在整个仿真过程中都不会被触发，算法退化为纯丢包驱动，ECN早期预警的作用也就无从验证。因此本文的参考配置显式选用RED并开启ECN标记；第~\ref{Chap:chap4}章所引用的全部实验产物均在该配置下生成，ECN分支在数据中真实可达。此外，\texttt{ns3::TcpSocketBase::UseEcn}被统一置为\texttt{On}并作用于全部四种被比较协议，而不是仅对Swift开启：ECN协商能力直接影响拥塞信号的到达时刻，若仅令待评估算法具备该能力，则对照实验中观测到的延迟与丢包差异将无法区分算法设计的贡献与信号通路配置的差异。统一开启ECN是保证四协议对照公平性的必要条件。
 
-本研究中的Swift实验采用ns3-gym提供的OpenGym接口与Python智能决策模块交互。仿真进程在TCP回调处同步发送观测向量，Python侧根据观测向量返回慢启动阈值和拥塞窗口动作。由于OpenGym/ZeroMQ采用同步请求-应答交互路径，本文实现未将该路径与MTP多线程并行仿真机制结合使用。
+Swift决策进程与ns-3仿真进程经ZeroMQ同步请求—应答路径交互：仿真进程在TCP回调处发送11维状态向量，决策进程返回慢启动阈值与拥塞窗口决策；状态向量的跨进程传输沿用ns3-gym/OpenGym框架提供的容器结构（仅作为消息通道承载状态与决策，不含任何学习逻辑）。由于该路径依赖同步消息交互，本文未将其与MTP多线程并行仿真机制结合使用。
 
-\textbf{拥塞控制环境模块}基于OpenGym框架实现，负责在TCP协议栈与强化学习智能体之间建立桥梁。OpenGym是ns3-gym项目提供的强化学习环境接口，遵循OpenAI Gym的标准API规范。拥塞控制环境模块在TCP协议栈的关键回调点采集状态参数，构建11维观测空间，并将智能体的决策动作应用于TCP连接。
+\textbf{状态采集与决策应用模块}（环境层）负责在TCP协议栈与决策进程之间建立桥梁：在TCP协议栈的关键回调点采集状态参数，构建11维状态向量，并将决策进程返回的\texttt{ssthresh}与\texttt{cwnd}决策应用于TCP连接。
 
 拥塞控制环境模块实现了以下回调接口：
 
@@ -78,71 +78,55 @@ Swift算法的系统架构如图\ref{fig:architecture}所示，由四个核心�
 
 \textbf{进程间通信模块}采用ZeroMQ（ZMQ）消息队列实现仿真进程和决策进程之间的高效通信。通信协议采用请求-应答（Request-Reply）模式：仿真进程在每个回调点发送观测数据请求，决策进程返回控制动作应答。消息格式采用Protocol Buffers序列化，保证了通信效率和跨语言兼容性。
 
-\section{强化学习问题建模}
+\section{决策问题建模与设计原则}
 
-Swift算法将网络拥塞控制问题建模为马尔可夫决策过程（Markov Decision Process，MDP）。MDP是强化学习的标准数学框架，由五元组$\langle S, A, P, R, \gamma \rangle$定义：
+Swift把网络拥塞控制刻画为\emph{逐事件决策问题}：在每个ACK确认或拥塞事件触发的回调上，决策模块以当前状态向量$s$为输入，按照确定性规则直接输出新的慢启动阈值与拥塞窗口决策$\langle ssthresh, cwnd\rangle$，并把由环境按传输进度与排队/丢包代价合成的性能反馈值$f_t$用于参数层的慢速自适应。该"状态—决策—反馈"三元结构不涉及策略学习：规则是离线设计的，反馈仅用于乘性增加因子等参数的小步调整，不存在训练、探索或模型更新环节。决策结构的合理性由以下四组设计原则保证。
 
-\begin{itemize}
-    \item $S$：状态空间，表示所有可能的网络状态
-    \item $A$：动作空间，表示所有可能的控制动作
-    \item $P$：状态转移概率函数，$P(s'|s,a)$表示在状态$s$执行动作$a$后转移到状态$s'$的概率
-    \item $R$：奖励函数，$R(s,a,s')$表示状态转移的即时奖励
-    \item $\gamma$：折扣因子，$0 \leq \gamma \leq 1$，表示未来奖励的衰减程度
-\end{itemize}
+\subsection{状态向量设计原则}
 
-\subsection{状态空间设计理论}
+状态向量的设计决定了一次回调能够携带多少决策所需信息。良好设计的判定标准包括：
 
-状态空间的设计是强化学习问题建模的关键环节。一个良好设计的状态空间应当满足以下理论要求：
+\textbf{信息充分性（Information Sufficiency）}：状态应包含区分不同网络状况所需的充分信息。信息不足会导致决策模块无法区分需要不同响应的情形，例如无法区分"ECN标记触发的收缩"与"真实丢包"。Swift的11维状态向量涵盖了TCP协议栈提供的全部关键信息——ECN状态、拥塞控制状态机状态、拥塞事件、RTT与窗口度量——保证了信息充分性。
 
-\textbf{马尔可夫性（Markov Property）}：当前状态应包含做出最优决策所需的全部信息，即给定当前状态，未来的状态和奖励与过去的状态序列条件独立。数学形式化表示为：
+\textbf{可观测性（Observability）}：状态应能够从环境中直接获得。Swift的15个状态参数均可从ns-3 TCP模块的标准回调接口直接获取，无需修改协议栈或引入额外探测流量。
 
-\begin{equation}
-P(s_{t+1}, r_{t+1} | s_t, a_t, s_{t-1}, a_{t-1}, ..., s_0, a_0) = P(s_{t+1}, r_{t+1} | s_t, a_t)
-\end{equation}
+\textbf{维度可控性（Dimensional Controllability）}：状态维度应保持在规则可维护的范围内。Swift的11维有效状态配合基于规则的决策，单次处理仅涉及常数次字段读取与比较，时间复杂度为$O(1)$，不存在高维表示带来的维度灾难问题；相比之下，学习型策略需要更高维的统计特征与模型推理。
 
-在网络拥塞控制场景中，完全满足马尔可夫性是困难的，因为网络状态可能依赖于较长的历史。Swift通过在状态中包含ECN状态、CA状态等协议栈内部状态，在实际应用中近似满足马尔可夫性。
+\subsection{决策输出设计}
 
-\textbf{信息充分性（Information Sufficiency）}：状态应包含做出最优决策所需的充分信息。信息不足会导致智能体无法区分需要不同动作的情况，从而影响学习效果。Swift的11维状态空间涵盖了TCP协议栈提供的所有关键信息，保证了信息充分性。
+决策输出决定了窗口控制的操作语义。Swift直接输出新的ssthresh与cwnd\emph{绝对值}而非窗口增量或离散档位，理由如下：
 
-\textbf{维度可扩展性（Dimensional Scalability）}：状态空间的维度不应过高，否则会导致维度灾难（Curse of Dimensionality）问题。Swift的11维状态空间在现有方案中属于较高维度，但仍在可处理范围内。基于规则的决策机制避免了维度灾难问题。
+\textbf{控制粒度（Control Granularity）}：直接输出窗口绝对值提供最细的控制粒度，允许把目标窗口（如$\alpha \times BDP$）精确映射到协议状态，避免离散动作（如"增加10\%"）带来的量化误差。
 
-\textbf{可观测性（Observability）}：状态应能够从环境中直接或间接观测获得。Swift的15个状态参数均可从ns-3 TCP模块的标准回调接口直接获取，满足可观测性要求。
+\textbf{绝对值语义（Absolute Semantics）}：以绝对值为输出可以避免增量式累积漂移：每步决策都以协议栈当前状态为基准重新计算，即使某次决策因跨进程延迟而失效（见第\ref{sec:correctness}节），后续事件也会在正确基线上重新收敛。
 
-\subsection{动作空间设计理论}
+\textbf{约束满足（Constraint Satisfaction）}：输出在应用前被箝位到$[4 \times MSS,\ \max(4 \times BDP,\ 200 \times MSS)]$区间，慢启动阈值同样受下界约束，保证输出始终满足TCP协议语义。
 
-动作空间的设计决定了智能体能够执行的控制操作范围。Swift采用连续动作空间，直接输出新的ssthresh和cwnd值。这种设计的理论考量如下：
+\subsection{性能反馈值设计}
 
-\textbf{控制粒度（Control Granularity）}：连续动作空间提供了最细的控制粒度，允许智能体精确调整控制参数。相比之下，离散动作空间（如"增加10\%"、"减少10\%"）限制了控制的精确性。
+环境侧在每个事件上合成一个标量性能反馈值$f_t$，供参数层的启发式自适应使用。其设计遵循三条原则：
 
-\textbf{探索效率（Exploration Efficiency）}：连续动作空间的探索效率取决于动作的参数化形式。Swift通过直接输出绝对值而非增量，避免了累积误差问题。
+\textbf{即时性（Immediacy）}：每个确认事件与每个窗口收缩回调都产生反馈，不存在稀疏反馈造成的信号缺失问题。
 
-\textbf{约束满足（Constraint Satisfaction）}：动作应满足TCP协议的约束条件。Swift通过在动作输出后应用边界约束，保证输出的控制参数始终有效。
+\textbf{多目标折中（Multi-objective Trade-off）}：反馈由传输进度激励与代价惩罚两部分合成：正常确认事件上的反馈为"与确认段数成正比且有上限的吞吐激励"减去"RTT膨胀惩罚"；窗口收缩回调上按拥塞类型施加分级负向惩罚（ECN、丢包、超时的惩罚幅度递增），使反馈同时携带吞吐收益与排队/丢包代价信息。
 
-\subsection{奖励函数设计理论}
+\textbf{相对性（Relativity）}：由于逐事件反馈几乎恒为正，绝对幅值不携带调节信息；Swift只使用反馈相对其自身慢速基线的\emph{变化量}驱动$\alpha$微调（详见第\ref{sec:adaptive-alpha}节），从而避免固定绝对阈值导致的单向漂移，并使同一组超参数可以跨带宽与RTT差异极大的路径复用。
 
-奖励函数是强化学习的核心组件，决定了智能体的优化目标。奖励函数设计的理论要求包括：
+\subsection{规则策略表示}
 
-\textbf{稀疏性问题（Sparsity Problem）}：如果奖励只在特定事件（如完成文件传输）时给出，智能体可能难以学习中间步骤的价值。Swift采用即时奖励（每次决策都给出奖励），避免了稀疏性问题。
+Swift的决策策略采用\emph{确定性规则}表示，而非随机策略或神经网络策略。这种选择的考量如下：
 
-\textbf{多目标权衡（Multi-objective Trade-off）}：网络拥塞控制需要平衡多个目标（吞吐量、延迟、公平性、丢包率）。Swift的奖励函数将吞吐量和延迟结合，通过权重参数控制优化偏好。
+\textbf{确定性}：给定相同的状态向量，决策输出完全确定，行为可逐分支解释、可离线推演，实验可精确复现。
 
-\textbf{奖励塑形（Reward Shaping）}：适当的奖励塑形可以使奖励信号既反映吞吐收益，也反映排队和拥塞代价。当前实现中，正常确认事件的奖励由确认段数带来的吞吐收益减去RTT膨胀惩罚组成；ECN、普通丢包和超时丢包分别施加不同强度的负奖励。Python侧再通过奖励EMA参与$\alpha$微调。
+\textbf{参数化 vs.\ 非参数化}：神经网络策略是参数化策略，表示能力强但依赖训练与推理设施；基于规则的策略计算开销为常数级、无推理依赖，表示能力受人工规则结构限制。Swift选择后者，以可解释性换取工程可控性，其策略表示能力的局限与可能的增强路线见第\ref{Chap:chap5}章。
 
-\subsection{策略表示理论}
-
-策略（Policy）定义了状态到动作的映射。Swift采用基于规则的确定性策略，而非随机策略或神经网络策略。这种选择的理论考量如下：
-
-\textbf{确定性 vs. 随机性}：确定性策略在给定状态下总是执行相同的动作，具有更好的可预测性和可解释性。随机策略可以提供更好的探索能力，但在部署阶段通常不需要探索。
-
-\textbf{参数化 vs. 非参数化}：神经网络策略是参数化策略，具有强大的表示能力，但训练和推理有计算开销。基于规则的策略是非参数化策略，计算效率高但表示能力有限。Swift选择基于规则的策略，牺牲部分表示能力换取实时性和可解释性。
-
-\textbf{在线学习 vs. 离线设计}：Swift的规则是离线设计的，不需要在线学习过程。这避免了在线学习可能带来的不稳定性，但也限制了算法对未知环境的适应能力。
+\textbf{离线设计 + 在线参数自适应}：规则主体离线设计，不经过在线学习；控制参数（乘性增加因子$\alpha$等）在运行期由反馈与RTT信号小步在线调整，使算法在保持确定性主路径的同时获得对环境变化的适应能力。
 
 \section{11维观测空间详细设计}
 
 本节详细描述Swift算法的11维观测空间设计，这是Swift区别于现有方案的核心创新之一。
 
-\textbf{记法约定}：为与ns-3侧OpenGym实现（\path{contrib/opengym/examples/swift-tcp/tcp-swift-env.cc}中\texttt{parameterNum = 15}）保持一致，每次回调实际通过\texttt{Box}跨进程传输的是15个元素，其中前4个（socketUuid、envType、simTime、nodeId）为跨进程路由用的元数据通道，不参与AIMD/ECN响应/$\alpha$自适应等窗口决策；后11个（ssthresh、cwnd、segSize、segmentsAcked、bytesInFlight、lastRtt、minRtt、callbackType、caState、caEvent、ecnState）构成参与决策的有效RL观测子空间。故下文所称"11维观测空间"特指该有效RL子空间；表~\ref{tab:observation}同时列出元数据通道以便审阅者核对完整布局。
+\textbf{记法约定}：为与ns-3侧OpenGym实现（\path{contrib/opengym/examples/swift-tcp/tcp-swift-env.cc}中\texttt{parameterNum = 15}）保持一致，每次回调实际通过跨进程传输容器传递15个元素，其中前4个（socketUuid、envType、simTime、nodeId）为跨进程路由用的元数据通道，不参与AIMD/ECN响应/$\alpha$自适应等窗口决策；后11个（ssthresh、cwnd、segSize、segmentsAcked、bytesInFlight、lastRtt、minRtt、callbackType、caState、caEvent、ecnState）构成参与决策的有效状态子空间。故下文所称"11维观测空间"特指该有效子空间；表~\ref{tab:observation}同时列出元数据通道以便审阅者核对完整布局。
 
 \begin{table}[htbp]
 \centering
@@ -179,7 +163,7 @@ P(s_{t+1}, r_{t+1} | s_t, a_t, s_{t-1}, a_{t-1}, ..., s_0, a_0) = P(s_{t+1}, r_{
 
 \subsection{时间信息参数（索引1、2）}
 
-\textbf{envType（索引1）}是环境类型标识符。当前OpenGym事件驱动实现中该字段固定为0，用于标识观测来自TCP回调事件路径。
+\textbf{envType（索引1）}是环境类型标识符。当前事件驱动实现中该字段固定为0，用于标识状态采集来自TCP回调事件路径。
 
 \textbf{simTime（索引2）}是当前仿真时间，单位为微秒。仿真时间用于标识观测发生的事件顺序，并为跨进程观测和动作交互提供时间上下文。
 
@@ -260,7 +244,7 @@ callbackType是多信号融合拥塞检测的关键输入之一。当callbackTyp
     \item ECN\_CWR\_SENT（值为5）：已发送CWR标志
 \end{itemize}
 
-这三个拥塞控制状态参数是Swift观测空间的核心创新。现有强化学习拥塞控制方案通常不包含这些协议栈内部状态，导致智能体对网络拥塞状况的感知不完整。Swift通过将caState、caEvent、ecnState纳入观测空间，使智能体能够感知TCP协议栈的完整状态信息，从而做出更精准的控制决策。
+这三个拥塞控制状态参数是Swift观测空间的核心创新。现有拥塞控制方案通常不包含这些协议栈内部状态，导致对网络拥塞状况的感知不完整。Swift通过将caState、caEvent、ecnState纳入状态向量，使决策模块能够感知TCP协议栈的完整状态信息，从而做出更精准的窗口决策。
 
 \section{多信号融合拥塞检测算法}\label{sec:multi-signal}
 
@@ -274,7 +258,7 @@ Swift将拥塞信号分为四个类别，每一类信号在"发生时刻—可�
 
 \textbf{（2）ECN拥塞经历信号}：当ecnState取值为ECN\_CE\_RCVD（值为2，本端收到被标记CE的数据包）或ECN\_ECE\_RCVD（值为4，本端收到对端回显的ECE标志）时，表明路径上的队列长度已经越过AQM的标记门限，但尚未溢出。ECN是唯一由网络设备主动生成、且不依赖丢包或RTT推断的拥塞证据，其时序显著早于丢包，因此适合作为早期预警。Swift直接读取协议栈的ECN状态字段，而不维护标记事件的时间戳队列与标记率统计，从而避免了标记率阈值这一额外的敏感参数。
 
-\textbf{（3）拥塞控制状态机信号}：caState刻画了协议栈当前所处的恢复阶段。其中CA\_LOSS（值为4）指示重传超时，是严重程度最高的信号；CA\_CWR（值为2）指示协议栈正因ECN回显而缩减窗口，在语义上属于ECN响应而非丢包响应；CA\_DISORDER与CA\_RECOVERY则指示乱序或快速恢复过程，不构成独立的降窗触发条件。将caState纳入观测使智能体能够在同一个GetSsThresh回调内区分"超时""ECN驱动的CWR"与"普通丢包"三条语义完全不同的路径。
+\textbf{（3）拥塞控制状态机信号}：caState刻画了协议栈当前所处的恢复阶段。其中CA\_LOSS（值为4）指示重传超时，是严重程度最高的信号；CA\_CWR（值为2）指示协议栈正因ECN回显而缩减窗口，在语义上属于ECN响应而非丢包响应；CA\_DISORDER与CA\_RECOVERY则指示乱序或快速恢复过程，不构成独立的降窗触发条件。将caState纳入状态向量使决策模块能够在同一个GetSsThresh回调内区分"超时""ECN驱动的CWR"与"普通丢包"三条语义完全不同的路径。
 
 \textbf{（4）延迟膨胀信号}：RTT膨胀比（lastRtt/minRtt）反映瓶颈队列的驻留程度。该信号连续可微、采样密度高，适合驱动参数的渐进调节；但它同时混杂了无线调度抖动、ACK压缩、路径切换和终端侧处理延迟等非拥塞因素，在远距离与异构终端场景中误判概率明显高于前三类信号。因此Swift不将其用作独立的乘性递减触发条件，而仅用于$\alpha$自适应与慢启动退出判定。
 
@@ -416,7 +400,7 @@ ECN标记是最早的拥塞信号，通常在队列长度超过低阈值时触�
 
 \subsection{慢启动阈值更新}
 
-除了拥塞窗口，拥塞响应还需要更新慢启动阈值。当前实现首先以$\rho \times cwnd$计算新的拥塞窗口，并设置最小窗口边界$W_{min}=\max(4\times MSS,1)$。慢启动阈值采用BDP锚定但不奖励队列膨胀的策略：
+除了拥塞窗口，拥塞响应还需要更新慢启动阈值。当前实现首先以$\rho \times cwnd$计算新的拥塞窗口，并设置最小窗口边界$W_{min}=\max(4\times MSS,1)$。慢启动阈值采用BDP锚定但不迁就队列膨胀的策略：
 
 \begin{equation}
 ref = \min(cwnd, \max(BDP, W_{min}))
@@ -469,9 +453,10 @@ new\_ssthresh = \max(\rho \times ref, W_{min}, new\_cwnd)
 \end{algorithmic}
 \end{algorithm}
 
-\section{强化学习驱动的自适应参数调优}
+\section{启发式反馈自适应的参数调优}
+\label{sec:adaptive-alpha}
 
-Swift算法实现了强化学习驱动的自适应参数调优机制，根据多种因素动态调整乘性增加因子（Multiplicative Increase Factor，$\alpha$）。
+Swift算法实现了启发式反馈驱动的参数自适应机制，根据多种因素动态调整乘性增加因子（Multiplicative Increase Factor，$\alpha$）。
 
 \subsection{乘性增加因子的作用}
 
@@ -508,9 +493,9 @@ s = 0.3 + 0.15\sqrt{\max(0, RTT_{min,ms}-1)}
 
 这种路径感知响应机制能够避免固定阈值在远距离路径上过早收紧窗口，同时保留低RTT路径中对排队增长的敏感性。
 
-\textbf{（2）基于奖励信号基线相对趋势的调整}
+\textbf{（2）基于性能反馈值基线相对趋势的调整}
 
-Swift利用环境反馈的奖励信号（Reward）评估当前控制策略的相对优劣。环境侧奖励在每个正常确认事件上由确认段数带来的吞吐收益减去RTT膨胀惩罚构成，因此在绝大多数ACK事件上取正值。这一分布特征决定了不能用固定的绝对阈值判断"奖励是否变好"：若采用形如$R_{ema} > 0.5$的判据，则该条件在几乎每个ACK事件上都成立，$\alpha$会被持续推向上界$\alpha_{max}$，自适应机制退化为单向棘轮，失去反馈意义。
+Swift利用环境合成的性能反馈值评估当前控制策略的相对优劣。反馈值在每个正常确认事件上由确认段数带来的吞吐收益减去RTT膨胀惩罚构成，因此在绝大多数ACK事件上取正值。这一分布特征决定了不能用固定的绝对阈值判断"反馈是否变好"：若采用形如$R_{ema} > 0.5$的判据，则该条件在几乎每个ACK事件上都成立，$\alpha$会被持续推向上界$\alpha_{max}$，自适应机制退化为单向棘轮，失去调节意义。
 
 当前实现改为\textbf{基线相对判据}，即同时维护快、慢两条指数移动平均，用快线相对慢线的偏离量而非绝对水平来判断趋势：
 
@@ -522,7 +507,7 @@ R_{fast} \leftarrow (1 - \eta_f) \times R_{fast} + \eta_f \times reward, \quad \
 R_{base} \leftarrow (1 - \eta_b) \times R_{base} + \eta_b \times reward, \quad \eta_b = 0.02
 \end{equation}
 
-其中$R_{fast}$为快线，反映最近若干次决策的即时效果；$R_{base}$为慢线基线，反映当前网络条件下的长期奖励水平。两条EMA在收到首个奖励时用同一数值初始化，避免冷启动阶段的虚假偏离。判定容差按基线幅值自适应缩放：
+其中$R_{fast}$为快线，反映最近若干次决策的即时效果；$R_{base}$为慢线基线，反映当前网络条件下的长期反馈水平。两条EMA在收到首个反馈值时用同一数值初始化，避免冷启动阶段的虚假偏离。判定容差按基线幅值自适应缩放：
 
 \begin{equation}
 m = \max(0.25,\; 0.1 \times |R_{base}|)
@@ -534,11 +519,11 @@ m = \max(0.25,\; 0.1 \times |R_{base}|)
     \item 当$R_{fast} < R_{base} - 4m$时，表明近期决策显著劣于常态水平，回退激进度：$\alpha \leftarrow \alpha - 0.01$。
 \end{itemize}
 
-下调阈值取$4m$而上调阈值取$m$，构成有意的非对称设计：奖励序列的负向尖峰主要由单次丢包或超时惩罚引起，而这类事件已经由差异化拥塞响应机制单独处理，若在$\alpha$层面再次同步收缩会造成响应叠加；采用较宽的下调死区可以把$\alpha$的收缩限定在持续性劣化而非瞬时惩罚上。基线相对判据的另一优点是与路径无关：不同带宽和RTT的路径其奖励绝对幅值相差可达数个数量级，而相对偏离量是无量纲的，因此同一组超参数可以直接跨场景复用，无需按链路类型重新标定。
+下调阈值取$4m$而上调阈值取$m$，构成有意的非对称设计：反馈序列的负向尖峰主要由单次丢包或超时惩罚引起，而这类事件已经由差异化拥塞响应机制单独处理，若在$\alpha$层面再次同步收缩会造成响应叠加；采用较宽的下调死区可以把$\alpha$的收缩限定在持续性劣化而非瞬时惩罚上。基线相对判据的另一优点是与路径无关：不同带宽和RTT的路径其反馈绝对幅值相差可达数个数量级，而相对偏离量是无量纲的，因此同一组超参数可以直接跨场景复用，无需按链路类型重新标定。
 
 \textbf{（3）基于连续增长趋势的调整}
 
-当窗口连续增长超过8次时，表明网络状况持续良好，给予稳定增长奖励：
+当窗口连续增长超过8次时，表明网络状况持续良好，给予稳定增长的正向反馈：
 \begin{equation}
 \alpha \leftarrow \alpha + 0.01 \quad \text{如果连续增长次数} > 8
 \end{equation}
@@ -558,7 +543,7 @@ $\alpha$的默认初始值为1.10。下界0.85为无线、蜂窝或浅缓冲路�
 \begin{algorithm}[htbp]
 \caption{自适应参数调优算法}
 \begin{algorithmic}[1]
-\Require 当前$\alpha$，观测状态$obs$，奖励信号$reward$，历史状态$history$
+\Require 当前$\alpha$，观测状态$obs$，性能反馈值$feedback$，历史状态$history$
 \Ensure 更新后的$\alpha$
 \State \Comment{因素1：基于RTT膨胀比的路径感知调整}
 \State $inflation\_ratio \leftarrow obs.lastRtt / obs.minRtt$
@@ -576,8 +561,8 @@ $\alpha$的默认初始值为1.10。下界0.85为无线、蜂窝或浅缓冲路�
     \State $\alpha \leftarrow \alpha - step$
     \State $history.consecutive\_growth \leftarrow 0$
 \EndIf
-\State \Comment{因素2：基于奖励信号基线相对偏离的趋势调整}
-\If{首次收到奖励}
+\State \Comment{因素2：基于反馈值基线相对偏离的趋势调整}
+\If{首次收到反馈值}
     \State $R_{fast} \leftarrow reward$, $R_{base} \leftarrow reward$
 \Else
     \State $R_{fast} \leftarrow 0.85 \times R_{fast} + 0.15 \times reward$
@@ -589,7 +574,7 @@ $\alpha$的默认初始值为1.10。下界0.85为无线、蜂窝或浅缓冲路�
 \ElsIf{$R_{fast} < R_{base} - 4 \times m$}
     \State $\alpha \leftarrow \alpha - 0.01$
 \EndIf
-\State \Comment{因素3：基于连续稳定增长的奖励}
+\State \Comment{因素3：基于连续稳定增长的反馈}
 \If{$history.consecutive\_growth > 8$}
     \State $\alpha \leftarrow \alpha + 0.01$
 \EndIf
@@ -797,7 +782,7 @@ Swift设计了每流独立的状态管理机制，为每个TCP连接维护独立
 
 \textbf{（3）性能指标数据}：性能指标模块维护吞吐量的指数移动平均值（EMA，平滑因子0.1），用于跟踪流级别的性能变化趋势。
 
-\textbf{（4）自适应参数数据}：自适应参数模块维护乘性增加因子$\alpha$（取值范围$[0.85, 1.30]$，默认值$1.10$）、加性增加因子$\gamma$（默认值$1.0$）、连续缩减计数器（用于连续缩减保护）、连续增长计数器（用于稳定增长奖励）、降窗后冻结ACK计数器（默认4个ACK事件）和慢启动阶段标记。
+\textbf{（4）自适应参数数据}：自适应参数模块维护乘性增加因子$\alpha$（取值范围$[0.85, 1.30]$，默认值$1.10$）、加性增加因子$\gamma$（默认值$1.0$）、连续缩减计数器（用于连续缩减保护）、连续增长计数器（用于稳定增长反馈）、降窗后冻结ACK计数器（默认4个ACK事件）和慢启动阶段标记。
 
 \subsection{状态查找与更新}
 
@@ -858,7 +843,7 @@ TCP连接的生命周期包括建立、传输和关闭三个阶段。Swift的状
 
 \subsection{系统架构设计}
 
-Swift算法的系统架构遵循模块化设计原则，采用分层结构实现各功能模块的解耦。整体架构分为仿真层、环境层、决策层和通信层四个层次。仿真层负责网络拓扑构建和数据包传输仿真；环境层作为强化学习与网络仿真的桥梁；决策层实现Swift算法的核心逻辑，遵循状态隔离、分层决策和实时性原则；通信层负责仿真进程和决策进程之间的数据交换。
+Swift算法的系统架构遵循模块化设计原则，采用分层结构实现各功能模块的解耦。整体架构分为仿真层、环境层、决策层和通信层四个层次。仿真层负责网络拓扑构建和数据包传输仿真；环境层作为协议栈与决策进程之间的桥梁；决策层实现Swift算法的核心逻辑，遵循状态隔离、分层决策和实时性原则；通信层负责仿真进程和决策进程之间的数据交换。
 
 \begin{algorithm}[htbp]
 \caption{Swift系统初始化流程}
@@ -868,7 +853,7 @@ Swift算法的系统架构遵循模块化设计原则，采用分层结构实现
 \State $simulator \leftarrow$ CreateSimulator($params.duration$)
 \State $network \leftarrow$ BuildTopology($topology$)
 \State ConfigureQueues($network$, $params.queue\_size$)
-\State $env \leftarrow$ CreateOpenGymEnvironment()
+\State $env \leftarrow$ CreateStateChannel()
 \State RegisterCallbacks($env$, $network.tcp\_sockets$)
 \State ConfigureObservationSpace($env$, $15$)
 \State ConfigureActionSpace($env$, $2$) \Comment{ssthresh和cwnd}
@@ -883,7 +868,7 @@ Swift算法的系统架构遵循模块化设计原则，采用分层结构实现
 
 \subsection{核心算法伪代码}
 
-Swift智能体的主控制循环负责协调各功能模块，处理来自环境的观测并输出控制动作。
+Swift决策模块的主控制循环负责协调各功能模块：处理来自环境层的状态采集结果，依据规则输出窗口决策，并把决策回写协议栈。
 
 \begin{algorithm}[htbp]
 \caption{Swift主控制循环}
@@ -947,15 +932,17 @@ Swift算法采用高效的数据结构支持其核心功能。\textbf{循环队�
 
 \textbf{（5）降窗后冻结}：显式降窗后冻结后续4个ACK事件中的窗口增长，减少窗口刚缩减后立即反弹造成的二次排队。
 
-\subsection{OpenGym/ZeroMQ同步交互路径}
+\subsection{状态—决策同步交互路径}
+\label{sec:sync-path}
 
-TcpSwift当前实验采用ns3-gym提供的OpenGym/ZeroMQ同步请求-响应路径：ns-3仿真进程在TCP回调处生成观测，Python决策进程返回慢启动阈值和拥塞窗口动作。该路径便于逐ACK解释窗口决策、复现实验数据并与\texttt{tcp\_swift.py}中的真实策略保持一致。由于OpenGym路径依赖同步消息交互，本文实验未将该路径与MTP并行仿真结合，也不报告MTP加速数据。
+TcpSwift当前实验采用ZeroMQ同步请求—响应路径：ns-3仿真进程在TCP回调处生成状态向量（由ns3-gym/OpenGym框架的传输容器承载，仅作消息通道），Python决策进程返回慢启动阈值和拥塞窗口决策。该路径便于逐ACK解释窗口决策、复现实验数据并与\texttt{tcp\_swift.py}中的真实策略保持一致。由于该路径依赖同步消息交互，本文实验未将其与MTP并行仿真结合，也不报告MTP加速数据。
 
 \subsection{正确性保证机制}
+\label{sec:correctness}
 
 Swift实现包含参数边界检查、跨进程动作时效性校验和状态一致性检查三类正确性保证机制。三者共同保证：即使Python决策进程返回了不合理的动作，仿真中的TCP连接仍能维持协议语义的正确性。
 
-\textbf{（1）跨进程动作的时效性校验}。OpenGym采用请求-应答模式，观测的采集时刻与动作的应用时刻之间存在一个消息往返间隔。在此间隔内协议栈的状态可能已经改变——最关键的情形是重传定时器超时。若把基于超时前观测计算出的拥塞窗口应用到已经进入CA\_LOSS的连接上，就会用一个偏大的窗口覆盖协议栈自身的丢包恢复决策，破坏Reno语义并可能立即触发第二轮丢包。因此\texttt{tcp-swift-env.cc}在\texttt{CongestionStateSet}回调中检测到新状态为CA\_LOSS时，主动丢弃尚未生效的待应用窗口（清除\texttt{m\_hasPendingCwnd}标志），使该次决策失效而不是延迟生效。
+\textbf{（1）跨进程决策的时效性校验}。同步信道采用请求—应答模式，状态的采集时刻与决策的应用时刻之间存在一个消息往返间隔。在此间隔内协议栈的状态可能已经改变——最关键的情形是重传定时器超时。若把基于超时前观测计算出的拥塞窗口应用到已经进入CA\_LOSS的连接上，就会用一个偏大的窗口覆盖协议栈自身的丢包恢复决策，破坏Reno语义并可能立即触发第二轮丢包。因此\texttt{tcp-swift-env.cc}在\texttt{CongestionStateSet}回调中检测到新状态为CA\_LOSS时，主动丢弃尚未生效的待应用窗口（清除\texttt{m\_hasPendingCwnd}标志），使该次决策失效而不是延迟生效。
 
 \textbf{（2）动作边界约束}。所有返回的窗口值在应用前被夹紧到$[4 \times MSS, \max(4 \times BDP, 200 \times MSS)]$区间，慢启动阈值同样受下界约束。该约束的意义不止于"防御非法输入"：BDP估计在带宽突降或跨流量抢占时可能暂时偏大，$4 \times BDP$的上界把这种偏差造成的窗口过冲限制在有界范围内；而$200 \times MSS$的兜底上界保证在BDP尚未建立的连接初期窗口仍可正常增长。
 
@@ -967,15 +954,15 @@ Swift实现包含参数边界检查、跨进程动作时效性校验和状态一
 
 本章详细介绍了Swift算法的设计与实现，包括：
 
-（1）系统架构：由网络仿真模块、拥塞控制环境模块、智能决策模块和进程间通信模块组成，实现了基于ns-3和OpenGym的端到端强化学习拥塞控制框架。
+（1）系统架构：由网络仿真模块、状态采集与决策应用模块、启发式决策模块和进程间通信模块组成，实现了基于ns-3与ZeroMQ同步信道的端到端白盒启发式拥塞控制框架。
 
-（2）11维观测空间：涵盖连接标识、时间信息、窗口状态、传输指标、延迟测量、回调类型和拥塞控制状态等多个维度，为强化学习智能体提供完整的环境感知能力。
+（2）11维观测空间：涵盖连接标识、时间信息、窗口状态、传输指标、延迟测量、回调类型和拥塞控制状态等多个维度，为决策模块提供完整的协议栈状态感知能力。
 
 （3）多信号融合拥塞检测：采用两级优先级机制。第一级在GetSsThresh显式降窗回调内部按caState与ecnState做三路语义判别，区分重传超时、ECN回显驱动的CWR与普通快速重传丢包；第二级在IncreaseWindow路径上巡检ECN状态。RTT膨胀不作为独立降窗触发条件，仅参与参数自适应与慢启动退出判定。
 
-（4）差异化拥塞响应：针对不同拥塞类型采用不同的窗口保留因子（丢包0.70、ECN 0.75、超时0.50），慢启动阈值以$\min(cwnd, BDP)$为锚定参考以避免奖励队列膨胀；并引入连续缩减保护（$D_{max}=3$）与降窗后4个ACK事件冻结机制，且连续缩减计数器仅在窗口真实增长时清零，保证冻结期内保护计数不被误复位。
+（4）差异化拥塞响应：针对不同拥塞类型采用不同的窗口保留因子（丢包0.70、ECN 0.75、超时0.50），慢启动阈值以$\min(cwnd, BDP)$为锚定参考以避免迁就队列膨胀；并引入连续缩减保护（$D_{max}=3$）与降窗后4个ACK事件冻结机制，且连续缩减计数器仅在窗口真实增长时清零，保证冻结期内保护计数不被误复位。
 
-（5）自适应参数调优：根据最小RTT感知的RTT膨胀阈值、奖励信号的\emph{基线相对}偏离趋势（快线$\eta_f=0.15$与慢线基线$\eta_b=0.02$，容差$m=\max(0.25, 0.1|R_{base}|)$）以及连续稳定增长动态调整乘性增加因子$\alpha \in [0.85, 1.30]$（基准值1.10）。基线相对判据取代了早期版本的固定绝对阈值，后者在奖励恒为正的分布下会退化为单向棘轮。
+（5）自适应参数调优：根据最小RTT感知的RTT膨胀阈值、性能反馈值的\emph{基线相对}偏离趋势（快线$\eta_f=0.15$与慢线基线$\eta_b=0.02$，容差$m=\max(0.25, 0.1|R_{base}|)$）以及连续稳定增长动态调整乘性增加因子$\alpha \in [0.85, 1.30]$（基准值1.10）。基线相对判据取代了早期版本的固定绝对阈值，后者在反馈值恒为正的分布下会退化为单向棘轮。
 
 （6）融合控制策略：BDP由"时间窗口投递速率采样（窗口跨度$\ge 2 \times RTT_{min}$）$+$容量40的窗口化最大值过滤"两级结构估计，取代了早期版本按单次确认计算投递速率的有偏公式；拥塞避免阶段以$\alpha \times BDP$为目标，通过有界步长向目标窗口拉升或回落，并在RTT未膨胀时启用管道利用率感知的加性补偿；慢启动阶段以$\max(2 \times BDP, 10 \times MSS)$为目标，并结合HyStart风格RTT膨胀检测退出慢启动。
 

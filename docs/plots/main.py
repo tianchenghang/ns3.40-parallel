@@ -225,7 +225,7 @@ def write_and_verify_csv(rows: list[dict]) -> str:
         with KPI_CSV.open(newline="") as handle:
             previous = [dict(row) for row in csv.DictReader(handle)]
     with KPI_CSV.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
@@ -568,7 +568,7 @@ def plot_architecture(plots: list) -> None:
         (0.29, 0.60),
         0.22,
         0.22,
-        "OpenGym状态容器\n11维有效观测\n+ 4项元数据",
+        "状态传输容器\n11维有效观测\n+ 4项元数据",
         "#E8F3E8",
     )
     add_box(
@@ -580,7 +580,7 @@ def plot_architecture(plots: list) -> None:
         "#FFF7DE",
     )
     add_box(
-        ax, (0.81, 0.60), 0.16, 0.22, "智能体决策\n动作对\n[ssThresh, cWnd]", "#FCE4D6"
+        ax, (0.81, 0.60), 0.16, 0.22, "决策模块\n决策输出\n[ssThresh, cWnd]", "#FCE4D6"
     )
     add_box(
         ax,
@@ -603,7 +603,7 @@ def plot_architecture(plots: list) -> None:
         (0.67, 0.12),
         0.28,
         0.24,
-        "基线相对奖励自适应\n快/慢EMA对比\n有界步长逼近 α×BDP",
+        "基线相对反馈自适应\n快/慢EMA对比\n有界步长逼近 α×BDP",
         "#D9EAD3",
     )
     add_arrow(ax, (0.23, 0.71), (0.29, 0.71), "观测")
@@ -695,7 +695,7 @@ def plot_workflow(plots: list) -> None:
         (0.58, 0.295),
         0.40,
         0.115,
-        "S4 参数自适应\nRTT膨胀 + 基线相对奖励 + 连续增长\n乘性增加因子 α ∈ [0.85, 1.30]",
+        "S4 参数自适应\nRTT膨胀 + 基线相对反馈 + 连续增长\n乘性增加因子 α ∈ [0.85, 1.30]",
         "#D9EAD3",
     )
     add_box(
@@ -729,7 +729,7 @@ def plot_workflow(plots: list) -> None:
     ax.text(
         0.038,
         0.62,
-        "奖励反馈：快速EMA与慢速基线EMA更新",
+        "反馈信号：快速EMA与慢速基线EMA更新",
         ha="center",
         va="center",
         rotation=90,

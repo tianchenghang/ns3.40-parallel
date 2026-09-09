@@ -1,7 +1,7 @@
 {
   "source": "logs/{comparison,comparison-udp}/*.flowmonitor (288 artifacts)",
   "kpi_csv": "logs/summary/kpi_forward.csv",
-  "kpi_csv_status": "kpi_forward.csv regenerated: 288 rows CHANGED vs previous version",
+  "kpi_csv_status": "kpi_forward.csv regenerated: identical to previous version",
   "metric_definition": "forward TCP data flows only (proto 6, 10.1.x -> 10.2.x)",
   "selected_groups": {
     "tcp_only": [
